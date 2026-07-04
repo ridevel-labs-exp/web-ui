@@ -1,22 +1,22 @@
-/* Global CSS Design System for Ridevel - Dark Cyber-Premium Theme */
+/* Global CSS Design System for Ridevel - Premium Yellow & Black Taxi Theme */
 
 :root {
-  --bg-primary: #080c1d;
-  --bg-secondary: #0f152d;
-  --bg-glass: rgba(15, 22, 49, 0.65);
-  --border-glass: rgba(255, 255, 255, 0.06);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-glass: rgba(20, 20, 20, 0.85);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
   --accent-blue: #3b82f6;
-  --accent-cyan: #06b6d4;
-  --accent-glow: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  --accent-cyan: #ffcc00; /* Replaced neon cyan with Taxi Yellow */
+  --accent-glow: linear-gradient(135deg, #ffcc00 0%, #ffb300 100%);
   --accent-success: #10b981;
   --accent-error: #ef4444;
   --accent-warning: #f59e0b;
-  --shadow-neon: 0 0 20px rgba(6, 182, 212, 0.25);
+  --shadow-neon: 0 4px 20px rgba(255, 204, 0, 0.12);
   --font-family: 'Inter', sans-serif;
   --font-display: 'Outfit', sans-serif;
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {

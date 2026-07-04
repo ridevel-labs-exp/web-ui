@@ -29,7 +29,7 @@ const createHtmlIcon = (color, shadowColor) => {
 
 const pickupIcon = createHtmlIcon('#10b981', 'rgba(16, 185, 129, 0.6)'); // Green
 const dropIcon = createHtmlIcon('#ef4444', 'rgba(239, 68, 68, 0.6)');   // Red
-const driverIcon = createHtmlIcon('#06b6d4', 'rgba(6, 182, 212, 0.8)'); // Cyan (Driver)
+const driverIcon = createHtmlIcon('#ffcc00', 'rgba(255, 204, 0, 0.8)'); // Yellow (Driver)
 
 // Helper component to auto-recenter the map when coordinates change
 function RecenterMap({ center }) {
