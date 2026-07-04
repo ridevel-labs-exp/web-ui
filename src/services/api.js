@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use relative URL so all requests go to https://ridevel.in/api/... (proxied via Vercel to GCP Gateway)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '';
+// On localhost use local gateway; in production on Vercel use relative '' so Vercel proxies /api and masks IP!
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
