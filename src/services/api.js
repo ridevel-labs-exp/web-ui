@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// The API Gateway routes all requests. In development, we talk to http://localhost:8000
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// The API Gateway routes all requests to GCP GKE Gateway or local fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://35.234.210.54:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
