@@ -207,7 +207,7 @@ export default function RiderDashboard() {
               </div>
 
               <button className="btn-primary" style={{ width: '100%', marginTop: '16px' }} onClick={handleBookTrip} disabled={loading}>
-                {loading ? <RefreshCw className="animate-spin" size={18} /> : 'Book Premium Ride'}
+                {loading ? <RefreshCw className="animate-spin" size={18} /> : 'Confirm Ride'}
               </button>
             </div>
           )}
