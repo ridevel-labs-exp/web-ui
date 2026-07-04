@@ -57,7 +57,8 @@ export default function Login({ onNavigate }) {
         onNavigate('rider');
       }
     } catch (err) {
-      const errMsg = err.response?.data?.error || 'Google Sign-In failed. Please try again.';
+      console.error('Google Login error details:', err);
+      const errMsg = err.response?.data?.error || err.message || 'Google Sign-In failed. Please try again.';
       setError(errMsg);
     }
   };

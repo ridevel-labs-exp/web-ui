@@ -40,7 +40,8 @@ export default function Register({ onNavigate }) {
       const data = await authService.googleLogin(googleResult.idToken);
       onNavigate('rider');
     } catch (err) {
-      const errMsg = err.response?.data?.error || 'Google Sign-Up failed. Please try again.';
+      console.error('Google SignUp error details:', err);
+      const errMsg = err.response?.data?.error || err.message || 'Google Sign-Up failed. Please try again.';
       setError(errMsg);
     }
   };
