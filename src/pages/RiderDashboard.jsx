@@ -127,11 +127,11 @@ export default function RiderDashboard() {
     if (!invoice) return;
     setPaying(true);
     try {
-      // Simulate Razorpay transaction ID callback
-      const mockPaymentId = 'pay_rzp_' + Math.random().toString(36).substring(2, 12);
+      // Simulate UPI reference transaction ID callback
+      const mockPaymentId = 'pay_upi_' + Math.random().toString(36).substring(2, 12);
       const updatedInvoice = await tripService.payTripInvoice(invoice.id, mockPaymentId);
       setInvoice(updatedInvoice);
-      alert('Payment Completed Successfully! Thank you.');
+      alert('UPI Payment Verified and Completed successfully!');
     } catch (err) {
       alert('Payment simulation failed.');
     } finally {
@@ -284,12 +284,57 @@ export default function RiderDashboard() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {invoice.paymentStatus === 'PENDING' ? (
-                  <button className="btn-primary" style={{ width: '100%', background: 'var(--accent-success)' }} onClick={handlePay} disabled={paying}>
-                    {paying ? 'Processing Razorpay...' : 'Simulate Checkout Payment'}
-                  </button>
+                  <div style={{ border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '12px', background: 'rgba(255,255,255,0.01)', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--accent-cyan)' }}>
+                      UPI Payment Gateway
+                    </div>
+                    
+                    {/* Simulated UPI ID input */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                      <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Enter UPI ID (e.g. mobile@upi)</label>
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="username@okaxis" 
+                        style={{ padding: '8px', fontSize: '13px' }}
+                        defaultValue={user ? `${user.email.split('@')[0]}@okaxis` : 'rider@okaxis'}
+                      />
+                    </div>
+
+                    {/* UPI App selector icons simulation */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px', marginBottom: '12px' }}>
+                      {['GPay', 'PhonePe', 'Paytm', 'BHIM'].map(app => (
+                        <div key={app} style={{
+                          flexGrow: 1,
+                          textAlign: 'center',
+                          padding: '6px',
+                          border: '1px solid var(--border-glass)',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          background: 'rgba(255,255,255,0.02)',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer'
+                        }} onClick={(e) => {
+                          e.target.style.borderColor = 'var(--accent-cyan)';
+                          e.target.style.color = '#ffffff';
+                        }}>
+                          {app}
+                        </div>
+                      ))}
+                    </div>
+
+                    <button 
+                      className="btn-primary" 
+                      style={{ width: '100%', background: 'var(--accent-glow)', color: '#000000', fontWeight: '700' }} 
+                      onClick={handlePay} 
+                      disabled={paying}
+                    >
+                      {paying ? 'Verifying UPI Request...' : 'Pay via UPI App'}
+                    </button>
+                  </div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', color: 'var(--accent-success)', fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                    <span>Payment completed successfully!</span>
+                    <span>UPI Payment Completed Successfully!</span>
                   </div>
                 )}
 
