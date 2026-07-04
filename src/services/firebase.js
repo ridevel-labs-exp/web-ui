@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 // Replace placeholders with your copied firebaseConfig values
 const firebaseConfig = {
@@ -13,6 +14,25 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+// Google Sign-In: opens popup and returns the Firebase ID token
+export const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    return {
+      idToken,
+      name: result.user.displayName,
+      email: result.user.email,
+      photoURL: result.user.photoURL
+    };
+  } catch (error) {
+    console.error('Google Sign-In error: ', error);
+    throw error;
+  }
+};
 
 // Request user browser permission for push notifications and retrieve token
 export const requestNotificationPermission = async () => {

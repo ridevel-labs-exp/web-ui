@@ -19,6 +19,19 @@ export const authService = {
     return response.data;
   },
 
+  googleLogin: async (idToken) => {
+    const response = await api.post('/api/users/google-login', { idToken });
+    if (response.data && response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify({
+        email: response.data.email,
+        role: response.data.role,
+        userId: response.data.userId,
+      }));
+    }
+    return response.data;
+  },
+
   verifyEmail: async (token) => {
     const response = await api.get(`/api/users/verify?token=${token}`);
     return response.data;

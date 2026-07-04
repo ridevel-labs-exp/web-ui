@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
@@ -9,7 +10,7 @@ import { authService } from './services/authService';
 import { requestNotificationPermission } from './services/firebase';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('login');
+  const [currentPage, setCurrentPage] = useState('landing');
 
   useEffect(() => {
     // 1. Check if we are intercepting email verification token route
@@ -50,6 +51,8 @@ export default function App() {
 
   // Simple Router
   switch (currentPage) {
+    case 'landing':
+      return <LandingPage onNavigate={navigateTo} />;
     case 'login':
       return <Login onNavigate={navigateTo} />;
     case 'register':
@@ -63,6 +66,6 @@ export default function App() {
     case 'admin':
       return <AdminDashboard />;
     default:
-      return <Login onNavigate={navigateTo} />;
+      return <LandingPage onNavigate={navigateTo} />;
   }
 }
