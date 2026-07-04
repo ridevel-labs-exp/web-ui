@@ -48,6 +48,23 @@ export default function CabMap({ pickup, drop, driver }) {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
 
   useEffect(() => {
+    // Automatically detect user's live browser GPS location on startup
+    if (navigator.geolocation && !pickup && !driver) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          setMapCenter([userLat, userLng]);
+          console.log(`>>> Detected user live GPS location: [${userLat}, ${userLng}]`);
+        },
+        (err) => {
+          console.warn('Browser geolocation denied or unavailable. Using default location.', err);
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
     if (pickup) {
       setMapCenter([pickup.lat, pickup.lng]);
     } else if (driver) {
