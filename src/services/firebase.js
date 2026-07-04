@@ -2,14 +2,14 @@ import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
-// Real production Firebase web configuration for Ridevel
+// Read Firebase Web configuration strictly from environment variables (No hardcoded fallback keys in public git repo)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyABxz63cw6cacpFqa6kLlccDZlfiUBmKEM",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "ridevel-labs-exp.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "ridevel-labs-exp",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "ridevel-labs-exp.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "302787408996",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:302787408996:web:fe8820d4b0dd9a96b91b71"
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
@@ -43,7 +43,7 @@ export const requestNotificationPermission = async () => {
       console.log('Push notification permission granted by user.');
       
       const token = await getToken(messaging, { 
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BF126aknJHTDiHOMlDGkHZlpJ9HgypceNGCpVHqqoOkcZE5oFdYl1dS4UUPJvJffyhguyXZWMfqa_RLktCZRqgU' 
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
       });
       
       console.log('FCM Registration Token generated: ', token);
