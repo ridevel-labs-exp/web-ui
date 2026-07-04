@@ -3,157 +3,128 @@ import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
-import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, ChevronDown, LocateFixed, Car, Info } from 'lucide-react';
+import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, LocateFixed, Info, User, LogOut, ChevronRight } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
   Chennai: {
     center: { lat: 13.0827, lng: 80.2707 },
     landmarks: [
-      { name: '✈️ Chennai International Airport (MAA)', lat: 12.9941, lng: 80.1709 },
-      { name: '🚉 Chennai Central Railway Station (MAS)', lat: 13.0827, lng: 80.2707 },
-      { name: '🛍️ T. Nagar Shopping District', lat: 13.0418, lng: 80.2341 },
-      { name: '💻 OMR IT Corridor (Taramani/Perungudi)', lat: 12.9698, lng: 80.2443 },
-      { name: '🌆 Anna Nagar Roundtana', lat: 13.0850, lng: 80.2101 },
-      { name: '🌊 ECR Beach Road (Thiruvanmiyur)', lat: 12.9830, lng: 80.2594 },
-      { name: '🏢 Guindy Industrial Estate', lat: 13.0102, lng: 80.2157 },
-      { name: '🏙️ Velachery Transport Hub', lat: 12.9759, lng: 80.2212 }
+      { name: 'Chennai International Airport (MAA)', lat: 12.9941, lng: 80.1709 },
+      { name: 'Chennai Central Railway Station (MAS)', lat: 13.0827, lng: 80.2707 },
+      { name: 'T. Nagar Commercial Hub', lat: 13.0418, lng: 80.2341 },
+      { name: 'OMR IT Corridor (Taramani/Perungudi)', lat: 12.9698, lng: 80.2443 },
+      { name: 'Anna Nagar Roundtana', lat: 13.0850, lng: 80.2101 },
+      { name: 'ECR Beach Road (Thiruvanmiyur)', lat: 12.9830, lng: 80.2594 },
+      { name: 'Guindy Industrial Estate', lat: 13.0102, lng: 80.2157 },
+      { name: 'Velachery Hub', lat: 12.9759, lng: 80.2212 }
     ]
   },
   Bangalore: {
     center: { lat: 12.9716, lng: 77.5946 },
     landmarks: [
-      { name: '✈️ Kempegowda Int\'l Airport (BLR)', lat: 13.1986, lng: 77.7066 },
-      { name: '🏰 Bangalore Palace (Center)', lat: 12.9716, lng: 77.5946 },
-      { name: '💻 Electronic City IT Park', lat: 12.8452, lng: 77.6602 },
-      { name: '🌆 Indiranagar 100ft Road', lat: 12.9784, lng: 77.6408 },
-      { name: '🏢 Whitefield ITPL', lat: 12.9870, lng: 77.7312 },
-      { name: '🛍️ Koramangala Forum Hub', lat: 12.9352, lng: 77.6245 }
+      { name: 'Kempegowda Int\'l Airport (BLR)', lat: 13.1986, lng: 77.7066 },
+      { name: 'Bangalore Palace Center', lat: 12.9716, lng: 77.5946 },
+      { name: 'Electronic City IT Park', lat: 12.8452, lng: 77.6602 },
+      { name: 'Indiranagar 100ft Road', lat: 12.9784, lng: 77.6408 },
+      { name: 'Whitefield ITPL', lat: 12.9870, lng: 77.7312 },
+      { name: 'Koramangala Commercial Hub', lat: 12.9352, lng: 77.6245 }
     ]
   },
   Coimbatore: {
     center: { lat: 11.0168, lng: 76.9558 },
     landmarks: [
-      { name: '✈️ Coimbatore Int\'l Airport (CJB)', lat: 11.0300, lng: 77.0434 },
-      { name: '🚉 Coimbatore Junction Railway Station', lat: 10.9980, lng: 76.9629 },
-      { name: '💻 TIDEL Park Coimbatore', lat: 11.0247, lng: 77.0264 },
-      { name: '🌆 RS Puram Commercial Zone', lat: 11.0069, lng: 76.9507 },
-      { name: '🛍️ Gandhipuram Bus Stand', lat: 11.0168, lng: 76.9558 }
+      { name: 'Coimbatore Int\'l Airport (CJB)', lat: 11.0300, lng: 77.0434 },
+      { name: 'Coimbatore Junction Station', lat: 10.9980, lng: 76.9629 },
+      { name: 'TIDEL Park Coimbatore', lat: 11.0247, lng: 77.0264 },
+      { name: 'RS Puram Zone', lat: 11.0069, lng: 76.9507 }
     ]
   },
   Delhi: {
     center: { lat: 28.6139, lng: 77.2090 },
     landmarks: [
-      { name: '✈️ IGI Airport Terminal 3 (DEL)', lat: 28.5562, lng: 77.1000 },
-      { name: '🏛️ Connaught Place (CP Center)', lat: 28.6315, lng: 77.2167 },
-      { name: '💻 Cyber Hub Gurgaon', lat: 28.4950, lng: 77.0890 },
-      { name: '🏢 Noida Sector 62 IT Hub', lat: 28.6270, lng: 77.3720 },
-      { name: '🚉 New Delhi Railway Station', lat: 28.6430, lng: 77.2190 }
+      { name: 'IGI Airport Terminal 3 (DEL)', lat: 28.5562, lng: 77.1000 },
+      { name: 'Connaught Place Center', lat: 28.6315, lng: 77.2167 },
+      { name: 'Cyber Hub Gurgaon', lat: 28.4950, lng: 77.0890 },
+      { name: 'Noida Sector 62 IT Hub', lat: 28.6270, lng: 77.3720 }
     ]
   },
   Mumbai: {
     center: { lat: 19.0760, lng: 72.8777 },
     landmarks: [
-      { name: '✈️ Chhatrapati Shivaji Airport (BOM)', lat: 19.0896, lng: 72.8656 },
-      { name: '🏢 Bandra Kurla Complex (BKC)', lat: 19.0660, lng: 72.8690 },
-      { name: '🌊 Marine Drive Promenade', lat: 18.9438, lng: 72.8230 },
-      { name: '🌆 Andheri West Commerce Hub', lat: 19.1136, lng: 72.8461 },
-      { name: '🚉 Chhatrapati Shivaji Terminus (CST)', lat: 18.9400, lng: 72.8350 }
+      { name: 'Chhatrapati Shivaji Airport (BOM)', lat: 19.0896, lng: 72.8656 },
+      { name: 'Bandra Kurla Complex (BKC)', lat: 19.0660, lng: 72.8690 },
+      { name: 'Marine Drive Promenade', lat: 18.9438, lng: 72.8230 },
+      { name: 'Andheri Commercial Hub', lat: 19.1136, lng: 72.8461 }
     ]
   },
   Kolkata: {
     center: { lat: 22.5726, lng: 88.3639 },
     landmarks: [
-      { name: '✈️ Netaji Subhash Airport (CCU)', lat: 22.6547, lng: 88.4467 },
-      { name: '🏛️ Park Street Commercial Hub', lat: 22.5530, lng: 88.3520 },
-      { name: '💻 Salt Lake Sector V IT Zone', lat: 22.5790, lng: 88.4340 },
-      { name: '🚉 Howrah Junction Railway Station', lat: 22.5850, lng: 88.3420 }
+      { name: 'Netaji Subhash Airport (CCU)', lat: 22.6547, lng: 88.4467 },
+      { name: 'Park Street Hub', lat: 22.5530, lng: 88.3520 },
+      { name: 'Salt Lake Sector V', lat: 22.5790, lng: 88.4340 }
     ]
   },
   Hyderabad: {
     center: { lat: 17.3850, lng: 78.4867 },
     landmarks: [
-      { name: '✈️ Rajiv Gandhi Int\'l Airport (HYD)', lat: 17.2403, lng: 78.4294 },
-      { name: '💻 HITEC City Cyber Towers', lat: 17.4504, lng: 78.3808 },
-      { name: '🌆 Banjara Hills Road No 1', lat: 17.4156, lng: 78.4489 },
-      { name: '🚉 Secunderabad Railway Station', lat: 17.4340, lng: 78.5010 }
+      { name: 'Rajiv Gandhi Int\'l Airport (HYD)', lat: 17.2403, lng: 78.4294 },
+      { name: 'HITEC City Cyber Towers', lat: 17.4504, lng: 78.3808 },
+      { name: 'Banjara Hills', lat: 17.4156, lng: 78.4489 }
     ]
   }
 };
 
-// Uber-style vehicle categories with per-km rates & SVG graphics
+// Uber-style realistic vehicle categories
 const VEHICLE_TYPES = [
   {
     id: 'SEDAN',
-    name: 'Dezire Sedan',
-    tagline: 'Comfortable, popular sedan cabs',
+    name: 'Uber Sedan',
+    subName: 'Dzire • Etios',
+    tagline: 'Affordable, executive sedans',
     baseFare: 50,
     ratePerKm: 18,
-    etaMin: '3 min away',
+    etaMin: '3 min',
     capacity: 4,
-    color: '#EAB308',
-    icon: (
-      <svg width="48" height="32" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 18C6 14 10 11 16 10L20 6C22 5 28 5 32 6L36 10C42 11 44 14 44 18V22C44 23 43 24 42 24H6C5 24 4 23 4 22V18Z" fill="#FACC15" stroke="#854D0E" strokeWidth="2"/>
-        <path d="M14 11L18 7H30L34 11H14Z" fill="#1E293B" opacity="0.8"/>
-        <circle cx="12" cy="24" r="4" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-        <circle cx="36" cy="24" r="4" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-      </svg>
-    )
+    color: '#FACC15',
+    image: '/assets/sedan.png'
   },
   {
     id: 'HATCHBACK',
-    name: 'Go Hatchback',
-    tagline: 'Affordable, compact daily rides',
+    name: 'Uber Go',
+    subName: 'Swift • WagonR',
+    tagline: 'Compact, daily rides',
     baseFare: 30,
     ratePerKm: 14,
-    etaMin: '2 min away',
+    etaMin: '2 min',
     capacity: 4,
-    color: '#22C55E',
-    icon: (
-      <svg width="48" height="32" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 18C8 14 12 11 18 10L22 7C24 6 28 6 31 7L34 10C39 11 42 14 42 18V22H8V18Z" fill="#4ADE80" stroke="#15803D" strokeWidth="2"/>
-        <path d="M16 11L20 8H28L32 11H16Z" fill="#1E293B" opacity="0.8"/>
-        <circle cx="13" cy="23" r="3.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-        <circle cx="35" cy="23" r="3.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-      </svg>
-    )
+    color: '#4ADE80',
+    image: '/assets/hatchback.png'
   },
   {
     id: 'SUV',
-    name: 'SUV Ertiga / Innova',
-    tagline: 'Spacious 6-seater for family & luggage',
+    name: 'UberXL SUV',
+    subName: 'Ertiga • Innova',
+    tagline: 'Spacious 6-seater for family & bags',
     baseFare: 80,
     ratePerKm: 24,
-    etaMin: '5 min away',
+    etaMin: '5 min',
     capacity: 6,
     color: '#EF4444',
-    icon: (
-      <svg width="48" height="32" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 16C5 12 8 9 15 8L20 4C22 3 30 3 35 4L39 8C43 9 45 12 45 16V22C45 23.5 43.5 25 42 25H6C4.5 25 3 23.5 3 22V16Z" fill="#F87171" stroke="#991B1B" strokeWidth="2"/>
-        <path d="M13 9L18 5H32L37 9H13Z" fill="#1E293B" opacity="0.85"/>
-        <circle cx="11" cy="24" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-        <circle cx="37" cy="24" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-      </svg>
-    )
+    image: '/assets/suv.png'
   },
   {
     id: 'PREMIER',
-    name: 'Executive Premier',
+    name: 'Uber Black',
+    subName: 'Camry • Superb',
     tagline: 'Top-rated drivers & luxury cars',
     baseFare: 120,
     ratePerKm: 32,
-    etaMin: '4 min away',
+    etaMin: '4 min',
     capacity: 4,
     color: '#38BDF8',
-    icon: (
-      <svg width="48" height="32" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 18C6 14 10 11 16 10L20 6C22 5 28 5 32 6L36 10C42 11 44 14 44 18V22H6V18Z" fill="#38BDF8" stroke="#0369A1" strokeWidth="2"/>
-        <path d="M14 11L18 7H30L34 11H14Z" fill="#0F172A" opacity="0.9"/>
-        <circle cx="12" cy="23" r="4" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-        <circle cx="36" cy="23" r="4" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5"/>
-      </svg>
-    )
+    image: '/assets/luxury.png'
   }
 ];
 
@@ -175,8 +146,8 @@ export default function RiderDashboard() {
   // Vehicle Selection State
   const [selectedVehicle, setSelectedVehicle] = useState('SEDAN');
 
-  // Schedule / Plan for Later State
-  const [isScheduled, setIsScheduled] = useState(false);
+  // Schedule / Reserve State
+  const [bookingMode, setBookingMode] = useState('NOW'); // 'NOW' or 'RESERVE'
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
 
@@ -194,7 +165,6 @@ export default function RiderDashboard() {
           const userLng = pos.coords.longitude;
           setDetectingLoc(false);
 
-          // Find closest city in India database
           let closestCity = 'Chennai';
           let minDistance = Infinity;
 
@@ -209,30 +179,26 @@ export default function RiderDashboard() {
 
           setSelectedCity(closestCity);
 
-          // Set user's current GPS location as priority pickup
           setPickup({
             lat: userLat,
             lng: userLng,
-            address: `📍 My Current Location (${userLat.toFixed(4)}, ${userLng.toFixed(4)})`
+            address: `Current Location`
           });
         },
         (err) => {
-          console.warn('Geolocation permission denied or unavailable:', err);
           setDetectingLoc(false);
-          // Fallback to default city center
           const cityCenter = CITIES_DATA['Chennai'].center;
           setPickup({
             lat: cityCenter.lat,
             lng: cityCenter.lng,
-            address: '📍 Chennai Central Hub'
+            address: 'Chennai Central Hub'
           });
         },
-        { timeout: 10000 }
+        { timeout: 8000 }
       );
     }
   }, []);
 
-  // Calculate distance in kilometers using Haversine formula
   const calculateHaversineKm = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -245,25 +211,7 @@ export default function RiderDashboard() {
     return R * c;
   };
 
-  // Calculate estimated distance between pickup & drop
   const tripDistanceKm = pickup && drop ? calculateHaversineKm(pickup.lat, pickup.lng, drop.lat, drop.lng) : 0;
-
-  // Detect if user selected a future date/time -> "Plan for Later"
-  const handleDateTimeChange = (date, time) => {
-    setScheduledDate(date);
-    setScheduledTime(time);
-
-    if (date && time) {
-      const selectedDateTime = new Date(`${date}T${time}`);
-      const now = new Date();
-      // If selected time is more than 15 minutes in the future
-      if (selectedDateTime.getTime() - now.getTime() > 15 * 60 * 1000) {
-        setIsScheduled(true);
-      } else {
-        setIsScheduled(false);
-      }
-    }
-  };
 
   const handleBookTrip = async () => {
     if (!pickup || !drop) {
@@ -284,8 +232,8 @@ export default function RiderDashboard() {
         pickupAddress: pickup.address,
         dropAddress: drop.address,
         vehicleType: selectedVehicle,
-        isScheduled,
-        scheduledDateTime: isScheduled ? `${scheduledDate} ${scheduledTime}` : null
+        isScheduled: bookingMode === 'RESERVE',
+        scheduledDateTime: bookingMode === 'RESERVE' ? `${scheduledDate} ${scheduledTime}` : null
       });
       setActiveTrip(response);
     } catch (err) {
@@ -295,7 +243,6 @@ export default function RiderDashboard() {
     }
   };
 
-  // Poll for trip status updates and WebSocket tracking
   useEffect(() => {
     if (!activeTrip) return;
 
@@ -375,159 +322,172 @@ export default function RiderDashboard() {
   const currentCityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
 
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <div className="sidebar">
-        <div className="sidebar-logo">Ridevel</div>
-        <div className="sidebar-menu">
-          <div className="menu-item active">
-            <Compass size={18} /> Book a Ride
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#090D16', color: '#FFFFFF', fontFamily: "'Inter', sans-serif" }}>
+      
+      {/* Top Navbar */}
+      <header style={{ height: '60px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#0F172A', zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <div style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '-0.5px', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            Uber <span style={{ fontSize: '10px', background: '#FACC15', color: '#000', padding: '2px 6px', borderRadius: '4px', fontWeight: '900' }}>RIDEVEL</span>
+          </div>
+
+          {/* City Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <MapPin size={14} style={{ color: '#FACC15' }} />
+            <select
+              value={selectedCity}
+              onChange={(e) => {
+                setSelectedCity(e.target.value);
+                const city = CITIES_DATA[e.target.value];
+                if (city) {
+                  setPickup({ lat: city.center.lat, lng: city.center.lng, address: `${e.target.value} Center` });
+                  setDrop(null);
+                }
+              }}
+              style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', outline: 'none' }}
+            >
+              {Object.keys(CITIES_DATA).map((c) => (
+                <option key={c} value={c} style={{ background: '#0F172A', color: '#FFFFFF' }}>{c}</option>
+              ))}
+            </select>
           </div>
         </div>
-        <button onClick={authService.logout} className="btn-secondary" style={{ marginTop: 'auto' }}>
-          Logout
-        </button>
-      </div>
 
-      {/* Main Content */}
-      <div className="main-content" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.2fr', gap: '28px' }}>
-        
-        {/* Left Booking Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          {/* Top City Header */}
-          <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Current City</span>
-              <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                📍 {selectedCity}
-              </div>
-            </div>
-
-            {/* City Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {detectingLoc && <span style={{ fontSize: '12px', color: 'var(--accent-cyan)' }}>Detecting Location...</span>}
-              <select
-                value={selectedCity}
-                onChange={(e) => {
-                  setSelectedCity(e.target.value);
-                  const city = CITIES_DATA[e.target.value];
-                  if (city) {
-                    setPickup({
-                      lat: city.center.lat,
-                      lng: city.center.lng,
-                      address: `📍 ${e.target.value} Center`
-                    });
-                    setDrop(null);
-                  }
-                }}
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--border-glass)',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  cursor: 'pointer'
-                }}
-              >
-                {Object.keys(CITIES_DATA).map((city) => (
-                  <option key={city} value={city} style={{ background: '#0f172a', color: '#ffffff' }}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <User size={16} /> {user?.name || user?.email || 'Rider Account'}
           </div>
+          <button onClick={authService.logout} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#FFFFFF', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <LogOut size={14} /> Logout
+          </button>
+        </div>
+      </header>
 
-          {/* Trip Booking Screen */}
+      {/* Main Grid: Left Booking Panel + Right Full Map */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '420px 1fr', overflow: 'hidden' }}>
+        
+        {/* Left Control Column */}
+        <div style={{ padding: '20px', overflowY: 'auto', background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          
           {!activeTrip && !invoice && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ fontSize: '18px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Navigation style={{ color: 'var(--accent-cyan)' }} size={20} /> Where to in {selectedCity}?
-                </h2>
-
-                {/* Plan for Later Badge */}
-                {isScheduled && (
-                  <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Calendar size={13} /> Plan for Later
-                  </span>
-                )}
+            <>
+              {/* Ride Now vs Reserve Mode Switch */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: 'rgba(255,255,255,0.04)', padding: '3px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <button
+                  onClick={() => setBookingMode('NOW')}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: bookingMode === 'NOW' ? '#FFFFFF' : 'transparent',
+                    color: bookingMode === 'NOW' ? '#000000' : 'rgba(255,255,255,0.7)',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Navigation size={14} /> Ride Now
+                </button>
+                <button
+                  onClick={() => setBookingMode('RESERVE')}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: bookingMode === 'RESERVE' ? '#FFFFFF' : 'transparent',
+                    color: bookingMode === 'RESERVE' ? '#000000' : 'rgba(255,255,255,0.7)',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Calendar size={14} /> Reserve Later
+                </button>
               </div>
 
               {error && (
-                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--accent-error)', padding: '10px 14px', borderRadius: '8px', fontSize: '13px' }}>
+                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#F87171', padding: '10px 12px', borderRadius: '8px', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
 
-              {/* 🟢 Pickup Location Dropdown & Input */}
-              <div className="input-group">
-                <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>🟢 Pickup Location</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition((pos) => {
-                          setPickup({
-                            lat: pos.coords.latitude,
-                            lng: pos.coords.longitude,
-                            address: `📍 My GPS Location (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`
-                          });
-                        });
-                      }
-                    }}
-                    style={{ background: 'none', border: 'none', color: 'var(--accent-cyan)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                  >
-                    <LocateFixed size={12} /> Use My GPS Location
-                  </button>
-                </label>
+              {/* Uber-Style Connected Location Selector */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
+                
+                {/* Visual Connector Line */}
+                <div style={{ position: 'absolute', left: '25px', top: '34px', bottom: '34px', width: '2px', background: 'rgba(255,255,255,0.2)', zIndex: 1 }} />
 
-                <select
-                  className="input-field"
-                  value={pickup ? pickup.address : ''}
-                  onChange={(e) => {
-                    const lm = currentCityData.landmarks.find((l) => l.name === e.target.value);
-                    if (lm) setPickup({ lat: lm.lat, lng: lm.lng, address: lm.name });
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {pickup && <option value={pickup.address}>{pickup.address}</option>}
-                  <option value="" disabled>Select Popular Landmark in {selectedCity}...</option>
-                  {currentCityData.landmarks.map((lm) => (
-                    <option key={lm.name} value={lm.name} style={{ background: '#0f172a' }}>
-                      {lm.name}
-                    </option>
-                  ))}
-                </select>
+                {/* 🟢 Pickup Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', position: 'relative', zIndex: 2 }}>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E', flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pickup Location</div>
+                    <select
+                      value={pickup ? pickup.address : ''}
+                      onChange={(e) => {
+                        const lm = currentCityData.landmarks.find((l) => l.name === e.target.value);
+                        if (lm) setPickup({ lat: lm.lat, lng: lm.lng, address: lm.name });
+                      }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none', cursor: 'pointer', padding: '4px 0' }}
+                    >
+                      {pickup && <option value={pickup.address}>{pickup.address}</option>}
+                      <option value="" disabled>Choose pickup landmark...</option>
+                      {currentCityData.landmarks.map((l) => (
+                        <option key={l.name} value={l.name} style={{ background: '#0F172A', color: '#FFFFFF' }}>{l.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ borderBottom: '1px dashed rgba(255,255,255,0.1)', margin: '0 0 14px 24px' }} />
+
+                {/* 🔴 Drop Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 2 }}>
+                  <div style={{ width: '10px', height: '10px', background: '#EF4444', boxShadow: '0 0 8px #EF4444', flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where to?</div>
+                    <select
+                      value={drop ? drop.address : ''}
+                      onChange={(e) => {
+                        const lm = currentCityData.landmarks.find((l) => l.name === e.target.value);
+                        if (lm) setDrop({ lat: lm.lat, lng: lm.lng, address: lm.name });
+                      }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none', cursor: 'pointer', padding: '4px 0' }}
+                    >
+                      <option value="" disabled>Select drop destination in {selectedCity}...</option>
+                      {currentCityData.landmarks.map((l) => (
+                        <option key={l.name} value={l.name} style={{ background: '#0F172A', color: '#FFFFFF' }}>{l.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
               </div>
 
-              {/* 🔴 Drop Destination Dropdown */}
-              <div className="input-group">
-                <label className="input-label">🔴 Select Destination</label>
-                <select
-                  className="input-field"
-                  value={drop ? drop.address : ''}
-                  onChange={(e) => {
-                    const lm = currentCityData.landmarks.find((l) => l.name === e.target.value);
-                    if (lm) setDrop({ lat: lm.lat, lng: lm.lng, address: lm.name });
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <option value="" disabled>Choose Destination in {selectedCity}...</option>
-                  {currentCityData.landmarks.map((lm) => (
-                    <option key={lm.name} value={lm.name} style={{ background: '#0f172a' }}>
-                      {lm.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Reserve Date & Time Picker */}
+              {bookingMode === 'RESERVE' && (
+                <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#38BDF8', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Calendar size={14} /> Select Future Date & Time
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
+                    <input type="time" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
+                  </div>
+                </div>
+              )}
 
-              {/* Uber-Style Vehicle Selection Cards */}
+              {/* Uber Car Selection List */}
               <div>
-                <label className="input-label" style={{ marginBottom: '10px' }}>🚕 Select Cab Category</label>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,255,255,0.8)', marginBottom: '10px' }}>Available Cabs Nearby</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {VEHICLE_TYPES.map((v) => {
                     const isSelected = selectedVehicle === v.id;
@@ -542,31 +502,26 @@ export default function RiderDashboard() {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           padding: '12px 14px',
-                          borderRadius: '10px',
-                          border: `1.5px solid ${isSelected ? v.color : 'var(--border-glass)'}`,
-                          background: isSelected ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.01)',
+                          borderRadius: '12px',
+                          border: isSelected ? `2px solid ${v.color}` : '1px solid rgba(255,255,255,0.08)',
+                          background: isSelected ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
                           cursor: 'pointer',
-                          transition: 'all 0.2s ease'
+                          transition: 'all 0.15s ease-in-out'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ flexShrink: 0 }}>{v.icon}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                          <img src={v.image} alt={v.name} style={{ width: '56px', height: '36px', objectFit: 'contain' }} />
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              {v.name}
-                              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '400' }}>({v.capacity} seats)</span>
-                            </div>
-                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{v.etaMin} • {v.tagline}</div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>{v.name}</div>
+                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{v.subName} • {v.etaMin}</div>
                           </div>
                         </div>
 
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '16px', fontWeight: '800', color: isSelected ? v.color : '#ffffff' }}>
+                          <div style={{ fontSize: '17px', fontWeight: '800', color: isSelected ? v.color : '#FFFFFF' }}>
                             ₹{estimatedFare}
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                            ₹{v.ratePerKm}/km
-                          </div>
+                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>₹{v.ratePerKm}/km</div>
                         </div>
                       </div>
                     );
@@ -574,177 +529,120 @@ export default function RiderDashboard() {
                 </div>
               </div>
 
-              {/* Date & Time Selector (Plan for Later) */}
-              <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '14px' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Clock size={14} /> Schedule Ride (Optional):
+              {/* 1 km Buffer Policy Callout */}
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px' }}>
+                <Info size={14} style={{ color: '#38BDF8', flexShrink: 0, marginTop: '2px' }} />
+                <span>Variations under 1 km carry no extra charge. Distance exceeding 1 km is added at standard per-km rate upon ride completion.</span>
+              </div>
+
+              {/* Confirm Booking Button */}
+              <button
+                onClick={handleBookTrip}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#FFFFFF',
+                  color: '#000000',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(255,255,255,0.15)'
+                }}
+              >
+                {loading ? <RefreshCw className="animate-spin" size={20} /> : `Request ${selectedVehicle} Ride`}
+              </button>
+            </>
+          )}
+
+          {/* Active Trip Status Card */}
+          {activeTrip && !invoice && (
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #38BDF8', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px' }}>Ride Status</div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>
+                <span>Status:</span>
+                <span style={{ fontWeight: '700', color: '#38BDF8' }}>{activeTrip.status}</span>
+              </div>
+
+              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
+                <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
+                <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
+              </div>
+
+              {activeTrip.driverId ? (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Assigned Driver:</div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF', marginTop: '2px' }}>
+                    Driver Ref: {activeTrip.driverId.substring(0, 8)}...
+                  </div>
+
+                  {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
+                    <div style={{ background: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.3)', borderRadius: '8px', padding: '12px', textAlign: 'center', marginTop: '12px' }}>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>Share Start OTP with Driver:</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', letterSpacing: '4px', color: '#FACC15', margin: '4px 0' }}>
+                        {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <input
-                    type="date"
-                    className="input-field"
-                    style={{ fontSize: '12px', padding: '8px' }}
-                    value={scheduledDate}
-                    onChange={(e) => handleDateTimeChange(e.target.value, scheduledTime)}
-                  />
-                  <input
-                    type="time"
-                    className="input-field"
-                    style={{ fontSize: '12px', padding: '8px' }}
-                    value={scheduledTime}
-                    onChange={(e) => handleDateTimeChange(scheduledDate, e.target.value)}
-                  />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
+                  <RefreshCw className="animate-spin" size={14} /> Searching for nearest driver...
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Invoice & Payment Screen */}
+          {invoice && (
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #22C55E', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <CheckCircle2 size={40} style={{ color: '#22C55E', margin: '0 auto 8px auto' }} />
+                <h3 style={{ margin: 0, fontSize: '18px' }}>Trip Completed</h3>
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Invoice Ref: {invoice.id.substring(0, 8)}...</span>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '14px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Distance:</span>
+                  <strong>{tripDistanceKm.toFixed(1)} km</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px', fontSize: '15px', fontWeight: '800' }}>
+                  <span>Total Amount:</span>
+                  <span style={{ color: '#38BDF8' }}>₹{invoice.fare}</span>
                 </div>
               </div>
 
-              {/* 1 km Distance Buffer Policy Notice */}
-              <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '8px', padding: '10px 12px', fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <Info size={15} style={{ color: 'var(--accent-cyan)', flexShrink: 0, marginTop: '2px' }} />
-                <span>
-                  <strong>Buffer Policy:</strong> Small route variations under <strong>1 km</strong> carry no additional charge. Any extra distance beyond 1 km will be billed at standard per-km rate upon ride completion.
-                </span>
-              </div>
+              {invoice.paymentStatus === 'PENDING' ? (
+                <button onClick={handlePay} disabled={paying} style={{ width: '100%', padding: '12px', background: '#22C55E', color: '#000000', border: 'none', borderRadius: '8px', fontWeight: '800', cursor: 'pointer', marginBottom: '8px' }}>
+                  {paying ? 'Processing UPI Payment...' : 'Pay via UPI'}
+                </button>
+              ) : (
+                <div style={{ textAlign: 'center', color: '#22C55E', fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>
+                  ✓ Paid via UPI
+                </div>
+              )}
 
-              <button className="btn-primary" style={{ width: '100%', marginTop: '4px', padding: '14px', fontSize: '16px', fontWeight: '700' }} onClick={handleBookTrip} disabled={loading}>
-                {loading ? <RefreshCw className="animate-spin" size={18} /> : (isScheduled ? 'Confirm Scheduled Ride' : 'Confirm Ride Now')}
+              <button onClick={resetDashboard} style={{ width: '100%', padding: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}>
+                Book Another Ride
               </button>
             </div>
           )}
 
-          {/* Active Trip Tracking Status Card */}
-          {activeTrip && !invoice && (
-            <div className="glass-card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-              <h3 style={{ fontSize: '18px', marginBottom: '16px' }}>Ride Status Dashboard</h3>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-glass)', fontSize: '14px' }}>
-                  <span>Matching Status:</span>
-                  <span style={{ fontWeight: '700', color: 'var(--accent-cyan)' }}>{activeTrip.status}</span>
-                </div>
-
-                <div style={{ fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
-                  <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
-                </div>
-
-                {activeTrip.driverId ? (
-                  <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '14px', marginTop: '10px' }}>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>ASSIGNED VEHICLE DRIVER:</div>
-                    <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginTop: '4px' }}>
-                      Driver Ref: {activeTrip.driverId.substring(0, 8)}...
-                    </div>
-                    {driverLoc ? (
-                      <p style={{ fontSize: '12px', color: 'var(--accent-success)', marginTop: '4px' }}>
-                        📡 GPS connection active. Tracking driver vehicle moving...
-                      </p>
-                    ) : (
-                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                        Waiting for driver telemetry coordinates ping...
-                      </p>
-                    )}
-
-                    {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
-                      <div style={{ background: 'rgba(255, 204, 0, 0.1)', border: '1px solid rgba(255, 204, 0, 0.3)', borderRadius: '8px', padding: '12px', textAlign: 'center', marginTop: '14px' }}>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Ride Start OTP (Share with Driver):</div>
-                        <div style={{ fontSize: '26px', fontWeight: '800', letterSpacing: '6px', color: 'var(--accent-cyan)', margin: '4px 0' }}>
-                          {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                    <RefreshCw className="animate-spin" size={16} style={{ color: 'var(--accent-warning)' }} />
-                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Searching for nearest available cab...</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Premium Invoice & Payment checkout screen */}
-          {invoice && (
-            <div className="glass-card" style={{ borderLeft: '4px solid var(--accent-success)' }}>
-              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <CheckCircle2 size={48} style={{ color: 'var(--accent-success)', margin: '0 auto 12px auto' }} />
-                <h3>Ride Completed!</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Invoice Ref: {invoice.id.substring(0, 8)}...</p>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', marginBottom: '24px', background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Ride Base Fare:</span>
-                  <strong>₹{invoice.fare}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Distance Travelled:</span>
-                  <strong>{tripDistanceKm.toFixed(1)} km</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-glass)', paddingTop: '10px', fontSize: '16px', fontWeight: '700' }}>
-                  <span>Total Bill Amount:</span>
-                  <span style={{ color: 'var(--accent-cyan)' }}>₹{invoice.fare}</span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {invoice.paymentStatus === 'PENDING' ? (
-                  <div style={{ border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '12px', background: 'rgba(255,255,255,0.01)', marginBottom: '8px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--accent-cyan)' }}>
-                      UPI Payment Gateway
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
-                      <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Enter UPI ID (e.g. mobile@upi)</label>
-                      <input 
-                        type="text" 
-                        className="input-field" 
-                        placeholder="username@okaxis" 
-                        style={{ padding: '8px', fontSize: '13px' }}
-                        defaultValue={user ? `${user.email.split('@')[0]}@okaxis` : 'rider@okaxis'}
-                      />
-                    </div>
-
-                    <button 
-                      className="btn-primary" 
-                      style={{ width: '100%', background: 'var(--accent-glow)', color: '#000000', fontWeight: '700' }} 
-                      onClick={handlePay} 
-                      disabled={paying}
-                    >
-                      {paying ? 'Verifying UPI Request...' : 'Pay via UPI App'}
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', color: 'var(--accent-success)', fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                    <span>UPI Payment Completed Successfully!</span>
-                  </div>
-                )}
-
-                <a
-                  href={tripService.getInvoicePdfUrl(invoice.id)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-secondary"
-                  style={{ width: '100%', textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <Download size={16} /> Download PDF Invoice
-                </a>
-
-                <button className="btn-secondary" style={{ width: '100%', marginTop: '10px' }} onClick={resetDashboard}>
-                  Book Another Ride
-                </button>
-              </div>
-            </div>
-          )}
-
         </div>
 
-        {/* Right Map Canvas Panel */}
-        <div>
-          <h2 style={{ fontSize: '18px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MapPin style={{ color: 'var(--accent-cyan)' }} /> Live Navigation Route
-          </h2>
+        {/* Right Map View */}
+        <div style={{ position: 'relative', height: '100%' }}>
           <CabMap pickup={pickup} drop={drop} driver={driverLoc} />
         </div>
+
       </div>
     </div>
   );
