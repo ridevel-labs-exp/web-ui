@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// The API Gateway routes all requests to GCP GKE Gateway or local fallback
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://35.234.210.54:8000';
+// Use relative URL so all requests go to https://ridevel.in/api/... (proxied via Vercel to GCP Gateway)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
