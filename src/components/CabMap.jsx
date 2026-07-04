@@ -115,7 +115,21 @@ export default function CabMap({ pickup, drop, driver }) {
           </Marker>
         )}
 
-        {/* Route Line */}
+        {/* Route Line 1: Driver to Pickup (Heading to Rider) */}
+        {driver && pickup && !drop && (
+          <Polyline
+            positions={[
+              [driver.lat, driver.lng],
+              [pickup.lat, pickup.lng],
+            ]}
+            color="#ffcc00"
+            weight={4}
+            opacity={0.9}
+            dashArray="8, 8"
+          />
+        )}
+
+        {/* Route Line 2: Pickup to Drop-off (Trip in Progress) */}
         {hasRoute && (
           <Polyline
             positions={[

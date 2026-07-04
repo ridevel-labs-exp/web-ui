@@ -243,6 +243,15 @@ export default function RiderDashboard() {
                         Waiting for driver telemetry coordinates ping...
                       </p>
                     )}
+
+                    {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
+                      <div style={{ background: 'rgba(255, 204, 0, 0.1)', border: '1px solid rgba(255, 204, 0, 0.3)', borderRadius: '8px', padding: '12px', textAlign: 'center', marginTop: '14px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Ride Start OTP (Share with Driver):</div>
+                        <div style={{ fontSize: '26px', fontWeight: '800', letterSpacing: '6px', color: 'var(--accent-cyan)', margin: '4px 0' }}>
+                          {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
