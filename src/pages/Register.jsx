@@ -7,7 +7,7 @@ export default function Register({ onNavigate }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('ROLE_RIDER');
+  const [role, setRole] = useState('ROLE_DRIVER');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -155,8 +155,8 @@ export default function Register({ onNavigate }) {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
-                <option value="ROLE_RIDER">Rider (Book rides)</option>
-                <option value="ROLE_DRIVER">Driver (Earn money)</option>
+                <option value="ROLE_DRIVER">Driver</option>
+                <option value="ROLE_RIDER">Rider</option>
               </select>
               <Car size={18} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-secondary)' }} />
             </div>
