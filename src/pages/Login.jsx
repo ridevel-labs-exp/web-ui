@@ -150,10 +150,6 @@ export default function Login({ onNavigate }) {
           </svg>
           Sign in with Google
         </button>
-        <div style={{ marginTop: '24px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-          <p>Demo Admin Logins:</p>
-          <code style={{ color: 'var(--accent-cyan)' }}>admin@ridevel.in / admin123</code>
-        </div>
 
         <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
