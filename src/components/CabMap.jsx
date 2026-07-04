@@ -10,26 +10,60 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom Premium Map Pins using L.divIcon
-const createHtmlIcon = (color, shadowColor) => {
-  return L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div style="
-      background-color: ${color};
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 3px solid #ffffff;
-      box-shadow: 0 0 12px ${shadowColor};
-    "></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-  });
-};
+// Custom Modern Premium Map Pins
+const pickupIcon = L.divIcon({
+  className: 'custom-pickup-pin',
+  html: `
+    <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 40px; height: 40px; background: rgba(16, 185, 129, 0.35); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <div style="background: #10b981; color: #ffffff; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.6); display: flex; align-items: center; justify-content: center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+    </div>
+  `,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+});
 
-const pickupIcon = createHtmlIcon('#10b981', 'rgba(16, 185, 129, 0.6)'); // Green
-const dropIcon = createHtmlIcon('#ef4444', 'rgba(239, 68, 68, 0.6)');   // Red
-const driverIcon = createHtmlIcon('#ffcc00', 'rgba(255, 204, 0, 0.8)'); // Yellow (Driver)
+const dropIcon = L.divIcon({
+  className: 'custom-drop-pin',
+  html: `
+    <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 40px; height: 40px; background: rgba(239, 68, 68, 0.35); border-radius: 50%;"></div>
+      <div style="background: #ef4444; color: #ffffff; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.6); display: flex; align-items: center; justify-content: center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+          <line x1="4" x2="4" y1="22" y2="15"/>
+        </svg>
+      </div>
+    </div>
+  `,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+});
+
+// Dezire Sedan Car Icon with glowing aura for Driver
+const driverIcon = L.divIcon({
+  className: 'custom-driver-pin',
+  html: `
+    <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 46px; height: 46px; background: rgba(255, 204, 0, 0.3); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <div style="background: #ffcc00; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #000000; box-shadow: 0 4px 16px rgba(255, 204, 0, 0.8); display: flex; align-items: center; justify-content: center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H7c-.7 0-1.3.3-1.8.7C4.3 8.6 3 10 3 10s-2.7.6-4.5 1.1C.7 11.3 0 12.1 0 13v3c0 .6.4 1 1 1h2"/>
+          <circle cx="7" cy="17" r="2"/>
+          <path d="M9 17h6"/>
+          <circle cx="17" cy="17" r="2"/>
+        </svg>
+      </div>
+    </div>
+  `,
+  iconSize: [46, 46],
+  iconAnchor: [23, 23],
+});
 
 // Helper component to auto-recenter the map when coordinates change
 function RecenterMap({ center }) {
