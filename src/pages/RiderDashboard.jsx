@@ -1,77 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
-import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, LocateFixed, Info, User, LogOut, ChevronRight } from 'lucide-react';
+import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, LocateFixed, Info, User, LogOut, Search, X } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
   Chennai: {
     center: { lat: 13.0827, lng: 80.2707 },
     landmarks: [
-      { name: 'Chennai International Airport (MAA)', lat: 12.9941, lng: 80.1709 },
-      { name: 'Chennai Central Railway Station (MAS)', lat: 13.0827, lng: 80.2707 },
-      { name: 'T. Nagar Commercial Hub', lat: 13.0418, lng: 80.2341 },
-      { name: 'OMR IT Corridor (Taramani/Perungudi)', lat: 12.9698, lng: 80.2443 },
-      { name: 'Anna Nagar Roundtana', lat: 13.0850, lng: 80.2101 },
-      { name: 'ECR Beach Road (Thiruvanmiyur)', lat: 12.9830, lng: 80.2594 },
-      { name: 'Guindy Industrial Estate', lat: 13.0102, lng: 80.2157 },
-      { name: 'Velachery Hub', lat: 12.9759, lng: 80.2212 }
+      { name: '📍 Kundrathur Main Road', lat: 12.9977, lng: 80.0972 },
+      { name: '📍 Pammal Commercial Hub', lat: 12.9818, lng: 80.1340 },
+      { name: '✈️ Chennai International Airport (MAA)', lat: 12.9941, lng: 80.1709 },
+      { name: '🚉 Chennai Central Railway Station (MAS)', lat: 13.0827, lng: 80.2707 },
+      { name: '🛍️ T. Nagar Commercial Hub', lat: 13.0418, lng: 80.2341 },
+      { name: '💻 OMR IT Corridor (Taramani/Perungudi)', lat: 12.9698, lng: 80.2443 },
+      { name: '🌆 Anna Nagar Roundtana', lat: 13.0850, lng: 80.2101 },
+      { name: '🌊 ECR Beach Road (Thiruvanmiyur)', lat: 12.9830, lng: 80.2594 }
     ]
   },
   Bangalore: {
     center: { lat: 12.9716, lng: 77.5946 },
     landmarks: [
-      { name: 'Kempegowda Int\'l Airport (BLR)', lat: 13.1986, lng: 77.7066 },
-      { name: 'Bangalore Palace Center', lat: 12.9716, lng: 77.5946 },
-      { name: 'Electronic City IT Park', lat: 12.8452, lng: 77.6602 },
-      { name: 'Indiranagar 100ft Road', lat: 12.9784, lng: 77.6408 },
-      { name: 'Whitefield ITPL', lat: 12.9870, lng: 77.7312 },
-      { name: 'Koramangala Commercial Hub', lat: 12.9352, lng: 77.6245 }
+      { name: '✈️ Kempegowda Int\'l Airport (BLR)', lat: 13.1986, lng: 77.7066 },
+      { name: '🏰 Bangalore Palace Center', lat: 12.9716, lng: 77.5946 },
+      { name: '💻 Electronic City IT Park', lat: 12.8452, lng: 77.6602 },
+      { name: '🌆 Indiranagar 100ft Road', lat: 12.9784, lng: 77.6408 },
+      { name: '🏢 Whitefield ITPL', lat: 12.9870, lng: 77.7312 }
     ]
   },
   Coimbatore: {
     center: { lat: 11.0168, lng: 76.9558 },
     landmarks: [
-      { name: 'Coimbatore Int\'l Airport (CJB)', lat: 11.0300, lng: 77.0434 },
-      { name: 'Coimbatore Junction Station', lat: 10.9980, lng: 76.9629 },
-      { name: 'TIDEL Park Coimbatore', lat: 11.0247, lng: 77.0264 },
-      { name: 'RS Puram Zone', lat: 11.0069, lng: 76.9507 }
+      { name: '✈️ Coimbatore Int\'l Airport (CJB)', lat: 11.0300, lng: 77.0434 },
+      { name: '🚉 Coimbatore Junction Station', lat: 10.9980, lng: 76.9629 },
+      { name: '💻 TIDEL Park Coimbatore', lat: 11.0247, lng: 77.0264 },
+      { name: '🌆 RS Puram Zone', lat: 11.0069, lng: 76.9507 }
     ]
   },
   Delhi: {
     center: { lat: 28.6139, lng: 77.2090 },
     landmarks: [
-      { name: 'IGI Airport Terminal 3 (DEL)', lat: 28.5562, lng: 77.1000 },
-      { name: 'Connaught Place Center', lat: 28.6315, lng: 77.2167 },
-      { name: 'Cyber Hub Gurgaon', lat: 28.4950, lng: 77.0890 },
-      { name: 'Noida Sector 62 IT Hub', lat: 28.6270, lng: 77.3720 }
+      { name: '✈️ IGI Airport Terminal 3 (DEL)', lat: 28.5562, lng: 77.1000 },
+      { name: '🏛️ Connaught Place Center', lat: 28.6315, lng: 77.2167 },
+      { name: '💻 Cyber Hub Gurgaon', lat: 28.4950, lng: 77.0890 },
+      { name: '🏢 Noida Sector 62 IT Hub', lat: 28.6270, lng: 77.3720 }
     ]
   },
   Mumbai: {
     center: { lat: 19.0760, lng: 72.8777 },
     landmarks: [
-      { name: 'Chhatrapati Shivaji Airport (BOM)', lat: 19.0896, lng: 72.8656 },
-      { name: 'Bandra Kurla Complex (BKC)', lat: 19.0660, lng: 72.8690 },
-      { name: 'Marine Drive Promenade', lat: 18.9438, lng: 72.8230 },
-      { name: 'Andheri Commercial Hub', lat: 19.1136, lng: 72.8461 }
-    ]
-  },
-  Kolkata: {
-    center: { lat: 22.5726, lng: 88.3639 },
-    landmarks: [
-      { name: 'Netaji Subhash Airport (CCU)', lat: 22.6547, lng: 88.4467 },
-      { name: 'Park Street Hub', lat: 22.5530, lng: 88.3520 },
-      { name: 'Salt Lake Sector V', lat: 22.5790, lng: 88.4340 }
-    ]
-  },
-  Hyderabad: {
-    center: { lat: 17.3850, lng: 78.4867 },
-    landmarks: [
-      { name: 'Rajiv Gandhi Int\'l Airport (HYD)', lat: 17.2403, lng: 78.4294 },
-      { name: 'HITEC City Cyber Towers', lat: 17.4504, lng: 78.3808 },
-      { name: 'Banjara Hills', lat: 17.4156, lng: 78.4489 }
+      { name: '✈️ Chhatrapati Shivaji Airport (BOM)', lat: 19.0896, lng: 72.8656 },
+      { name: '🏢 Bandra Kurla Complex (BKC)', lat: 19.0660, lng: 72.8690 },
+      { name: '🌊 Marine Drive Promenade', lat: 18.9438, lng: 72.8230 }
     ]
   }
 };
@@ -134,7 +116,7 @@ export default function RiderDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Active City Selection (Auto-detect or Manual)
+  // Active City Selection
   const [selectedCity, setSelectedCity] = useState('Chennai');
   const [detectingLoc, setDetectingLoc] = useState(false);
 
@@ -142,6 +124,14 @@ export default function RiderDashboard() {
   const [pickup, setPickup] = useState(null);
   const [drop, setDrop] = useState(null);
   const [driverLoc, setDriverLoc] = useState(null);
+
+  // Unrestricted Text Search State
+  const [pickupInput, setPickupInput] = useState('');
+  const [dropInput, setDropInput] = useState('');
+  const [pickupSuggestions, setPickupSuggestions] = useState([]);
+  const [dropSuggestions, setDropSuggestions] = useState([]);
+  const [searchingPickup, setSearchingPickup] = useState(false);
+  const [searchingDrop, setSearchingDrop] = useState(false);
 
   // Vehicle Selection State
   const [selectedVehicle, setSelectedVehicle] = useState('SEDAN');
@@ -155,49 +145,74 @@ export default function RiderDashboard() {
   const [invoice, setInvoice] = useState(null);
   const [paying, setPaying] = useState(false);
 
-  // Auto-Detect User GPS Location & City on mount
-  useEffect(() => {
+  // Reverse geocode & detect exact user GPS position & address name
+  const handleUseCurrentLocation = () => {
     if ('geolocation' in navigator) {
       setDetectingLoc(true);
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const userLat = pos.coords.latitude;
-          const userLng = pos.coords.longitude;
-          setDetectingLoc(false);
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-          let closestCity = 'Chennai';
-          let minDistance = Infinity;
+          try {
+            // Reverse geocode to get street name
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            const addressName = data.display_name ? data.display_name.split(',').slice(0, 3).join(',') : `📍 GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
 
-          Object.keys(CITIES_DATA).forEach((city) => {
-            const center = CITIES_DATA[city].center;
-            const dist = calculateHaversineKm(userLat, userLng, center.lat, center.lng);
-            if (dist < minDistance) {
-              minDistance = dist;
-              closestCity = city;
-            }
-          });
-
-          setSelectedCity(closestCity);
-
-          setPickup({
-            lat: userLat,
-            lng: userLng,
-            address: `Current Location`
-          });
+            setPickup({ lat, lng, address: addressName });
+            setPickupInput(addressName);
+          } catch (e) {
+            setPickup({ lat, lng, address: `📍 GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})` });
+            setPickupInput(`Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+          } finally {
+            setDetectingLoc(false);
+          }
         },
         (err) => {
+          console.warn('Geolocation permission denied:', err);
           setDetectingLoc(false);
-          const cityCenter = CITIES_DATA['Chennai'].center;
-          setPickup({
-            lat: cityCenter.lat,
-            lng: cityCenter.lng,
-            address: 'Chennai Central Hub'
-          });
+          alert('Could not retrieve GPS location. Please type your location in the search bar.');
         },
         { timeout: 8000 }
       );
     }
+  };
+
+  useEffect(() => {
+    handleUseCurrentLocation();
   }, []);
+
+  // Fetch live OpenStreetMap address suggestions for ANY location in India
+  const searchAddress = async (query, type) => {
+    if (!query || query.length < 3) {
+      if (type === 'pickup') setPickupSuggestions([]);
+      else setDropSuggestions([]);
+      return;
+    }
+
+    if (type === 'pickup') setSearchingPickup(true);
+    else setSearchingDrop(true);
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' ' + selectedCity + ' India')}&countrycodes=in&limit=5`);
+      const data = await res.json();
+      const formatted = data.map((item) => ({
+        name: item.display_name.split(',').slice(0, 3).join(','),
+        fullAddress: item.display_name,
+        lat: parseFloat(item.lat),
+        lng: parseFloat(item.lon)
+      }));
+
+      if (type === 'pickup') setPickupSuggestions(formatted);
+      else setDropSuggestions(formatted);
+    } catch (e) {
+      console.error('Geocoding search failed', e);
+    } finally {
+      if (type === 'pickup') setSearchingPickup(false);
+      else setSearchingDrop(false);
+    }
+  };
 
   const calculateHaversineKm = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
@@ -315,6 +330,7 @@ export default function RiderDashboard() {
   const resetDashboard = () => {
     setActiveTrip(null);
     setDrop(null);
+    setDropInput('');
     setDriverLoc(null);
     setInvoice(null);
   };
@@ -341,7 +357,9 @@ export default function RiderDashboard() {
                 const city = CITIES_DATA[e.target.value];
                 if (city) {
                   setPickup({ lat: city.center.lat, lng: city.center.lng, address: `${e.target.value} Center` });
+                  setPickupInput(`${e.target.value} Center`);
                   setDrop(null);
+                  setDropInput('');
                 }
               }}
               style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', outline: 'none' }}
@@ -419,57 +437,134 @@ export default function RiderDashboard() {
                 </div>
               )}
 
-              {/* Uber-Style Connected Location Selector */}
+              {/* Uber-Style Unrestricted Location Input with Live Autocomplete */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
                 
                 {/* Visual Connector Line */}
                 <div style={{ position: 'absolute', left: '25px', top: '34px', bottom: '34px', width: '2px', background: 'rgba(255,255,255,0.2)', zIndex: 1 }} />
 
-                {/* 🟢 Pickup Row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', position: 'relative', zIndex: 2 }}>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pickup Location</div>
-                    <select
-                      value={pickup ? pickup.address : ''}
-                      onChange={(e) => {
-                        const lm = currentCityData.landmarks.find((l) => l.name === e.target.value);
-                        if (lm) setPickup({ lat: lm.lat, lng: lm.lng, address: lm.name });
-                      }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none', cursor: 'pointer', padding: '4px 0' }}
+                {/* 🟢 Pickup Search Input */}
+                <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pickup Location</span>
+                    <button
+                      type="button"
+                      onClick={handleUseCurrentLocation}
+                      style={{ background: 'none', border: 'none', color: '#FACC15', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
                     >
-                      {pickup && <option value={pickup.address}>{pickup.address}</option>}
-                      <option value="" disabled>Choose pickup landmark...</option>
-                      {currentCityData.landmarks.map((l) => (
-                        <option key={l.name} value={l.name} style={{ background: '#0F172A', color: '#FFFFFF' }}>{l.name}</option>
-                      ))}
-                    </select>
+                      <LocateFixed size={12} /> {detectingLoc ? 'Locating...' : 'Use Current Location'}
+                    </button>
                   </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 12px', borderRadius: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E', flexShrink: 0 }} />
+                    <input
+                      type="text"
+                      placeholder="Enter pickup location (e.g. Kundrathur, Pammal...)"
+                      value={pickupInput}
+                      onChange={(e) => {
+                        setPickupInput(e.target.value);
+                        searchAddress(e.target.value, 'pickup');
+                      }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', outline: 'none' }}
+                    />
+                    {searchingPickup && <RefreshCw size={14} className="animate-spin" style={{ color: 'rgba(255,255,255,0.5)' }} />}
+                  </div>
+
+                  {/* Pickup Autocomplete Dropdown List */}
+                  {pickupSuggestions.length > 0 && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                      {pickupSuggestions.map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setPickup({ lat: item.lat, lng: item.lng, address: item.name });
+                            setPickupInput(item.name);
+                            setPickupSuggestions([]);
+                          }}
+                          style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: '#FFFFFF' }}
+                        >
+                          <MapPin size={14} style={{ color: '#22C55E', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{item.name}</div>
+                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>{item.fullAddress}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div style={{ borderBottom: '1px dashed rgba(255,255,255,0.1)', margin: '0 0 14px 24px' }} />
+                {/* 🔴 Drop Search Input */}
+                <div style={{ position: 'relative', zIndex: 2 }}>
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>Where to?</span>
 
-                {/* 🔴 Drop Row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 2 }}>
-                  <div style={{ width: '10px', height: '10px', background: '#EF4444', boxShadow: '0 0 8px #EF4444', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where to?</div>
-                    <select
-                      value={drop ? drop.address : ''}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 12px', borderRadius: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', background: '#EF4444', boxShadow: '0 0 8px #EF4444', flexShrink: 0 }} />
+                    <input
+                      type="text"
+                      placeholder="Enter destination (e.g. Kundrathur, Pammal, Airport...)"
+                      value={dropInput}
                       onChange={(e) => {
-                        const lm = currentCityData.landmarks.find((l) => l.name === e.target.value);
-                        if (lm) setDrop({ lat: lm.lat, lng: lm.lng, address: lm.name });
+                        setDropInput(e.target.value);
+                        searchAddress(e.target.value, 'drop');
                       }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none', cursor: 'pointer', padding: '4px 0' }}
-                    >
-                      <option value="" disabled>Select drop destination in {selectedCity}...</option>
-                      {currentCityData.landmarks.map((l) => (
-                        <option key={l.name} value={l.name} style={{ background: '#0F172A', color: '#FFFFFF' }}>{l.name}</option>
-                      ))}
-                    </select>
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', outline: 'none' }}
+                    />
+                    {searchingDrop && <RefreshCw size={14} className="animate-spin" style={{ color: 'rgba(255,255,255,0.5)' }} />}
                   </div>
+
+                  {/* Drop Autocomplete Dropdown List */}
+                  {dropSuggestions.length > 0 && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                      {dropSuggestions.map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setDrop({ lat: item.lat, lng: item.lng, address: item.name });
+                            setDropInput(item.name);
+                            setDropSuggestions([]);
+                          }}
+                          style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: '#FFFFFF' }}
+                        >
+                          <MapPin size={14} style={{ color: '#EF4444', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{item.name}</div>
+                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>{item.fullAddress}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
+              </div>
+
+              {/* Popular Landmark Quick Chips */}
+              <div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>Popular Landmarks in {selectedCity}:</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {currentCityData.landmarks.slice(0, 5).map((lm) => (
+                    <button
+                      key={lm.name}
+                      onClick={() => {
+                        setDrop({ lat: lm.lat, lng: lm.lng, address: lm.name });
+                        setDropInput(lm.name);
+                      }}
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.8)',
+                        padding: '4px 10px',
+                        borderRadius: '16px',
+                        fontSize: '11px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {lm.name.split(' ')[0]} {lm.name.split(' ')[1] || ''}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Reserve Date & Time Picker */}
