@@ -6,6 +6,7 @@ import RiderDashboard from './pages/RiderDashboard';
 import DriverOnboarding from './pages/DriverOnboarding';
 import AdminDashboard from './pages/AdminDashboard';
 import { authService } from './services/authService';
+import { requestNotificationPermission } from './services/firebase';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login');
@@ -22,6 +23,9 @@ export default function App() {
     if (authService.isAuthenticated()) {
       const user = authService.getCurrentUser();
       if (user) {
+        // Request FCM web push notification permission from user
+        requestNotificationPermission().catch(err => console.log('FCM setup bypassed: ', err));
+
         if (user.role === 'ROLE_ADMIN') {
           setCurrentPage('admin');
         } else if (user.role === 'ROLE_DRIVER') {
@@ -38,6 +42,9 @@ export default function App() {
     // Clear query parameters when manually navigating
     if (page !== 'verify') {
       window.history.pushState({}, document.title, window.location.pathname);
+    }
+    if (page === 'rider' || page === 'driver' || page === 'admin') {
+      requestNotificationPermission().catch(err => console.log('FCM setup bypassed: ', err));
     }
   };
 
