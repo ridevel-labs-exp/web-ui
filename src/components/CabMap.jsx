@@ -15,10 +15,10 @@ const pickupIcon = L.divIcon({
   className: 'custom-pickup-pin',
   html: `
     <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
-      <div style="position: absolute; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.3); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
-      <div style="position: relative; background: #10b981; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 14px rgba(16, 185, 129, 0.85); display: flex; align-items: center; justify-content: center; z-index: 2;">
-        <div style="background: #ffffff; width: 6px; height: 6px; border-radius: 50%;"></div>
-      </div>
+      <div style="position: absolute; width: 36px; height: 36px; background: rgba(0, 0, 0, 0.15); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" style="position: relative; z-index: 2; filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));">
+        <path d="M12 3l9 16H3L12 3z"/>
+      </svg>
     </div>
   `,
   iconSize: [36, 36],
@@ -29,10 +29,10 @@ const dropIcon = L.divIcon({
   className: 'custom-drop-pin',
   html: `
     <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
-      <div style="position: absolute; width: 36px; height: 36px; background: rgba(239, 68, 68, 0.3); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" style="position: relative; z-index: 2; filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.85));">
-        <path d="M12 3l9 16H3L12 3z"/>
-      </svg>
+      <div style="position: absolute; width: 36px; height: 36px; background: rgba(0, 0, 0, 0.15); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <div style="position: relative; background: #000000; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 2;">
+        <div style="background: #ffffff; width: 6px; height: 6px; border-radius: 50%;"></div>
+      </div>
     </div>
   `,
   iconSize: [36, 36],
