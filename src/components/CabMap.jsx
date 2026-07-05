@@ -65,21 +65,25 @@ const driverIcon = L.divIcon({
   iconAnchor: [23, 23],
 });
 
-// Helper component to auto-recenter the map when coordinates change
-function RecenterMap({ center }) {
+// Helper component to auto-recenter and fit bounds of the map
+function RecenterMap({ center, bounds }) {
   const map = useMap();
   useEffect(() => {
-    if (center) {
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    } else if (center) {
       map.setView(center, map.getZoom());
     }
-  }, [center, map]);
+  }, [center, bounds, map]);
   return null;
 }
 
 export default function CabMap({ pickup, drop, driver }) {
-  // Default map center set to Bangalore (where PostGIS queries can run)
+  // Default map center set to Bangalore
   const defaultCenter = [12.9716, 77.5946];
   const [mapCenter, setMapCenter] = useState(defaultCenter);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [driverRouteCoordinates, setDriverRouteCoordinates] = useState([]);
 
   useEffect(() => {
     // Automatically detect user's live browser GPS location on startup
@@ -106,18 +110,69 @@ export default function CabMap({ pickup, drop, driver }) {
     }
   }, [pickup, driver]);
 
+  // Fetch actual route from OSRM for pickup to dropoff
+  useEffect(() => {
+    if (pickup && drop) {
+      fetch(`https://router.project-osrm.org/route/v1/driving/${pickup.lng},${pickup.lat};${drop.lng},${drop.lat}?overview=full&geometries=geojson`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+            setRouteCoordinates(coords);
+          } else {
+            setRouteCoordinates([[pickup.lat, pickup.lng], [drop.lat, drop.lng]]);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch OSRM route:', err);
+          setRouteCoordinates([[pickup.lat, pickup.lng], [drop.lat, drop.lng]]);
+        });
+    } else {
+      setRouteCoordinates([]);
+    }
+  }, [pickup, drop]);
+
+  // Fetch actual route from OSRM for driver to pickup
+  useEffect(() => {
+    if (driver && pickup && !drop) {
+      fetch(`https://router.project-osrm.org/route/v1/driving/${driver.lng},${driver.lat};${pickup.lng},${pickup.lat}?overview=full&geometries=geojson`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+            setDriverRouteCoordinates(coords);
+          } else {
+            setDriverRouteCoordinates([[driver.lat, driver.lng], [pickup.lat, pickup.lng]]);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch driver OSRM route:', err);
+          setDriverRouteCoordinates([[driver.lat, driver.lng], [pickup.lat, pickup.lng]]);
+        });
+    } else {
+      setDriverRouteCoordinates([]);
+    }
+  }, [driver, pickup, drop]);
+
   const hasRoute = pickup && drop;
+  const bounds = hasRoute ? [
+    [pickup.lat, pickup.lng],
+    [drop.lat, drop.lng]
+  ] : (driver && pickup ? [
+    [driver.lat, driver.lng],
+    [pickup.lat, pickup.lng]
+  ] : null);
 
   return (
     <div className="map-container" style={{ height: '100%', borderRadius: 'inherit', border: 'none', boxShadow: 'none' }}>
       <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true}>
-        {/* Sleek Light CartoDB Map Tiles to match our light theme */}
+        {/* Standard OpenStreetMap tiles with natural colors (blue water, green parks/trees) */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <RecenterMap center={mapCenter} />
+        <RecenterMap center={mapCenter} bounds={bounds} />
 
         {/* Pickup Pin */}
         {pickup && (
@@ -150,31 +205,34 @@ export default function CabMap({ pickup, drop, driver }) {
         )}
 
         {/* Route Line 1: Driver to Pickup (Heading to Rider) */}
-        {driver && pickup && !drop && (
+        {driver && pickup && !drop && driverRouteCoordinates.length > 0 && (
           <Polyline
-            positions={[
-              [driver.lat, driver.lng],
-              [pickup.lat, pickup.lng],
-            ]}
+            positions={driverRouteCoordinates}
             color="#ffcc00"
-            weight={4}
+            weight={5}
             opacity={0.9}
             dashArray="8, 8"
           />
         )}
 
         {/* Route Line 2: Pickup to Drop-off (Trip in Progress) */}
-        {hasRoute && (
-          <Polyline
-            positions={[
-              [pickup.lat, pickup.lng],
-              [drop.lat, drop.lng],
-            ]}
-            color="#3b82f6"
-            weight={4}
-            opacity={0.8}
-            dashArray="10, 10"
-          />
+        {hasRoute && routeCoordinates.length > 0 && (
+          <>
+            {/* Background shadow/border line */}
+            <Polyline
+              positions={routeCoordinates}
+              color="#1D4ED8"
+              weight={8}
+              opacity={0.4}
+            />
+            {/* Foreground active route line */}
+            <Polyline
+              positions={routeCoordinates}
+              color="#2563EB"
+              weight={5}
+              opacity={0.95}
+            />
+          </>
         )}
       </MapContainer>
     </div>
