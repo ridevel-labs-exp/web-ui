@@ -208,9 +208,9 @@ export default function CabMap({ pickup, drop, driver }) {
         {driver && pickup && !drop && driverRouteCoordinates.length > 0 && (
           <Polyline
             positions={driverRouteCoordinates}
-            color="#ffcc00"
+            color="#334155"
             weight={5}
-            opacity={0.9}
+            opacity={0.8}
             dashArray="8, 8"
           />
         )}
@@ -221,16 +221,16 @@ export default function CabMap({ pickup, drop, driver }) {
             {/* Background shadow/border line */}
             <Polyline
               positions={routeCoordinates}
-              color="#1D4ED8"
+              color="#000000"
               weight={8}
-              opacity={0.4}
+              opacity={0.15}
             />
             {/* Foreground active route line */}
             <Polyline
               positions={routeCoordinates}
-              color="#2563EB"
+              color="#000000"
               weight={5}
-              opacity={0.95}
+              opacity={0.9}
             />
           </>
         )}
