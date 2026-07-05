@@ -132,8 +132,32 @@ export default function RiderDashboard() {
   const [searchingPickup, setSearchingPickup] = useState(false);
   const [searchingDrop, setSearchingDrop] = useState(false);
   const [dropdownRect, setDropdownRect] = useState(null);
+  const [recentSearches, setRecentSearches] = useState([]);
   const pickupInputRef = useRef(null);
   const dropInputRef = useRef(null);
+  const searchDebounceRef = useRef(null);
+
+  // Load Recent Searches from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ridevel_recent_searches');
+      if (saved) {
+        setRecentSearches(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Failed to load recent searches', e);
+    }
+  }, []);
+
+  const saveRecentSearch = (item) => {
+    try {
+      const updated = [item, ...recentSearches.filter(r => r.fullAddress !== item.fullAddress)].slice(0, 5);
+      setRecentSearches(updated);
+      localStorage.setItem('ridevel_recent_searches', JSON.stringify(updated));
+    } catch (e) {
+      console.error('Failed to save recent search', e);
+    }
+  };
 
   // Vehicle Selection State
   const [selectedVehicle, setSelectedVehicle] = useState('SEDAN');
@@ -188,64 +212,109 @@ export default function RiderDashboard() {
     handleUseCurrentLocation();
   }, []);
 
-  // Fetch live OSM address suggestions using Nominatim (locality-aware full text search)
-  const searchAddress = async (query, type, inputRef) => {
-    if (!query || query.length < 2) {
-      if (type === 'pickup') setPickupSuggestions([]);
-      else setDropSuggestions([]);
-      setDropdownRect(null);
+  // Debounced search with Photon (fast autocomplete with proximity bias) + Nominatim fallback
+  const searchAddress = (query, type, inputRef) => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    if (inputRef?.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownRect({ top: rect.bottom + 4, left: rect.left, width: rect.width, type });
+    }
+
+    if (!query || query.trim().length < 2) {
+      // If query is short/empty, show recent searches & landmarks
+      const cityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
+      const defaultSuggestions = [
+        ...recentSearches.map(r => ({ ...r, isRecent: true })),
+        ...cityData.landmarks.map(l => ({
+          title: l.name,
+          subtitle: l.fullAddress,
+          fullAddress: `${l.name}, ${l.fullAddress}`,
+          lat: l.lat,
+          lng: l.lng,
+          isLandmark: true
+        }))
+      ];
+      if (type === 'pickup') setPickupSuggestions(defaultSuggestions.slice(0, 6));
+      else setDropSuggestions(defaultSuggestions.slice(0, 6));
       return;
     }
 
     if (type === 'pickup') setSearchingPickup(true);
     else setSearchingDrop(true);
 
-    // Capture input position for fixed dropdown placement
-    if (inputRef?.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setDropdownRect({ top: rect.bottom + 4, left: rect.left, width: rect.width, type });
-    }
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const cityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
+        // Use user's current GPS position if available for proximity bias, else city center
+        const lat = pickup?.lat || cityData.center.lat;
+        const lng = pickup?.lng || cityData.center.lng;
 
-    try {
-      const cityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
-      const clat = cityData.center.lat;
-      const clng = cityData.center.lng;
+        // Try Photon API first (fast, location-biased search-as-you-type)
+        let res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lat=${lat}&lon=${lng}&limit=8&countrycode=IN`);
+        let data = await res.json();
+        let features = data.features || [];
 
-      // Use Nominatim for full-text locality-aware search (handles "Street Name City" queries correctly)
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=IN&format=json&limit=6&addressdetails=1&viewbox=${clng - 1.5},${clat + 1.5},${clng + 1.5},${clat - 1.5}`,
-        { headers: { 'Accept-Language': 'en', 'User-Agent': 'RidevelApp/1.0' } }
-      );
-      const results = await res.json();
+        let formatted = features.map((item) => {
+          const p = item.properties;
+          const title = p.name || p.street || query;
+          const subtitleParts = [
+            p.street !== title ? p.street : null,
+            p.district !== title ? p.district : null,
+            p.city !== p.district && p.city !== title ? p.city : null,
+            p.county !== p.city && p.county !== p.district ? p.county : null,
+            p.state,
+            p.country
+          ].filter(Boolean);
+          const subtitle = subtitleParts.join(', ');
 
-      const formatted = results.map((item) => {
-        const addr = item.address || {};
-        const titleParts = [addr.road || addr.pedestrian || addr.footway || item.name].filter(Boolean);
-        const title = titleParts[0] || item.display_name.split(',')[0];
-        const subtitleParts = [
-          addr.suburb || addr.neighbourhood,
-          addr.city || addr.town || addr.village || addr.county,
-          addr.state,
-          addr.country
-        ].filter(Boolean);
-        const subtitle = subtitleParts.join(', ');
-        return {
-          title,
-          subtitle,
-          fullAddress: item.display_name,
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon)
-        };
-      });
+          return {
+            title,
+            subtitle: subtitle || 'India',
+            fullAddress: subtitle ? `${title}, ${subtitle}` : title,
+            lat: item.geometry.coordinates[1],
+            lng: item.geometry.coordinates[0]
+          };
+        });
 
-      if (type === 'pickup') setPickupSuggestions(formatted);
-      else setDropSuggestions(formatted);
-    } catch (e) {
-      console.error('Geocoding search failed', e);
-    } finally {
-      if (type === 'pickup') setSearchingPickup(false);
-      else setSearchingDrop(false);
-    }
+        // Fallback to Nominatim if Photon returns empty results
+        if (formatted.length === 0) {
+          const nomRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=IN&format=json&limit=8&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en', 'User-Agent': 'RidevelApp/1.0' } }
+          );
+          const nomResults = await nomRes.json();
+          formatted = nomResults.map((item) => {
+            const addr = item.address || {};
+            const title = addr.road || addr.pedestrian || addr.footway || item.name || item.display_name.split(',')[0];
+            const subtitleParts = [
+              addr.suburb || addr.neighbourhood,
+              addr.city || addr.town || addr.village || addr.county,
+              addr.state,
+              addr.country
+            ].filter(Boolean);
+            const subtitle = subtitleParts.join(', ');
+            return {
+              title,
+              subtitle: subtitle || item.display_name,
+              fullAddress: item.display_name,
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lon)
+            };
+          });
+        }
+
+        if (type === 'pickup') setPickupSuggestions(formatted);
+        else setDropSuggestions(formatted);
+      } catch (e) {
+        console.error('Geocoding search failed', e);
+      } finally {
+        if (type === 'pickup') setSearchingPickup(false);
+        else setSearchingDrop(false);
+      }
+    }, 300);
   };
 
   const calculateHaversineKm = (lat1, lon1, lat2, lon2) => {
@@ -481,12 +550,13 @@ export default function RiderDashboard() {
                 <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
                   <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
 
-                  <div ref={pickupInputRef} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: `1.5px solid ${pickupSuggestions.length > 0 ? '#2563EB' : '#CBD5E1'}`, padding: '10px 14px', borderRadius: '8px', transition: 'border-color 0.2s' }}>
+                  <div ref={pickupInputRef} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: `1.5px solid ${pickupSuggestions.length > 0 && dropdownRect?.type === 'pickup' ? '#2563EB' : '#CBD5E1'}`, padding: '10px 14px', borderRadius: '8px', transition: 'border-color 0.2s' }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 0 2px #E2E8F0', flexShrink: 0 }} />
                     <input
                       type="text"
                       placeholder="Pickup location"
                       value={pickupInput}
+                      onFocus={() => searchAddress(pickupInput, 'pickup', pickupInputRef)}
                       onChange={(e) => {
                         setPickupInput(e.target.value);
                         searchAddress(e.target.value, 'pickup', pickupInputRef);
@@ -503,74 +573,93 @@ export default function RiderDashboard() {
                   {/* Pickup Autocomplete Dropdown — position:fixed to escape overflow:auto clipping */}
                   {pickupSuggestions.length > 0 && dropdownRect?.type === 'pickup' && (
                     <div style={{ position: 'fixed', top: dropdownRect.top, left: dropdownRect.left, width: dropdownRect.width, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', zIndex: 9999, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.15)', maxHeight: '260px', overflowY: 'auto' }}>
-                      {pickupSuggestions.map((item, idx) => (
-                        <div
-                          key={idx}
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => {
-                            setPickup({ lat: item.lat, lng: item.lng, address: item.fullAddress });
-                            setPickupInput(item.title);
-                            setPickupSuggestions([]);
-                            setDropdownRect(null);
-                          }}
-                          style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
-                        >
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <MapPin size={16} style={{ color: '#2563EB' }} />
+                      {pickupSuggestions.map((item, idx) => {
+                        const displayTitle = item.title;
+                        const displaySubtitle = item.subtitle;
+                        const fullLabel = item.subtitle ? `${item.title}, ${item.subtitle}` : item.title;
+                        return (
+                          <div
+                            key={idx}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setPickup({ lat: item.lat, lng: item.lng, address: fullLabel });
+                              setPickupInput(fullLabel);
+                              saveRecentSearch({ ...item, fullAddress: fullLabel });
+                              setPickupSuggestions([]);
+                              setDropdownRect(null);
+                            }}
+                            style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                          >
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: item.isRecent ? '#F1F5F9' : '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <MapPin size={16} style={{ color: item.isRecent ? '#64748B' : '#2563EB' }} />
+                            </div>
+                            <div style={{ overflow: 'hidden' }}>
+                              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {displayTitle} {item.isRecent && <span style={{ fontSize: '10px', color: '#64748B', fontWeight: '500', marginLeft: '4px' }}>(Recent)</span>}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displaySubtitle}</div>
+                            </div>
                           </div>
-                          <div style={{ overflow: 'hidden' }}>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
-                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subtitle}</div>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
 
                 {/* 🔴 Drop Search Row */}
-                <div style={{ position: 'relative', zIndex: dropSuggestions.length > 0 ? 10 : 1 }}>
+                <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Dropoff location</div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '8px' }}>
+                  <div ref={dropInputRef} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: `1.5px solid ${dropSuggestions.length > 0 && dropdownRect?.type === 'drop' ? '#2563EB' : '#CBD5E1'}`, padding: '10px 14px', borderRadius: '8px' }}>
                     <div style={{ width: '10px', height: '10px', background: '#EF4444', border: '2px solid #FFFFFF', flexShrink: 0 }} />
                     <input
                       type="text"
-                      placeholder="Dropoff location"
+                      placeholder="Where to?"
                       value={dropInput}
+                      onFocus={() => searchAddress(dropInput, 'drop', dropInputRef)}
                       onChange={(e) => {
                         setDropInput(e.target.value);
-                        searchAddress(e.target.value, 'drop');
+                        searchAddress(e.target.value, 'drop', dropInputRef);
                       }}
                       style={{ width: '100%', background: 'transparent', border: 'none', color: '#0F172A', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                     />
                     {dropInput && (
-                      <X size={16} onClick={() => { setDropInput(''); setDrop(null); }} style={{ cursor: 'pointer', color: '#64748B' }} />
+                      <X size={16} onClick={() => { setDropInput(''); setDrop(null); setDropSuggestions([]); setDropdownRect(null); }} style={{ cursor: 'pointer', color: '#64748B' }} />
                     )}
                   </div>
 
-                  {/* Drop Autocomplete Dropdown List (Screenshot #4 Match) */}
-                  {dropSuggestions.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', maxHeight: '250px', overflowY: 'auto' }}>
-                      {dropSuggestions.map((item, idx) => (
-                        <div
-                          key={idx}
-                          onClick={() => {
-                            setDrop({ lat: item.lat, lng: item.lng, address: item.title });
-                            setDropInput(item.title);
-                            setDropSuggestions([]);
-                          }}
-                          style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
-                        >
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <MapPin size={16} style={{ color: '#2563EB' }} />
+                  {/* Drop Autocomplete Dropdown — position:fixed to escape overflow:auto clipping */}
+                  {dropSuggestions.length > 0 && dropdownRect?.type === 'drop' && (
+                    <div style={{ position: 'fixed', top: dropdownRect.top, left: dropdownRect.left, width: dropdownRect.width, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', zIndex: 9999, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.15)', maxHeight: '260px', overflowY: 'auto' }}>
+                      {dropSuggestions.map((item, idx) => {
+                        const displayTitle = item.title;
+                        const displaySubtitle = item.subtitle;
+                        const fullLabel = item.subtitle ? `${item.title}, ${item.subtitle}` : item.title;
+                        return (
+                          <div
+                            key={idx}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setDrop({ lat: item.lat, lng: item.lng, address: fullLabel });
+                              setDropInput(fullLabel);
+                              saveRecentSearch({ ...item, fullAddress: fullLabel });
+                              setDropSuggestions([]);
+                              setDropdownRect(null);
+                            }}
+                            style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                          >
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: item.isRecent ? '#F1F5F9' : '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <MapPin size={16} style={{ color: item.isRecent ? '#64748B' : '#2563EB' }} />
+                            </div>
+                            <div style={{ overflow: 'hidden' }}>
+                              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {displayTitle} {item.isRecent && <span style={{ fontSize: '10px', color: '#64748B', fontWeight: '500', marginLeft: '4px' }}>(Recent)</span>}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displaySubtitle}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>{item.title}</div>
-                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{item.subtitle}</div>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
