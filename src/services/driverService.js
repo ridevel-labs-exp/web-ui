@@ -35,7 +35,7 @@ export const driverService = {
 
   // Serving documents helper URL
   getFileUrl: (virtualPath) => {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '';
     return `${API_BASE_URL}${virtualPath}`;
   }
 };
