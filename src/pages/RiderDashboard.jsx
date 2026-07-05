@@ -133,6 +133,8 @@ export default function RiderDashboard() {
   const [searchingDrop, setSearchingDrop] = useState(false);
   const [dropdownRect, setDropdownRect] = useState(null);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [mapSelectMode, setMapSelectMode] = useState(null); // 'pickup' | 'drop' | null
+  const [selectedMapLocation, setSelectedMapLocation] = useState(null);
   const pickupInputRef = useRef(null);
   const dropInputRef = useRef(null);
   const searchDebounceRef = useRef(null);
@@ -205,6 +207,41 @@ export default function RiderDashboard() {
         },
         { timeout: 8000 }
       );
+    }
+  };
+
+  // Reverse geocode map click coordinates
+  const handleMapClick = async (lat, lng) => {
+    try {
+      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+      const data = await res.json();
+      const adminParts = data.localityInfo?.administrative || [];
+      const subParts = adminParts
+        .filter(part => part.adminLevel > 2)
+        .map(part => part.name);
+      const addressName = subParts.length > 0 
+        ? subParts.reverse().slice(0, 3).join(', ') 
+        : (data.locality || `📍 Pin Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+
+      const locObj = { lat, lng, address: addressName };
+
+      if (mapSelectMode === 'drop') {
+        setDrop(locObj);
+        setDropInput(addressName);
+        saveRecentSearch({ title: addressName, subtitle: 'Selected from map', fullAddress: addressName, lat, lng });
+        setMapSelectMode(null);
+        setSelectedMapLocation(null);
+      } else if (mapSelectMode === 'pickup') {
+        setPickup(locObj);
+        setPickupInput(addressName);
+        saveRecentSearch({ title: addressName, subtitle: 'Selected from map', fullAddress: addressName, lat, lng });
+        setMapSelectMode(null);
+        setSelectedMapLocation(null);
+      } else {
+        setSelectedMapLocation(locObj);
+      }
+    } catch (e) {
+      console.error('Reverse geocode failed', e);
     }
   };
 
@@ -548,7 +585,15 @@ export default function RiderDashboard() {
 
                 {/* 🟢 Pickup Search Row */}
                 <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
-                  <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px', marginLeft: '26px' }}>
+                    <span style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pickup location</span>
+                    <button
+                      onClick={() => setMapSelectMode('pickup')}
+                      style={{ background: 'none', border: 'none', color: '#2563EB', fontSize: '11px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <MapPin size={12} /> Set on map
+                    </button>
+                  </div>
 
                   <div ref={pickupInputRef} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: `1.5px solid ${pickupSuggestions.length > 0 && dropdownRect?.type === 'pickup' ? '#2563EB' : '#CBD5E1'}`, padding: '10px 14px', borderRadius: '8px', transition: 'border-color 0.2s' }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 0 2px #E2E8F0', flexShrink: 0 }} />
@@ -608,7 +653,15 @@ export default function RiderDashboard() {
 
                 {/* 🔴 Drop Search Row */}
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Dropoff location</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px', marginLeft: '26px' }}>
+                    <span style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dropoff location</span>
+                    <button
+                      onClick={() => setMapSelectMode('drop')}
+                      style={{ background: 'none', border: 'none', color: '#2563EB', fontSize: '11px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <MapPin size={12} /> Set on map
+                    </button>
+                  </div>
 
                   <div ref={dropInputRef} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: `1.5px solid ${dropSuggestions.length > 0 && dropdownRect?.type === 'drop' ? '#2563EB' : '#CBD5E1'}`, padding: '10px 14px', borderRadius: '8px' }}>
                     <div style={{ width: '10px', height: '10px', background: '#EF4444', border: '2px solid #FFFFFF', flexShrink: 0 }} />
@@ -831,7 +884,54 @@ export default function RiderDashboard() {
 
         {/* Right Map View */}
         <div style={{ position: 'relative', height: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-          <CabMap pickup={pickup} drop={drop} driver={driverLoc} />
+          <CabMap pickup={pickup} drop={drop} driver={driverLoc} onMapClick={handleMapClick} />
+
+          {/* Floating Map Selection Banner */}
+          {mapSelectMode && (
+            <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', background: '#0F172A', color: '#FFFFFF', padding: '10px 20px', borderRadius: '30px', fontSize: '13px', fontWeight: '700', zIndex: 1000, boxShadow: '0 10px 25px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span>📍 Tap anywhere on the map to set {mapSelectMode === 'pickup' ? 'Pickup' : 'Dropoff'}</span>
+              <button
+                onClick={() => setMapSelectMode(null)}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#FFFFFF', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {/* Floating Selected Map Location Action Card */}
+          {selectedMapLocation && !mapSelectMode && (
+            <div style={{ position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '16px 20px', zIndex: 1000, boxShadow: '0 20px 30px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '320px' }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '700' }}>Selected Location</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{selectedMapLocation.address}</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    setPickup(selectedMapLocation);
+                    setPickupInput(selectedMapLocation.address);
+                    saveRecentSearch({ title: selectedMapLocation.address, subtitle: 'Set from map', fullAddress: selectedMapLocation.address, lat: selectedMapLocation.lat, lng: selectedMapLocation.lng });
+                    setSelectedMapLocation(null);
+                  }}
+                  style={{ background: '#10B981', color: '#FFFFFF', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}
+                >
+                  Set as Pickup 🟢
+                </button>
+                <button
+                  onClick={() => {
+                    setDrop(selectedMapLocation);
+                    setDropInput(selectedMapLocation.address);
+                    saveRecentSearch({ title: selectedMapLocation.address, subtitle: 'Set from map', fullAddress: selectedMapLocation.address, lat: selectedMapLocation.lat, lng: selectedMapLocation.lng });
+                    setSelectedMapLocation(null);
+                  }}
+                  style={{ background: '#EF4444', color: '#FFFFFF', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}
+                >
+                  Set as Drop 🔴
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

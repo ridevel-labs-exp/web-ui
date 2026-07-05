@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 
 // Leaflet default icon fix to prevent missing asset errors
@@ -59,6 +59,18 @@ const driverIcon = L.divIcon({
   iconAnchor: [23, 23],
 });
 
+// Helper component to handle map clicks for manual pin placement
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({
+    click(e) {
+      if (onMapClick) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    }
+  });
+  return null;
+}
+
 // Helper component to auto-recenter and fit bounds of the map
 function RecenterMap({ center, bounds }) {
   const map = useMap();
@@ -72,7 +84,7 @@ function RecenterMap({ center, bounds }) {
   return null;
 }
 
-export default function CabMap({ pickup, drop, driver }) {
+export default function CabMap({ pickup, drop, driver, onMapClick }) {
   // Default map center set to Bangalore
   const defaultCenter = [12.9716, 77.5946];
   const [mapCenter, setMapCenter] = useState(defaultCenter);
@@ -188,6 +200,7 @@ export default function CabMap({ pickup, drop, driver }) {
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
+        <MapClickHandler onMapClick={onMapClick} />
         <RecenterMap center={mapCenter} bounds={bounds} />
 
         {/* Pickup Pin */}
