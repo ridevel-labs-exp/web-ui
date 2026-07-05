@@ -166,10 +166,10 @@ export default function CabMap({ pickup, drop, driver }) {
   return (
     <div className="map-container" style={{ height: '100%', borderRadius: 'inherit', border: 'none', boxShadow: 'none' }}>
       <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true}>
-        {/* Standard OpenStreetMap tiles with natural colors (blue water, green parks/trees) */}
+        {/* Voyager tiles with clean color scheme (white roads/land, blue water, green parks) */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
         <RecenterMap center={mapCenter} bounds={bounds} />
