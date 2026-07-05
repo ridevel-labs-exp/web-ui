@@ -154,9 +154,15 @@ export default function RiderDashboard() {
           const lng = pos.coords.longitude;
 
           try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
             const data = await res.json();
-            const addressName = data.display_name ? data.display_name.split(',').slice(0, 3).join(',') : `📍 GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            const adminParts = data.localityInfo?.administrative || [];
+            const subParts = adminParts
+              .filter(part => part.adminLevel > 2)
+              .map(part => part.name);
+            const addressName = subParts.length > 0 
+              ? subParts.reverse().slice(0, 3).join(', ') 
+              : (data.locality || `📍 GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
 
             setPickup({ lat, lng, address: addressName });
             setPickupInput(addressName);
@@ -179,7 +185,7 @@ export default function RiderDashboard() {
     handleUseCurrentLocation();
   }, []);
 
-  // Fetch live OpenStreetMap address suggestions for ANY location in India
+  // Fetch live OSM address suggestions using Photon (Komoot) which supports CORS
   const searchAddress = async (query, type) => {
     if (!query || query.length < 2) {
       if (type === 'pickup') setPickupSuggestions([]);
@@ -192,33 +198,42 @@ export default function RiderDashboard() {
 
     try {
       const cityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
-      const lat = cityData.center.lat;
-      const lng = cityData.center.lng;
-      const x1 = lng - 0.4;
-      const y1 = lat + 0.4;
-      const x2 = lng + 0.4;
-      const y2 = lat - 0.4;
-      const viewboxStr = `${x1},${y1},${x2},${y2}`;
+      const clat = cityData.center.lat;
+      const clng = cityData.center.lng;
+      const minLon = clng - 0.4;
+      const minLat = clat - 0.4;
+      const maxLon = clng + 0.4;
+      const maxLat = clat + 0.4;
 
-      let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(query)}&countrycodes=in&limit=6&viewbox=${viewboxStr}&bounded=1`);
+      let res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${minLon},${minLat},${maxLon},${maxLat}&limit=6`);
       let data = await res.json();
+      let features = data.features || [];
       
-      if (!data || data.length === 0) {
-        // Fallback to unbounded search with city name appended if no local results are found
-        res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(query + ' ' + selectedCity)}&countrycodes=in&limit=6`);
-        data = await res.json();
+      if (features.length === 0) {
+        // Fallback to unbounded search with city coordinates bias
+        res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lon=${clng}&lat=${clat}&limit=6`);
+        const fallbackData = await res.json();
+        features = fallbackData.features || [];
       }
       
-      const formatted = data.map((item) => {
-        const parts = item.display_name.split(',');
-        const title = parts[0].trim();
-        const subtitle = parts.slice(1).join(',').trim();
+      const formatted = features.map((item) => {
+        const p = item.properties;
+        const title = p.name;
+        const subtitleParts = [];
+        if (p.street) subtitleParts.push(p.street);
+        if (p.district && p.district !== p.name) subtitleParts.push(p.district);
+        if (p.city && p.city !== p.district && p.city !== p.name) subtitleParts.push(p.city);
+        if (p.county && p.county !== p.city && p.county !== p.district) subtitleParts.push(p.county);
+        if (p.state) subtitleParts.push(p.state);
+        if (p.country) subtitleParts.push(p.country);
+        const subtitle = subtitleParts.join(', ');
+
         return {
           title,
           subtitle,
-          fullAddress: item.display_name,
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon)
+          fullAddress: `${title}, ${subtitle}`,
+          lat: item.geometry.coordinates[1],
+          lng: item.geometry.coordinates[0]
         };
       });
 
