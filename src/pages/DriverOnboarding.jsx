@@ -203,8 +203,8 @@ export default function DriverOnboarding() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
-        <RefreshCw className="animate-spin" size={32} style={{ color: 'var(--accent-cyan)' }} />
+      <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#F8FAFC' }}>
+        <RefreshCw className="animate-spin" size={32} style={{ color: 'var(--accent-blue)' }} />
       </div>
     );
   }
@@ -236,11 +236,11 @@ export default function DriverOnboarding() {
               onClick={toggleOnline}
               className="btn-primary"
               style={{
-                background: isOnline ? 'var(--accent-success)' : 'rgba(255, 255, 255, 0.05)',
+                background: isOnline ? 'var(--accent-success)' : '#FFFFFF',
                 color: isOnline ? '#ffffff' : 'var(--text-primary)',
                 border: isOnline ? 'none' : '1px solid var(--border-glass)',
                 padding: '10px 20px',
-                boxShadow: isOnline ? '0 0 15px rgba(16,185,129,0.3)' : 'none'
+                boxShadow: isOnline ? '0 0 15px rgba(16,185,129,0.3)' : '0 1px 3px rgba(0,0,0,0.05)'
               }}
             >
               <Power size={18} /> {isOnline ? 'Go Offline' : 'Go Online'}
@@ -252,7 +252,7 @@ export default function DriverOnboarding() {
         {!profile && (
           <div className="glass-card" style={{ maxWidth: '640px' }}>
             <h2 style={{ fontSize: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText style={{ color: 'var(--accent-cyan)' }} /> Submit Onboarding Documents
+              <FileText style={{ color: 'var(--accent-blue)' }} /> Submit Onboarding Documents
             </h2>
 
             {error && (
@@ -281,25 +281,25 @@ export default function DriverOnboarding() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <label className="btn-secondary" style={{ width: '100%', cursor: 'pointer', flexDirection: 'column', height: '100px', display: 'flex', justifyContent: 'center' }}>
-                    <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-cyan)' }} />
-                    <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoFront ? photoFront.name.substring(0, 10) + '...' : 'Front Photo'}</span>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoFront)} />
+                     <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-blue)' }} />
+                     <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoFront ? photoFront.name.substring(0, 10) + '...' : 'Front Photo'}</span>
+                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoFront)} />
                   </label>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <label className="btn-secondary" style={{ width: '100%', cursor: 'pointer', flexDirection: 'column', height: '100px', display: 'flex', justifyContent: 'center' }}>
-                    <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-cyan)' }} />
-                    <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoSide ? photoSide.name.substring(0, 10) + '...' : 'Side Photo'}</span>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoSide)} />
+                     <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-blue)' }} />
+                     <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoSide ? photoSide.name.substring(0, 10) + '...' : 'Side Photo'}</span>
+                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoSide)} />
                   </label>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <label className="btn-secondary" style={{ width: '100%', cursor: 'pointer', flexDirection: 'column', height: '100px', display: 'flex', justifyContent: 'center' }}>
-                    <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-cyan)' }} />
-                    <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoBack ? photoBack.name.substring(0, 10) + '...' : 'Back Photo'}</span>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoBack)} />
+                     <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-blue)' }} />
+                     <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoBack ? photoBack.name.substring(0, 10) + '...' : 'Back Photo'}</span>
+                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoBack)} />
                   </label>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function DriverOnboarding() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <div className="glass-card" style={{ padding: '16px' }}>
                   <h2 style={{ fontSize: '16px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Navigation size={18} style={{ color: 'var(--accent-cyan)' }} />
+                    <Navigation size={18} style={{ color: 'var(--accent-blue)' }} />
                     {activeTrip 
                       ? (activeTrip.status === 'STARTED' ? 'Trip in Progress (Heading to Destination)' : 'Heading to Rider Pickup')
                       : 'Live Driver GPS Position'}
@@ -371,7 +371,7 @@ export default function DriverOnboarding() {
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       {assignedTrips.map(trip => (
-                        <div key={trip.id} style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '16px', background: 'rgba(255,255,255,0.01)' }}>
+                        <div key={trip.id} style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '16px', background: '#F8FAFC' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                             <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Trip Ref: {trip.id.substring(0, 8)}...</span>
                             <span className={`badge ${trip.status === 'ACCEPTED' ? 'badge-approved' : 'badge-pending'}`}>{trip.status}</span>
@@ -379,7 +379,7 @@ export default function DriverOnboarding() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', marginBottom: '16px' }}>
                             <div>🟢 <strong>Pickup:</strong> {trip.pickupAddress}</div>
                             <div>🔴 <strong>Drop:</strong> {trip.dropAddress}</div>
-                            <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--accent-cyan)', marginTop: '6px' }}>Fare: ₹{trip.fare}</div>
+                            <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--accent-blue)', marginTop: '6px' }}>Fare: ₹{trip.fare}</div>
                           </div>
 
                           {/* Status update controls */}
@@ -416,14 +416,14 @@ export default function DriverOnboarding() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <div className="glass-card">
                   <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Navigation style={{ color: 'var(--accent-cyan)' }} /> GPS Telemetry Simulator
+                    <Navigation style={{ color: 'var(--accent-blue)' }} /> GPS Telemetry Simulator
                   </h2>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6', marginBottom: '20px' }}>
                     Demonstrate live coordinates tracking! Pinging coordinates triggers the WebSocket and updates the map layout in real-time.
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-glass)', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-glass)', fontSize: '14px' }}>
                       <span>Simulator Status:</span>
                       <span style={{ fontWeight: '700', color: simulating ? 'var(--accent-success)' : 'var(--text-secondary)' }}>
                         {simulating ? 'Simulating Movement' : 'Inactive'}
@@ -443,7 +443,7 @@ export default function DriverOnboarding() {
                       <button
                         onClick={stopLocationSimulation}
                         className="btn-secondary"
-                        style={{ width: '100%', gap: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                        style={{ width: '100%', gap: '8px', background: '#FEF2F2', color: 'var(--accent-error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
                       >
                         <Pause size={18} /> Stop Simulation
                       </button>
@@ -469,7 +469,7 @@ export default function DriverOnboarding() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(15, 23, 42, 0.4)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             justifyContent: 'center',
@@ -486,7 +486,7 @@ export default function DriverOnboarding() {
               </button>
 
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <KeyRound size={48} style={{ color: 'var(--accent-cyan)', margin: '0 auto 12px auto' }} />
+                <KeyRound size={48} style={{ color: 'var(--accent-blue)', margin: '0 auto 12px auto' }} />
                 <h3 style={{ fontSize: '20px' }}>Verify Rider OTP</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '6px' }}>
                   Ask the rider for the 4-digit Ride Start OTP shown on their screen.
