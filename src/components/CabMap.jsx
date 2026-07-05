@@ -111,10 +111,10 @@ export default function CabMap({ pickup, drop, driver }) {
   return (
     <div className="map-container">
       <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true}>
-        {/* Sleek Dark CartoDB Map Tiles to match our dark premium theme */}
+        {/* Sleek Light CartoDB Map Tiles to match our light theme */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
         <RecenterMap center={mapCenter} />

@@ -347,67 +347,68 @@ export default function RiderDashboard() {
   const currentCityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#090D16', color: '#FFFFFF', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Inter', -apple-system, sans-serif" }}>
       
       {/* Top Navbar */}
-      <header style={{ height: '60px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#000000', zIndex: 100 }}>
+      <header style={{ height: '60px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#FFFFFF', zIndex: 100, boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
             Ridevel
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontSize: '13px', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
             <User size={16} /> {user?.name || user?.email || 'Karthi'}
           </div>
-          <button onClick={authService.logout} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#FFFFFF', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button onClick={authService.logout} style={{ background: '#F1F5F9', border: '1px solid #CBD5E1', color: '#0F172A', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>
             <LogOut size={13} /> Logout
           </button>
         </div>
       </header>
 
-      {/* Main Grid: Left Control Panel + Right Full Map */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '430px 1fr', overflow: 'hidden' }}>
+      {/* Main Grid: Left Control Panel Overlay + Right Full Screen Map */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         
-        {/* Left Control Column */}
-        <div style={{ padding: '24px', overflowY: 'auto', background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        {/* Left Floating Control Column */}
+        <div style={{ position: 'absolute', left: '24px', top: '24px', bottom: '24px', width: '420px', zIndex: 10, padding: '24px', overflowY: 'auto', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '18px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
           
           {!activeTrip && !invoice && (
             <>
               {/* Header Location Tag (Screenshot #2 Match: "📍 Chennai, IN  Change city") */}
               <div>
-                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
-                  <MapPin size={15} style={{ color: '#000000', fill: '#FFFFFF' }} />
+                <div style={{ fontSize: '13px', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
+                  <MapPin size={15} style={{ color: '#2563EB', fill: '#DBEAFE' }} />
                   <span>{selectedCity}, IN</span>
                   <button
                     onClick={() => setShowCityModal(true)}
-                    style={{ background: 'none', border: 'none', color: '#FFFFFF', textDecoration: 'underline', fontSize: '13px', cursor: 'pointer', marginLeft: '4px', fontWeight: '600' }}
+                    style={{ background: 'none', border: 'none', color: '#2563EB', textDecoration: 'underline', fontSize: '13px', cursor: 'pointer', marginLeft: '4px', fontWeight: '600' }}
                   >
                     Change city
                   </button>
                 </div>
-                <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#FFFFFF', margin: '8px 0 16px 0', letterSpacing: '-0.5px' }}>
+                <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#0F172A', margin: '8px 0 16px 0', letterSpacing: '-0.5px' }}>
                   Request a ride
                 </h1>
               </div>
 
               {/* Ride Now vs Reserve Mode Switch */}
-              <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.08)', padding: '4px', borderRadius: '24px', width: 'fit-content', marginBottom: '8px' }}>
+              <div style={{ display: 'inline-flex', background: '#F1F5F9', padding: '4px', borderRadius: '24px', width: 'fit-content', marginBottom: '8px' }}>
                 <button
                   onClick={() => setBookingMode('NOW')}
                   style={{
                     padding: '8px 16px',
                     borderRadius: '20px',
                     border: 'none',
-                    background: bookingMode === 'NOW' ? '#000000' : 'transparent',
-                    color: '#FFFFFF',
+                    background: bookingMode === 'NOW' ? '#FFFFFF' : 'transparent',
+                    color: bookingMode === 'NOW' ? '#0F172A' : '#64748B',
                     fontWeight: '700',
                     fontSize: '13px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    boxShadow: bookingMode === 'NOW' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
                   <Clock size={14} /> Pickup now
@@ -418,14 +419,15 @@ export default function RiderDashboard() {
                     padding: '8px 16px',
                     borderRadius: '20px',
                     border: 'none',
-                    background: bookingMode === 'RESERVE' ? '#000000' : 'transparent',
-                    color: '#FFFFFF',
+                    background: bookingMode === 'RESERVE' ? '#FFFFFF' : 'transparent',
+                    color: bookingMode === 'RESERVE' ? '#0F172A' : '#64748B',
                     fontWeight: '700',
                     fontSize: '13px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    boxShadow: bookingMode === 'RESERVE' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
                   <Calendar size={14} /> Reserve a ride
@@ -433,23 +435,23 @@ export default function RiderDashboard() {
               </div>
 
               {error && (
-                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#F87171', padding: '10px 14px', borderRadius: '8px', fontSize: '13px' }}>
+                <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '10px 14px', borderRadius: '8px', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
 
               {/* Connected Location Selector (Screenshot #3 & #4 Match) */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '14px', position: 'relative' }}>
+              <div style={{ background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', padding: '14px', position: 'relative' }}>
                 
                 {/* Visual Connector Line */}
-                <div style={{ position: 'absolute', left: '26px', top: '34px', bottom: '34px', width: '2px', background: 'rgba(255,255,255,0.3)', zIndex: 1 }} />
+                <div style={{ position: 'absolute', left: '26px', top: '34px', bottom: '34px', width: '2px', background: '#E2E8F0', zIndex: 1 }} />
 
                 {/* 🟢 Pickup Search Row */}
                 <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
+                  <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.15)', padding: '10px 14px', borderRadius: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 0 0 2px #000000', flexShrink: 0 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 0 2px #E2E8F0', flexShrink: 0 }} />
                     <input
                       type="text"
                       placeholder="Pickup location"
@@ -458,18 +460,18 @@ export default function RiderDashboard() {
                         setPickupInput(e.target.value);
                         searchAddress(e.target.value, 'pickup');
                       }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none' }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#0F172A', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                     />
                     {pickupInput ? (
-                      <X size={16} onClick={() => { setPickupInput(''); setPickup(null); }} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} />
+                      <X size={16} onClick={() => { setPickupInput(''); setPickup(null); }} style={{ cursor: 'pointer', color: '#64748B' }} />
                     ) : (
-                      <LocateFixed size={16} onClick={handleUseCurrentLocation} style={{ cursor: 'pointer', color: '#FACC15' }} />
+                      <LocateFixed size={16} onClick={handleUseCurrentLocation} style={{ cursor: 'pointer', color: '#2563EB' }} />
                     )}
                   </div>
 
                   {/* Pickup Autocomplete Dropdown List (Screenshot #3 Match) */}
                   {pickupSuggestions.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1E293B', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px rgba(0,0,0,0.6)', maxHeight: '250px', overflowY: 'auto' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', maxHeight: '250px', overflowY: 'auto' }}>
                       {pickupSuggestions.map((item, idx) => (
                         <div
                           key={idx}
@@ -478,14 +480,14 @@ export default function RiderDashboard() {
                             setPickupInput(item.title);
                             setPickupSuggestions([]);
                           }}
-                          style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: 'transparent' }}
+                          style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: 'transparent' }}
                         >
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <MapPin size={16} style={{ color: '#FFFFFF' }} />
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <MapPin size={16} style={{ color: '#2563EB' }} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF' }}>{item.title}</div>
-                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{item.subtitle}</div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>{item.title}</div>
+                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{item.subtitle}</div>
                           </div>
                         </div>
                       ))}
@@ -495,10 +497,10 @@ export default function RiderDashboard() {
 
                 {/* 🔴 Drop Search Row */}
                 <div style={{ position: 'relative', zIndex: 2 }}>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Dropoff location</div>
+                  <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Dropoff location</div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.15)', padding: '10px 14px', borderRadius: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', background: '#000000', border: '2px solid #FFFFFF', flexShrink: 0 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', background: '#EF4444', border: '2px solid #FFFFFF', flexShrink: 0 }} />
                     <input
                       type="text"
                       placeholder="Dropoff location"
@@ -507,16 +509,16 @@ export default function RiderDashboard() {
                         setDropInput(e.target.value);
                         searchAddress(e.target.value, 'drop');
                       }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none' }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#0F172A', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                     />
                     {dropInput && (
-                      <X size={16} onClick={() => { setDropInput(''); setDrop(null); }} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} />
+                      <X size={16} onClick={() => { setDropInput(''); setDrop(null); }} style={{ cursor: 'pointer', color: '#64748B' }} />
                     )}
                   </div>
 
                   {/* Drop Autocomplete Dropdown List (Screenshot #4 Match) */}
                   {dropSuggestions.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1E293B', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px rgba(0,0,0,0.6)', maxHeight: '250px', overflowY: 'auto' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', maxHeight: '250px', overflowY: 'auto' }}>
                       {dropSuggestions.map((item, idx) => (
                         <div
                           key={idx}
@@ -525,14 +527,14 @@ export default function RiderDashboard() {
                             setDropInput(item.title);
                             setDropSuggestions([]);
                           }}
-                          style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                          style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
                         >
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <MapPin size={16} style={{ color: '#FFFFFF' }} />
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <MapPin size={16} style={{ color: '#2563EB' }} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF' }}>{item.title}</div>
-                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{item.subtitle}</div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>{item.title}</div>
+                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{item.subtitle}</div>
                           </div>
                         </div>
                       ))}
@@ -544,20 +546,20 @@ export default function RiderDashboard() {
 
               {/* Reserve Date & Time Picker */}
               {bookingMode === 'RESERVE' && (
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#FFFFFF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#0F172A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Calendar size={14} /> Schedule Date & Time
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
-                    <input type="time" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
+                    <input type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} style={{ background: '#FFFFFF', border: '1px solid #CBD5E1', color: '#0F172A', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
+                    <input type="time" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} style={{ background: '#FFFFFF', border: '1px solid #CBD5E1', color: '#0F172A', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
                   </div>
                 </div>
               )}
 
               {/* Ridevel Vehicle Cards (Screenshot #1 Match) */}
               <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>Select Ride Category</div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#475569', marginBottom: '10px' }}>Select Ride Category</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {VEHICLE_TYPES.map((v, idx) => {
                     const isSelected = selectedVehicle === v.id;
@@ -574,8 +576,8 @@ export default function RiderDashboard() {
                           justifyContent: 'space-between',
                           padding: '14px 16px',
                           borderRadius: '12px',
-                          border: isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.08)',
-                          background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)',
+                          border: isSelected ? '2px solid #2563EB' : '1px solid #E2E8F0',
+                          background: isSelected ? '#EFF6FF' : '#FFFFFF',
                           cursor: 'pointer',
                           transition: 'all 0.15s ease'
                         }}
@@ -583,20 +585,20 @@ export default function RiderDashboard() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                           <img src={v.image} alt={v.name} style={{ width: '64px', height: '40px', objectFit: 'contain' }} />
                           <div>
-                            <div style={{ fontSize: '17px', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               {v.name}
-                              <span style={{ fontSize: '12px', fontWeight: '500', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                              <span style={{ fontSize: '12px', fontWeight: '500', color: '#475569', display: 'flex', alignItems: 'center', gap: '2px' }}>
                                 <Users size={12} /> {v.capacity}
                               </span>
                             </div>
-                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>
+                            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
                               {v.etaMin} • {etaTime}
                             </div>
-                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{v.tagline}</div>
+                            <div style={{ fontSize: '12px', color: '#64748B' }}>{v.tagline}</div>
                           </div>
                         </div>
 
-                        <div style={{ fontSize: '20px', fontWeight: '900', color: '#FFFFFF' }}>
+                        <div style={{ fontSize: '20px', fontWeight: '900', color: '#0F172A' }}>
                           ₹{estimatedFare}
                         </div>
                       </div>
@@ -612,15 +614,15 @@ export default function RiderDashboard() {
                 style={{
                   width: '100%',
                   padding: '16px',
-                  background: '#FFFFFF',
-                  color: '#000000',
+                  background: '#2563EB',
+                  color: '#FFFFFF',
                   border: 'none',
                   borderRadius: '12px',
                   fontSize: '17px',
                   fontWeight: '900',
                   cursor: 'pointer',
                   marginTop: '6px',
-                  boxShadow: '0 4px 20px rgba(255,255,255,0.2)'
+                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
                 }}
               >
                 {loading ? <RefreshCw className="animate-spin" size={20} /> : `Request ${selectedVehicle} Ride`}
@@ -630,37 +632,37 @@ export default function RiderDashboard() {
 
           {/* Active Trip Status Card */}
           {activeTrip && !invoice && (
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #38BDF8', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: '18px', fontWeight: '800', marginBottom: '14px' }}>Ride Status</div>
+            <div style={{ background: '#FFFFFF', borderLeft: '4px solid #2563EB', padding: '18px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '18px', fontWeight: '800', marginBottom: '14px', color: '#0F172A' }}>Ride Status</div>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '14px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', marginBottom: '14px' }}>
                 <span>Matching Status:</span>
-                <span style={{ fontWeight: '800', color: '#38BDF8' }}>{activeTrip.status}</span>
+                <span style={{ fontWeight: '800', color: '#2563EB' }}>{activeTrip.status}</span>
               </div>
 
-              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px', color: '#334155' }}>
                 <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
                 <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
               </div>
 
               {activeTrip.driverId ? (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px' }}>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Assigned Driver:</div>
-                  <div style={{ fontSize: '15px', fontWeight: '800', color: '#FFFFFF', marginTop: '2px' }}>
+                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '14px' }}>
+                  <div style={{ fontSize: '12px', color: '#64748B' }}>Assigned Driver:</div>
+                  <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
                     Driver Ref: {activeTrip.driverId.substring(0, 8)}...
                   </div>
 
                   {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
-                    <div style={{ background: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.3)', borderRadius: '10px', padding: '14px', textAlign: 'center', marginTop: '14px' }}>
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>Share Start OTP with Driver:</div>
-                      <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '6px', color: '#FACC15', margin: '6px 0' }}>
+                    <div style={{ background: '#FEF9C3', border: '1px solid #FEF08A', borderRadius: '10px', padding: '14px', textAlign: 'center', marginTop: '14px' }}>
+                      <div style={{ fontSize: '11px', color: '#854D0E', textTransform: 'uppercase', fontWeight: '600' }}>Share Start OTP with Driver:</div>
+                      <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '6px', color: '#854D0E', margin: '6px 0' }}>
                         {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#475569' }}>
                   <RefreshCw className="animate-spin" size={16} /> Searching for nearest Ridevel driver...
                 </div>
               )}
@@ -669,26 +671,26 @@ export default function RiderDashboard() {
 
           {/* Invoice & Payment Screen */}
           {invoice && (
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #22C55E', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ background: '#FFFFFF', borderLeft: '4px solid #22C55E', padding: '18px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
               <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                 <CheckCircle2 size={44} style={{ color: '#22C55E', margin: '0 auto 8px auto' }} />
-                <h3 style={{ margin: 0, fontSize: '20px' }}>Trip Completed</h3>
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Invoice Ref: {invoice.id.substring(0, 8)}...</span>
+                <h3 style={{ margin: 0, fontSize: '20px', color: '#0F172A' }}>Trip Completed</h3>
+                <span style={{ fontSize: '12px', color: '#64748B' }}>Invoice Ref: {invoice.id.substring(0, 8)}...</span>
               </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '14px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', marginBottom: '16px' }}>
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Distance Travelled:</span>
                   <strong>{tripDistanceKm.toFixed(1)} km</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', fontSize: '18px', fontWeight: '900' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #E2E8F0', paddingTop: '10px', fontSize: '18px', fontWeight: '900' }}>
                   <span>Total Amount:</span>
-                  <span style={{ color: '#38BDF8' }}>₹{invoice.fare}</span>
+                  <span style={{ color: '#2563EB' }}>₹{invoice.fare}</span>
                 </div>
               </div>
 
               {invoice.paymentStatus === 'PENDING' ? (
-                <button onClick={handlePay} disabled={paying} style={{ width: '100%', padding: '14px', background: '#22C55E', color: '#000000', border: 'none', borderRadius: '10px', fontWeight: '900', cursor: 'pointer', marginBottom: '10px' }}>
+                <button onClick={handlePay} disabled={paying} style={{ width: '100%', padding: '14px', background: '#22C55E', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '900', cursor: 'pointer', marginBottom: '10px' }}>
                   {paying ? 'Processing UPI Payment...' : 'Pay via UPI App'}
                 </button>
               ) : (
@@ -697,7 +699,7 @@ export default function RiderDashboard() {
                 </div>
               )}
 
-              <button onClick={resetDashboard} style={{ width: '100%', padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}>
+              <button onClick={resetDashboard} style={{ width: '100%', padding: '12px', background: 'transparent', border: '1px solid #CBD5E1', color: '#0F172A', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>
                 Book Another Ride
               </button>
             </div>
@@ -705,8 +707,8 @@ export default function RiderDashboard() {
 
         </div>
 
-        {/* Right Map View */}
-        <div style={{ position: 'relative', height: '100%' }}>
+        {/* Right Map View (Full Screen Background) */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}>
           <CabMap pickup={pickup} drop={drop} driver={driverLoc} />
         </div>
 
@@ -714,11 +716,11 @@ export default function RiderDashboard() {
 
       {/* City Switcher Modal Popup (Screenshot #2 Match) */}
       {showCityModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '24px', width: '400px', maxWidth: '90vw', color: '#FFFFFF' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '24px', width: '400px', maxWidth: '90vw', color: '#0F172A', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>Select City</h3>
-              <X size={20} onClick={() => setShowCityModal(false)} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} />
+              <X size={20} onClick={() => setShowCityModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
             </div>
 
             <input
@@ -726,7 +728,7 @@ export default function RiderDashboard() {
               placeholder="Search city in India..."
               value={citySearchQuery}
               onChange={(e) => setCitySearchQuery(e.target.value)}
-              style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#FFF', fontSize: '14px', marginBottom: '16px', outline: 'none' }}
+              style={{ width: '100%', padding: '10px 14px', background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '8px', color: '#0F172A', fontSize: '14px', marginBottom: '16px', outline: 'none' }}
             />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '280px', overflowY: 'auto' }}>
@@ -749,8 +751,9 @@ export default function RiderDashboard() {
                     style={{
                       padding: '12px 14px',
                       borderRadius: '8px',
-                      background: selectedCity === city ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.06)',
+                      background: selectedCity === city ? '#EFF6FF' : '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      color: selectedCity === city ? '#2563EB' : '#0F172A',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -759,7 +762,7 @@ export default function RiderDashboard() {
                     }}
                   >
                     <span>📍 {city}, {CITIES_DATA[city].state}</span>
-                    {selectedCity === city && <span style={{ color: '#FACC15', fontSize: '12px' }}>Active</span>}
+                    {selectedCity === city && <span style={{ color: '#2563EB', fontSize: '12px', fontWeight: '700' }}>Active</span>}
                   </div>
                 ))}
             </div>
