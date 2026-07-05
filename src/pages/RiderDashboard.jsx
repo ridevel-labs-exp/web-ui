@@ -367,11 +367,11 @@ export default function RiderDashboard() {
         </div>
       </header>
 
-      {/* Main Grid: Left Control Panel Overlay + Right Full Screen Map */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+      {/* Main Grid: Left Control Panel + Right Full Height Map */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '430px 1fr', overflow: 'hidden' }}>
         
-        {/* Left Floating Control Column */}
-        <div style={{ position: 'absolute', left: '24px', top: '24px', bottom: '24px', width: '420px', zIndex: 10, padding: '24px', overflowY: 'auto', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '18px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+        {/* Left Control Column */}
+        <div style={{ padding: '24px', overflowY: 'auto', background: '#FFFFFF', borderRight: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           
           {!activeTrip && !invoice && (
             <>
@@ -707,8 +707,8 @@ export default function RiderDashboard() {
 
         </div>
 
-        {/* Right Map View (Full Screen Background) */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}>
+        {/* Right Map View */}
+        <div style={{ position: 'relative', height: '100%' }}>
           <CabMap pickup={pickup} drop={drop} driver={driverLoc} />
         </div>
 
