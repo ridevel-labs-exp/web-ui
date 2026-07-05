@@ -3,107 +3,104 @@ import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
-import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, LocateFixed, Info, User, LogOut, Search, X } from 'lucide-react';
+import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, LocateFixed, Info, User, LogOut, Search, X, Users } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
   Chennai: {
     center: { lat: 13.0827, lng: 80.2707 },
+    state: 'Tamil Nadu',
     landmarks: [
-      { name: '📍 Kundrathur Main Road', lat: 12.9977, lng: 80.0972 },
-      { name: '📍 Pammal Commercial Hub', lat: 12.9818, lng: 80.1340 },
-      { name: '✈️ Chennai International Airport (MAA)', lat: 12.9941, lng: 80.1709 },
-      { name: '🚉 Chennai Central Railway Station (MAS)', lat: 13.0827, lng: 80.2707 },
-      { name: '🛍️ T. Nagar Commercial Hub', lat: 13.0418, lng: 80.2341 },
-      { name: '💻 OMR IT Corridor (Taramani/Perungudi)', lat: 12.9698, lng: 80.2443 },
-      { name: '🌆 Anna Nagar Roundtana', lat: 13.0850, lng: 80.2101 },
-      { name: '🌊 ECR Beach Road (Thiruvanmiyur)', lat: 12.9830, lng: 80.2594 }
+      { name: 'Kundrathur', fullAddress: 'Chennai, Tamil Nadu, India', lat: 12.9977, lng: 80.0972 },
+      { name: 'KUNDRATHUR MURUGAN TEMPLE', fullAddress: 'Kundrathur, Chennai, Tamil Nadu, India', lat: 12.9998, lng: 80.0945 },
+      { name: 'Kundrathur Bus Stand', fullAddress: 'Kundrathur Bus Stand Road, Chennai, Tamil Nadu, India', lat: 12.9975, lng: 80.0968 },
+      { name: 'Pammal', fullAddress: 'Pammal Main Road, Chennai, Tamil Nadu, India', lat: 12.9818, lng: 80.1340 },
+      { name: 'Perungudi', fullAddress: 'Chennai, Tamil Nadu, India', lat: 12.9698, lng: 80.2443 },
+      { name: 'Chennai International Airport (MAA)', fullAddress: 'Meenambakkam, Chennai, Tamil Nadu, India', lat: 12.9941, lng: 80.1709 },
+      { name: 'Chennai Central Railway Station (MAS)', fullAddress: 'Park Town, Chennai, Tamil Nadu, India', lat: 13.0827, lng: 80.2707 },
+      { name: 'T. Nagar Commercial Hub', fullAddress: 'Thyagaraya Nagar, Chennai, Tamil Nadu, India', lat: 13.0418, lng: 80.2341 }
     ]
   },
   Bangalore: {
     center: { lat: 12.9716, lng: 77.5946 },
+    state: 'Karnataka',
     landmarks: [
-      { name: '✈️ Kempegowda Int\'l Airport (BLR)', lat: 13.1986, lng: 77.7066 },
-      { name: '🏰 Bangalore Palace Center', lat: 12.9716, lng: 77.5946 },
-      { name: '💻 Electronic City IT Park', lat: 12.8452, lng: 77.6602 },
-      { name: '🌆 Indiranagar 100ft Road', lat: 12.9784, lng: 77.6408 },
-      { name: '🏢 Whitefield ITPL', lat: 12.9870, lng: 77.7312 }
+      { name: 'Kempegowda Int\'l Airport (BLR)', fullAddress: 'Devanahalli, Bangalore, Karnataka, India', lat: 13.1986, lng: 77.7066 },
+      { name: 'MG Road Metro Station', fullAddress: 'MG Road, Bangalore, Karnataka, India', lat: 12.9730, lng: 77.6070 },
+      { name: 'Electronic City IT Park', fullAddress: 'Electronic City, Bangalore, Karnataka, India', lat: 12.8452, lng: 77.6602 },
+      { name: 'Indiranagar 100ft Road', fullAddress: 'Indiranagar, Bangalore, Karnataka, India', lat: 12.9784, lng: 77.6408 }
     ]
   },
   Coimbatore: {
     center: { lat: 11.0168, lng: 76.9558 },
+    state: 'Tamil Nadu',
     landmarks: [
-      { name: '✈️ Coimbatore Int\'l Airport (CJB)', lat: 11.0300, lng: 77.0434 },
-      { name: '🚉 Coimbatore Junction Station', lat: 10.9980, lng: 76.9629 },
-      { name: '💻 TIDEL Park Coimbatore', lat: 11.0247, lng: 77.0264 },
-      { name: '🌆 RS Puram Zone', lat: 11.0069, lng: 76.9507 }
+      { name: 'Coimbatore Int\'l Airport (CJB)', fullAddress: 'Peelamedu, Coimbatore, Tamil Nadu, India', lat: 11.0300, lng: 77.0434 },
+      { name: 'Coimbatore Junction Station', fullAddress: 'Gopalapuram, Coimbatore, Tamil Nadu, India', lat: 10.9980, lng: 76.9629 },
+      { name: 'TIDEL Park Coimbatore', fullAddress: 'Peelamedu, Coimbatore, Tamil Nadu, India', lat: 11.0247, lng: 77.0264 }
     ]
   },
   Delhi: {
     center: { lat: 28.6139, lng: 77.2090 },
+    state: 'Delhi NCR',
     landmarks: [
-      { name: '✈️ IGI Airport Terminal 3 (DEL)', lat: 28.5562, lng: 77.1000 },
-      { name: '🏛️ Connaught Place Center', lat: 28.6315, lng: 77.2167 },
-      { name: '💻 Cyber Hub Gurgaon', lat: 28.4950, lng: 77.0890 },
-      { name: '🏢 Noida Sector 62 IT Hub', lat: 28.6270, lng: 77.3720 }
+      { name: 'IGI Airport Terminal 3 (DEL)', fullAddress: 'New Delhi, Delhi, India', lat: 28.5562, lng: 77.1000 },
+      { name: 'Connaught Place', fullAddress: 'New Delhi, Delhi, India', lat: 28.6315, lng: 77.2167 },
+      { name: 'Cyber Hub Gurgaon', fullAddress: 'Gurgaon, Haryana, India', lat: 28.4950, lng: 77.0890 }
     ]
   },
   Mumbai: {
     center: { lat: 19.0760, lng: 72.8777 },
+    state: 'Maharashtra',
     landmarks: [
-      { name: '✈️ Chhatrapati Shivaji Airport (BOM)', lat: 19.0896, lng: 72.8656 },
-      { name: '🏢 Bandra Kurla Complex (BKC)', lat: 19.0660, lng: 72.8690 },
-      { name: '🌊 Marine Drive Promenade', lat: 18.9438, lng: 72.8230 }
+      { name: 'Chhatrapati Shivaji Airport (BOM)', fullAddress: 'Andheri East, Mumbai, Maharashtra, India', lat: 19.0896, lng: 72.8656 },
+      { name: 'Bandra Kurla Complex (BKC)', fullAddress: 'Bandra East, Mumbai, Maharashtra, India', lat: 19.0660, lng: 72.8690 }
     ]
   }
 };
 
-// Uber-style realistic vehicle categories
+// 100% Ridevel Branded Vehicle Categories
 const VEHICLE_TYPES = [
   {
     id: 'SEDAN',
-    name: 'Uber Sedan',
-    subName: 'Dzire • Etios',
-    tagline: 'Affordable, executive sedans',
+    name: 'Go Sedan',
+    tagline: 'Affordable sedans',
     baseFare: 50,
     ratePerKm: 18,
-    etaMin: '3 min',
+    etaMin: '3 mins away',
     capacity: 4,
     color: '#FACC15',
     image: '/assets/sedan.png'
   },
   {
     id: 'HATCHBACK',
-    name: 'Uber Go',
-    subName: 'Swift • WagonR',
-    tagline: 'Compact, daily rides',
+    name: 'Ridevel Go',
+    tagline: 'Compact daily rides',
     baseFare: 30,
     ratePerKm: 14,
-    etaMin: '2 min',
+    etaMin: '2 mins away',
     capacity: 4,
     color: '#4ADE80',
     image: '/assets/hatchback.png'
   },
   {
     id: 'SUV',
-    name: 'UberXL SUV',
-    subName: 'Ertiga • Innova',
-    tagline: 'Spacious 6-seater for family & bags',
+    name: 'Ridevel XL',
+    tagline: 'Spacious 6-seater for family',
     baseFare: 80,
     ratePerKm: 24,
-    etaMin: '5 min',
+    etaMin: '5 mins away',
     capacity: 6,
     color: '#EF4444',
     image: '/assets/suv.png'
   },
   {
     id: 'PREMIER',
-    name: 'Uber Black',
-    subName: 'Camry • Superb',
+    name: 'Ridevel Premier',
     tagline: 'Top-rated drivers & luxury cars',
     baseFare: 120,
     ratePerKm: 32,
-    etaMin: '4 min',
+    etaMin: '4 mins away',
     capacity: 4,
     color: '#38BDF8',
     image: '/assets/luxury.png'
@@ -116,8 +113,10 @@ export default function RiderDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Active City Selection
+  // City Selection & Change City Modal
   const [selectedCity, setSelectedCity] = useState('Chennai');
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [citySearchQuery, setCitySearchQuery] = useState('');
   const [detectingLoc, setDetectingLoc] = useState(false);
 
   // Map markers state
@@ -125,7 +124,7 @@ export default function RiderDashboard() {
   const [drop, setDrop] = useState(null);
   const [driverLoc, setDriverLoc] = useState(null);
 
-  // Unrestricted Text Search State
+  // Address Input & Autocomplete State
   const [pickupInput, setPickupInput] = useState('');
   const [dropInput, setDropInput] = useState('');
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
@@ -136,7 +135,7 @@ export default function RiderDashboard() {
   // Vehicle Selection State
   const [selectedVehicle, setSelectedVehicle] = useState('SEDAN');
 
-  // Schedule / Reserve State
+  // Schedule State
   const [bookingMode, setBookingMode] = useState('NOW'); // 'NOW' or 'RESERVE'
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
@@ -145,7 +144,7 @@ export default function RiderDashboard() {
   const [invoice, setInvoice] = useState(null);
   const [paying, setPaying] = useState(false);
 
-  // Reverse geocode & detect exact user GPS position & address name
+  // Reverse geocode & detect exact user GPS position
   const handleUseCurrentLocation = () => {
     if ('geolocation' in navigator) {
       setDetectingLoc(true);
@@ -155,7 +154,6 @@ export default function RiderDashboard() {
           const lng = pos.coords.longitude;
 
           try {
-            // Reverse geocode to get street name
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             const data = await res.json();
             const addressName = data.display_name ? data.display_name.split(',').slice(0, 3).join(',') : `📍 GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
@@ -170,9 +168,7 @@ export default function RiderDashboard() {
           }
         },
         (err) => {
-          console.warn('Geolocation permission denied:', err);
           setDetectingLoc(false);
-          alert('Could not retrieve GPS location. Please type your location in the search bar.');
         },
         { timeout: 8000 }
       );
@@ -185,7 +181,7 @@ export default function RiderDashboard() {
 
   // Fetch live OpenStreetMap address suggestions for ANY location in India
   const searchAddress = async (query, type) => {
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       if (type === 'pickup') setPickupSuggestions([]);
       else setDropSuggestions([]);
       return;
@@ -195,14 +191,21 @@ export default function RiderDashboard() {
     else setSearchingDrop(true);
 
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' ' + selectedCity + ' India')}&countrycodes=in&limit=5`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' ' + selectedCity + ' India')}&countrycodes=in&limit=6`);
       const data = await res.json();
-      const formatted = data.map((item) => ({
-        name: item.display_name.split(',').slice(0, 3).join(','),
-        fullAddress: item.display_name,
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon)
-      }));
+      
+      const formatted = data.map((item) => {
+        const parts = item.display_name.split(',');
+        const title = parts[0].trim();
+        const subtitle = parts.slice(1).join(',').trim();
+        return {
+          title,
+          subtitle,
+          fullAddress: item.display_name,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon)
+        };
+      });
 
       if (type === 'pickup') setPickupSuggestions(formatted);
       else setDropSuggestions(formatted);
@@ -335,159 +338,154 @@ export default function RiderDashboard() {
     setInvoice(null);
   };
 
+  // Get current time string for ride ETA calculation (e.g. 11:42 PM)
+  const getEtaTimeString = (minsOffset) => {
+    const d = new Date(Date.now() + minsOffset * 60 * 1000);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   const currentCityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#090D16', color: '#FFFFFF', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#090D16', color: '#FFFFFF', fontFamily: "'Inter', -apple-system, sans-serif" }}>
       
       {/* Top Navbar */}
-      <header style={{ height: '60px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#0F172A', zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '-0.5px', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            Uber <span style={{ fontSize: '10px', background: '#FACC15', color: '#000', padding: '2px 6px', borderRadius: '4px', fontWeight: '900' }}>RIDEVEL</span>
-          </div>
-
-          {/* City Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <MapPin size={14} style={{ color: '#FACC15' }} />
-            <select
-              value={selectedCity}
-              onChange={(e) => {
-                setSelectedCity(e.target.value);
-                const city = CITIES_DATA[e.target.value];
-                if (city) {
-                  setPickup({ lat: city.center.lat, lng: city.center.lng, address: `${e.target.value} Center` });
-                  setPickupInput(`${e.target.value} Center`);
-                  setDrop(null);
-                  setDropInput('');
-                }
-              }}
-              style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', outline: 'none' }}
-            >
-              {Object.keys(CITIES_DATA).map((c) => (
-                <option key={c} value={c} style={{ background: '#0F172A', color: '#FFFFFF' }}>{c}</option>
-              ))}
-            </select>
+      <header style={{ height: '60px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#000000', zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+          <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            Ridevel
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <User size={16} /> {user?.name || user?.email || 'Rider Account'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <User size={16} /> {user?.name || user?.email || 'Karthi'}
           </div>
-          <button onClick={authService.logout} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#FFFFFF', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <LogOut size={14} /> Logout
+          <button onClick={authService.logout} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#FFFFFF', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <LogOut size={13} /> Logout
           </button>
         </div>
       </header>
 
-      {/* Main Grid: Left Booking Panel + Right Full Map */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '420px 1fr', overflow: 'hidden' }}>
+      {/* Main Grid: Left Control Panel + Right Full Map */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '430px 1fr', overflow: 'hidden' }}>
         
         {/* Left Control Column */}
-        <div style={{ padding: '20px', overflowY: 'auto', background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ padding: '24px', overflowY: 'auto', background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           
           {!activeTrip && !invoice && (
             <>
+              {/* Header Location Tag (Screenshot #2 Match: "📍 Chennai, IN  Change city") */}
+              <div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
+                  <MapPin size={15} style={{ color: '#000000', fill: '#FFFFFF' }} />
+                  <span>{selectedCity}, IN</span>
+                  <button
+                    onClick={() => setShowCityModal(true)}
+                    style={{ background: 'none', border: 'none', color: '#FFFFFF', textDecoration: 'underline', fontSize: '13px', cursor: 'pointer', marginLeft: '4px', fontWeight: '600' }}
+                  >
+                    Change city
+                  </button>
+                </div>
+                <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#FFFFFF', margin: '8px 0 16px 0', letterSpacing: '-0.5px' }}>
+                  Request a ride
+                </h1>
+              </div>
+
               {/* Ride Now vs Reserve Mode Switch */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: 'rgba(255,255,255,0.04)', padding: '3px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.08)', padding: '4px', borderRadius: '24px', width: 'fit-content', marginBottom: '8px' }}>
                 <button
                   onClick={() => setBookingMode('NOW')}
                   style={{
-                    padding: '8px',
-                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
                     border: 'none',
-                    background: bookingMode === 'NOW' ? '#FFFFFF' : 'transparent',
-                    color: bookingMode === 'NOW' ? '#000000' : 'rgba(255,255,255,0.7)',
+                    background: bookingMode === 'NOW' ? '#000000' : 'transparent',
+                    color: '#FFFFFF',
                     fontWeight: '700',
                     fontSize: '13px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
                     gap: '6px'
                   }}
                 >
-                  <Navigation size={14} /> Ride Now
+                  <Clock size={14} /> Pickup now
                 </button>
                 <button
                   onClick={() => setBookingMode('RESERVE')}
                   style={{
-                    padding: '8px',
-                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
                     border: 'none',
-                    background: bookingMode === 'RESERVE' ? '#FFFFFF' : 'transparent',
-                    color: bookingMode === 'RESERVE' ? '#000000' : 'rgba(255,255,255,0.7)',
+                    background: bookingMode === 'RESERVE' ? '#000000' : 'transparent',
+                    color: '#FFFFFF',
                     fontWeight: '700',
                     fontSize: '13px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
                     gap: '6px'
                   }}
                 >
-                  <Calendar size={14} /> Reserve Later
+                  <Calendar size={14} /> Reserve a ride
                 </button>
               </div>
 
               {error && (
-                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#F87171', padding: '10px 12px', borderRadius: '8px', fontSize: '13px' }}>
+                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#F87171', padding: '10px 14px', borderRadius: '8px', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
 
-              {/* Uber-Style Unrestricted Location Input with Live Autocomplete */}
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
+              {/* Connected Location Selector (Screenshot #3 & #4 Match) */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '14px', position: 'relative' }}>
                 
                 {/* Visual Connector Line */}
-                <div style={{ position: 'absolute', left: '25px', top: '34px', bottom: '34px', width: '2px', background: 'rgba(255,255,255,0.2)', zIndex: 1 }} />
+                <div style={{ position: 'absolute', left: '26px', top: '34px', bottom: '34px', width: '2px', background: 'rgba(255,255,255,0.3)', zIndex: 1 }} />
 
-                {/* 🟢 Pickup Search Input */}
+                {/* 🟢 Pickup Search Row */}
                 <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pickup Location</span>
-                    <button
-                      type="button"
-                      onClick={handleUseCurrentLocation}
-                      style={{ background: 'none', border: 'none', color: '#FACC15', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                    >
-                      <LocateFixed size={12} /> {detectingLoc ? 'Locating...' : 'Use Current Location'}
-                    </button>
-                  </div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 12px', borderRadius: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E', flexShrink: 0 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.15)', padding: '10px 14px', borderRadius: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 0 0 2px #000000', flexShrink: 0 }} />
                     <input
                       type="text"
-                      placeholder="Enter pickup location (e.g. Kundrathur, Pammal...)"
+                      placeholder="Pickup location"
                       value={pickupInput}
                       onChange={(e) => {
                         setPickupInput(e.target.value);
                         searchAddress(e.target.value, 'pickup');
                       }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', outline: 'none' }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                     />
-                    {searchingPickup && <RefreshCw size={14} className="animate-spin" style={{ color: 'rgba(255,255,255,0.5)' }} />}
+                    {pickupInput ? (
+                      <X size={16} onClick={() => { setPickupInput(''); setPickup(null); }} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} />
+                    ) : (
+                      <LocateFixed size={16} onClick={handleUseCurrentLocation} style={{ cursor: 'pointer', color: '#FACC15' }} />
+                    )}
                   </div>
 
-                  {/* Pickup Autocomplete Dropdown List */}
+                  {/* Pickup Autocomplete Dropdown List (Screenshot #3 Match) */}
                   {pickupSuggestions.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1E293B', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px rgba(0,0,0,0.6)', maxHeight: '250px', overflowY: 'auto' }}>
                       {pickupSuggestions.map((item, idx) => (
                         <div
                           key={idx}
                           onClick={() => {
-                            setPickup({ lat: item.lat, lng: item.lng, address: item.name });
-                            setPickupInput(item.name);
+                            setPickup({ lat: item.lat, lng: item.lng, address: item.title });
+                            setPickupInput(item.title);
                             setPickupSuggestions([]);
                           }}
-                          style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: '#FFFFFF' }}
+                          style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: 'transparent' }}
                         >
-                          <MapPin size={14} style={{ color: '#22C55E', flexShrink: 0 }} />
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <MapPin size={16} style={{ color: '#FFFFFF' }} />
+                          </div>
                           <div>
-                            <div style={{ fontWeight: '600' }}>{item.name}</div>
-                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>{item.fullAddress}</div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF' }}>{item.title}</div>
+                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{item.subtitle}</div>
                           </div>
                         </div>
                       ))}
@@ -495,42 +493,46 @@ export default function RiderDashboard() {
                   )}
                 </div>
 
-                {/* 🔴 Drop Search Input */}
+                {/* 🔴 Drop Search Row */}
                 <div style={{ position: 'relative', zIndex: 2 }}>
-                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>Where to?</span>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Dropoff location</div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 12px', borderRadius: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', background: '#EF4444', boxShadow: '0 0 8px #EF4444', flexShrink: 0 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.15)', padding: '10px 14px', borderRadius: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', background: '#000000', border: '2px solid #FFFFFF', flexShrink: 0 }} />
                     <input
                       type="text"
-                      placeholder="Enter destination (e.g. Kundrathur, Pammal, Airport...)"
+                      placeholder="Dropoff location"
                       value={dropInput}
                       onChange={(e) => {
                         setDropInput(e.target.value);
                         searchAddress(e.target.value, 'drop');
                       }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: '600', outline: 'none' }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                     />
-                    {searchingDrop && <RefreshCw size={14} className="animate-spin" style={{ color: 'rgba(255,255,255,0.5)' }} />}
+                    {dropInput && (
+                      <X size={16} onClick={() => { setDropInput(''); setDrop(null); }} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} />
+                    )}
                   </div>
 
-                  {/* Drop Autocomplete Dropdown List */}
+                  {/* Drop Autocomplete Dropdown List (Screenshot #4 Match) */}
                   {dropSuggestions.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1E293B', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px rgba(0,0,0,0.6)', maxHeight: '250px', overflowY: 'auto' }}>
                       {dropSuggestions.map((item, idx) => (
                         <div
                           key={idx}
                           onClick={() => {
-                            setDrop({ lat: item.lat, lng: item.lng, address: item.name });
-                            setDropInput(item.name);
+                            setDrop({ lat: item.lat, lng: item.lng, address: item.title });
+                            setDropInput(item.title);
                             setDropSuggestions([]);
                           }}
-                          style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: '#FFFFFF' }}
+                          style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
                         >
-                          <MapPin size={14} style={{ color: '#EF4444', flexShrink: 0 }} />
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <MapPin size={16} style={{ color: '#FFFFFF' }} />
+                          </div>
                           <div>
-                            <div style={{ fontWeight: '600' }}>{item.name}</div>
-                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>{item.fullAddress}</div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF' }}>{item.title}</div>
+                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{item.subtitle}</div>
                           </div>
                         </div>
                       ))}
@@ -540,53 +542,27 @@ export default function RiderDashboard() {
 
               </div>
 
-              {/* Popular Landmark Quick Chips */}
-              <div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>Popular Landmarks in {selectedCity}:</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {currentCityData.landmarks.slice(0, 5).map((lm) => (
-                    <button
-                      key={lm.name}
-                      onClick={() => {
-                        setDrop({ lat: lm.lat, lng: lm.lng, address: lm.name });
-                        setDropInput(lm.name);
-                      }}
-                      style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        color: 'rgba(255,255,255,0.8)',
-                        padding: '4px 10px',
-                        borderRadius: '16px',
-                        fontSize: '11px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {lm.name.split(' ')[0]} {lm.name.split(' ')[1] || ''}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Reserve Date & Time Picker */}
               {bookingMode === 'RESERVE' && (
-                <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '12px', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#38BDF8', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Calendar size={14} /> Select Future Date & Time
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#FFFFFF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Calendar size={14} /> Schedule Date & Time
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
-                    <input type="time" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
+                    <input type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
+                    <input type="time" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', color: '#FFF', padding: '8px', borderRadius: '6px', fontSize: '12px' }} />
                   </div>
                 </div>
               )}
 
-              {/* Uber Car Selection List */}
+              {/* Ridevel Vehicle Cards (Screenshot #1 Match) */}
               <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,255,255,0.8)', marginBottom: '10px' }}>Available Cabs Nearby</div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>Select Ride Category</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {VEHICLE_TYPES.map((v) => {
+                  {VEHICLE_TYPES.map((v, idx) => {
                     const isSelected = selectedVehicle === v.id;
-                    const estimatedFare = Math.round(v.baseFare + (tripDistanceKm > 0 ? v.ratePerKm * tripDistanceKm : 0));
+                    const estimatedFare = (v.baseFare + (tripDistanceKm > 0 ? v.ratePerKm * tripDistanceKm : 0)).toFixed(2);
+                    const etaTime = getEtaTimeString(3 + idx * 2);
 
                     return (
                       <div
@@ -596,27 +572,32 @@ export default function RiderDashboard() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          padding: '12px 14px',
+                          padding: '14px 16px',
                           borderRadius: '12px',
-                          border: isSelected ? `2px solid ${v.color}` : '1px solid rgba(255,255,255,0.08)',
-                          background: isSelected ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
+                          border: isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.08)',
+                          background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)',
                           cursor: 'pointer',
-                          transition: 'all 0.15s ease-in-out'
+                          transition: 'all 0.15s ease'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                          <img src={v.image} alt={v.name} style={{ width: '56px', height: '36px', objectFit: 'contain' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <img src={v.image} alt={v.name} style={{ width: '64px', height: '40px', objectFit: 'contain' }} />
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>{v.name}</div>
-                            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{v.subName} • {v.etaMin}</div>
+                            <div style={{ fontSize: '17px', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {v.name}
+                              <span style={{ fontSize: '12px', fontWeight: '500', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                <Users size={12} /> {v.capacity}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>
+                              {v.etaMin} • {etaTime}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{v.tagline}</div>
                           </div>
                         </div>
 
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '17px', fontWeight: '800', color: isSelected ? v.color : '#FFFFFF' }}>
-                            ₹{estimatedFare}
-                          </div>
-                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>₹{v.ratePerKm}/km</div>
+                        <div style={{ fontSize: '20px', fontWeight: '900', color: '#FFFFFF' }}>
+                          ₹{estimatedFare}
                         </div>
                       </div>
                     );
@@ -624,31 +605,22 @@ export default function RiderDashboard() {
                 </div>
               </div>
 
-              {/* 1 km Buffer Policy Callout */}
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px' }}>
-                <Info size={14} style={{ color: '#38BDF8', flexShrink: 0, marginTop: '2px' }} />
-                <span>Variations under 1 km carry no extra charge. Distance exceeding 1 km is added at standard per-km rate upon ride completion.</span>
-              </div>
-
-              {/* Confirm Booking Button */}
+              {/* Confirm Ride Button */}
               <button
                 onClick={handleBookTrip}
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '14px',
+                  padding: '16px',
                   background: '#FFFFFF',
                   color: '#000000',
                   border: 'none',
-                  borderRadius: '10px',
-                  fontSize: '16px',
-                  fontWeight: '800',
+                  borderRadius: '12px',
+                  fontSize: '17px',
+                  fontWeight: '900',
                   cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 14px rgba(255,255,255,0.15)'
+                  marginTop: '6px',
+                  boxShadow: '0 4px 20px rgba(255,255,255,0.2)'
                 }}
               >
                 {loading ? <RefreshCw className="animate-spin" size={20} /> : `Request ${selectedVehicle} Ride`}
@@ -658,38 +630,38 @@ export default function RiderDashboard() {
 
           {/* Active Trip Status Card */}
           {activeTrip && !invoice && (
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #38BDF8', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px' }}>Ride Status</div>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #38BDF8', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '18px', fontWeight: '800', marginBottom: '14px' }}>Ride Status</div>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>
-                <span>Status:</span>
-                <span style={{ fontWeight: '700', color: '#38BDF8' }}>{activeTrip.status}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '14px', marginBottom: '14px' }}>
+                <span>Matching Status:</span>
+                <span style={{ fontWeight: '800', color: '#38BDF8' }}>{activeTrip.status}</span>
               </div>
 
-              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
+              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                 <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
                 <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
               </div>
 
               {activeTrip.driverId ? (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px' }}>
                   <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Assigned Driver:</div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF', marginTop: '2px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: '800', color: '#FFFFFF', marginTop: '2px' }}>
                     Driver Ref: {activeTrip.driverId.substring(0, 8)}...
                   </div>
 
                   {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
-                    <div style={{ background: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.3)', borderRadius: '8px', padding: '12px', textAlign: 'center', marginTop: '12px' }}>
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>Share Start OTP with Driver:</div>
-                      <div style={{ fontSize: '24px', fontWeight: '800', letterSpacing: '4px', color: '#FACC15', margin: '4px 0' }}>
+                    <div style={{ background: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.3)', borderRadius: '10px', padding: '14px', textAlign: 'center', marginTop: '14px' }}>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>Share Start OTP with Driver:</div>
+                      <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '6px', color: '#FACC15', margin: '6px 0' }}>
                         {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
-                  <RefreshCw className="animate-spin" size={14} /> Searching for nearest driver...
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>
+                  <RefreshCw className="animate-spin" size={16} /> Searching for nearest Ridevel driver...
                 </div>
               )}
             </div>
@@ -697,35 +669,35 @@ export default function RiderDashboard() {
 
           {/* Invoice & Payment Screen */}
           {invoice && (
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #22C55E', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #22C55E', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                <CheckCircle2 size={40} style={{ color: '#22C55E', margin: '0 auto 8px auto' }} />
-                <h3 style={{ margin: 0, fontSize: '18px' }}>Trip Completed</h3>
+                <CheckCircle2 size={44} style={{ color: '#22C55E', margin: '0 auto 8px auto' }} />
+                <h3 style={{ margin: 0, fontSize: '20px' }}>Trip Completed</h3>
                 <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Invoice Ref: {invoice.id.substring(0, 8)}...</span>
               </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '14px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', marginBottom: '16px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '14px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Distance:</span>
+                  <span>Distance Travelled:</span>
                   <strong>{tripDistanceKm.toFixed(1)} km</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px', fontSize: '15px', fontWeight: '800' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', fontSize: '18px', fontWeight: '900' }}>
                   <span>Total Amount:</span>
                   <span style={{ color: '#38BDF8' }}>₹{invoice.fare}</span>
                 </div>
               </div>
 
               {invoice.paymentStatus === 'PENDING' ? (
-                <button onClick={handlePay} disabled={paying} style={{ width: '100%', padding: '12px', background: '#22C55E', color: '#000000', border: 'none', borderRadius: '8px', fontWeight: '800', cursor: 'pointer', marginBottom: '8px' }}>
-                  {paying ? 'Processing UPI Payment...' : 'Pay via UPI'}
+                <button onClick={handlePay} disabled={paying} style={{ width: '100%', padding: '14px', background: '#22C55E', color: '#000000', border: 'none', borderRadius: '10px', fontWeight: '900', cursor: 'pointer', marginBottom: '10px' }}>
+                  {paying ? 'Processing UPI Payment...' : 'Pay via UPI App'}
                 </button>
               ) : (
-                <div style={{ textAlign: 'center', color: '#22C55E', fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>
+                <div style={{ textAlign: 'center', color: '#22C55E', fontWeight: '700', fontSize: '14px', marginBottom: '12px' }}>
                   ✓ Paid via UPI
                 </div>
               )}
 
-              <button onClick={resetDashboard} style={{ width: '100%', padding: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}>
+              <button onClick={resetDashboard} style={{ width: '100%', padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}>
                 Book Another Ride
               </button>
             </div>
@@ -739,6 +711,62 @@ export default function RiderDashboard() {
         </div>
 
       </div>
+
+      {/* City Switcher Modal Popup (Screenshot #2 Match) */}
+      {showCityModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '24px', width: '400px', maxWidth: '90vw', color: '#FFFFFF' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>Select City</h3>
+              <X size={20} onClick={() => setShowCityModal(false)} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} />
+            </div>
+
+            <input
+              type="text"
+              placeholder="Search city in India..."
+              value={citySearchQuery}
+              onChange={(e) => setCitySearchQuery(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#FFF', fontSize: '14px', marginBottom: '16px', outline: 'none' }}
+            />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '280px', overflowY: 'auto' }}>
+              {Object.keys(CITIES_DATA)
+                .filter((c) => c.toLowerCase().includes(citySearchQuery.toLowerCase()))
+                .map((city) => (
+                  <div
+                    key={city}
+                    onClick={() => {
+                      setSelectedCity(city);
+                      const cData = CITIES_DATA[city];
+                      if (cData) {
+                        setPickup({ lat: cData.center.lat, lng: cData.center.lng, address: `${city} Center` });
+                        setPickupInput(`${city} Center`);
+                        setDrop(null);
+                        setDropInput('');
+                      }
+                      setShowCityModal(false);
+                    }}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      background: selectedCity === city ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontWeight: selectedCity === city ? '700' : '400'
+                    }}
+                  >
+                    <span>📍 {city}, {CITIES_DATA[city].state}</span>
+                    {selectedCity === city && <span style={{ color: '#FACC15', fontSize: '12px' }}>Active</span>}
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
