@@ -170,7 +170,7 @@ export default function Register({ onNavigate }) {
         <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: 'var(--text-secondary)' }}>
           Already have an account?{' '}
           <span
-            style={{ color: 'var(--accent-cyan)', cursor: 'pointer', fontWeight: '600' }}
+            style={{ color: 'var(--accent-blue)', cursor: 'pointer', fontWeight: '600' }}
             onClick={() => onNavigate('login')}
           >
             Log In
