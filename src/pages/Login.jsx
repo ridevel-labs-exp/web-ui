@@ -117,7 +117,15 @@ export default function Login({ onNavigate }) {
           </div>
 
           <div className="input-group">
-            <label className="input-label">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label className="input-label" style={{ margin: 0 }}>Password</label>
+              <span
+                style={{ color: 'var(--accent-blue)', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}
+                onClick={() => onNavigate('forgot-password')}
+              >
+                Forgot password?
+              </span>
+            </div>
             <div style={{ position: 'relative' }}>
               <input
                 type="password"

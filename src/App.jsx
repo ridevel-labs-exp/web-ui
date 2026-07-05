@@ -3,6 +3,8 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import RiderDashboard from './pages/RiderDashboard';
 import DriverOnboarding from './pages/DriverOnboarding';
 import AdminDashboard from './pages/AdminDashboard';
@@ -13,10 +15,16 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('landing');
 
   useEffect(() => {
-    // 1. Check if email verification token parameter exists
+    // 1. Check if token parameter exists (for email verify or reset password)
     const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname.replace('/', '') || 'landing';
+
     if (params.has('token')) {
-      setCurrentPage('verify');
+      if (path.includes('reset-password')) {
+        setCurrentPage('reset-password');
+      } else {
+        setCurrentPage('verify');
+      }
       return;
     }
 
@@ -39,8 +47,7 @@ export default function App() {
     }
 
     // 3. Sync page state based on current URL path for unauthenticated users
-    const path = window.location.pathname.replace('/', '') || 'landing';
-    const validPages = ['landing', 'login', 'register'];
+    const validPages = ['landing', 'login', 'register', 'forgot-password', 'reset-password'];
     const initialPage = validPages.includes(path) ? path : 'landing';
     setCurrentPage(initialPage);
 
@@ -70,7 +77,7 @@ export default function App() {
     setCurrentPage(page);
     
     // Push new entry to browser history
-    if (page !== 'verify') {
+    if (page !== 'verify' && page !== 'reset-password') {
       const targetPath = page === 'landing' ? '/' : `/${page}`;
       window.history.pushState({ page }, '', targetPath);
     }
@@ -90,6 +97,10 @@ export default function App() {
       return <Register onNavigate={navigateTo} />;
     case 'verify':
       return <VerifyEmail onNavigate={navigateTo} />;
+    case 'forgot-password':
+      return <ForgotPassword onNavigate={navigateTo} />;
+    case 'reset-password':
+      return <ResetPassword onNavigate={navigateTo} />;
     case 'rider':
       return <RiderDashboard />;
     case 'driver':
