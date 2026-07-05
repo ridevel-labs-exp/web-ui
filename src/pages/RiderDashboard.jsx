@@ -205,13 +205,13 @@ export default function RiderDashboard() {
       const maxLon = clng + 0.4;
       const maxLat = clat + 0.4;
 
-      let res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${minLon},${minLat},${maxLon},${maxLat}&limit=6`);
+      let res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${minLon},${minLat},${maxLon},${maxLat}&limit=6&countrycode=IN`);
       let data = await res.json();
       let features = data.features || [];
       
       if (features.length === 0) {
-        // Fallback to unbounded search with city coordinates bias
-        res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lon=${clng}&lat=${clat}&limit=6`);
+        // Fallback to unbounded search with city coordinates bias (all over India)
+        res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lon=${clng}&lat=${clat}&limit=6&countrycode=IN`);
         const fallbackData = await res.json();
         features = fallbackData.features || [];
       }
