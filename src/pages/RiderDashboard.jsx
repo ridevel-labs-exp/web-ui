@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
@@ -131,6 +131,9 @@ export default function RiderDashboard() {
   const [dropSuggestions, setDropSuggestions] = useState([]);
   const [searchingPickup, setSearchingPickup] = useState(false);
   const [searchingDrop, setSearchingDrop] = useState(false);
+  const [dropdownRect, setDropdownRect] = useState(null);
+  const pickupInputRef = useRef(null);
+  const dropInputRef = useRef(null);
 
   // Vehicle Selection State
   const [selectedVehicle, setSelectedVehicle] = useState('SEDAN');
@@ -185,55 +188,53 @@ export default function RiderDashboard() {
     handleUseCurrentLocation();
   }, []);
 
-  // Fetch live OSM address suggestions using Photon (Komoot) which supports CORS
-  const searchAddress = async (query, type) => {
+  // Fetch live OSM address suggestions using Nominatim (locality-aware full text search)
+  const searchAddress = async (query, type, inputRef) => {
     if (!query || query.length < 2) {
       if (type === 'pickup') setPickupSuggestions([]);
       else setDropSuggestions([]);
+      setDropdownRect(null);
       return;
     }
 
     if (type === 'pickup') setSearchingPickup(true);
     else setSearchingDrop(true);
 
+    // Capture input position for fixed dropdown placement
+    if (inputRef?.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownRect({ top: rect.bottom + 4, left: rect.left, width: rect.width, type });
+    }
+
     try {
       const cityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
       const clat = cityData.center.lat;
       const clng = cityData.center.lng;
-      const minLon = clng - 0.4;
-      const minLat = clat - 0.4;
-      const maxLon = clng + 0.4;
-      const maxLat = clat + 0.4;
 
-      let res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${minLon},${minLat},${maxLon},${maxLat}&limit=6&countrycode=IN`);
-      let data = await res.json();
-      let features = data.features || [];
-      
-      if (features.length === 0) {
-        // Fallback to unbounded search with city coordinates bias (all over India)
-        res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lon=${clng}&lat=${clat}&limit=6&countrycode=IN`);
-        const fallbackData = await res.json();
-        features = fallbackData.features || [];
-      }
-      
-      const formatted = features.map((item) => {
-        const p = item.properties;
-        const title = p.name;
-        const subtitleParts = [];
-        if (p.street) subtitleParts.push(p.street);
-        if (p.district && p.district !== p.name) subtitleParts.push(p.district);
-        if (p.city && p.city !== p.district && p.city !== p.name) subtitleParts.push(p.city);
-        if (p.county && p.county !== p.city && p.county !== p.district) subtitleParts.push(p.county);
-        if (p.state) subtitleParts.push(p.state);
-        if (p.country) subtitleParts.push(p.country);
+      // Use Nominatim for full-text locality-aware search (handles "Street Name City" queries correctly)
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=IN&format=json&limit=6&addressdetails=1&viewbox=${clng - 1.5},${clat + 1.5},${clng + 1.5},${clat - 1.5}`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'RidevelApp/1.0' } }
+      );
+      const results = await res.json();
+
+      const formatted = results.map((item) => {
+        const addr = item.address || {};
+        const titleParts = [addr.road || addr.pedestrian || addr.footway || item.name].filter(Boolean);
+        const title = titleParts[0] || item.display_name.split(',')[0];
+        const subtitleParts = [
+          addr.suburb || addr.neighbourhood,
+          addr.city || addr.town || addr.village || addr.county,
+          addr.state,
+          addr.country
+        ].filter(Boolean);
         const subtitle = subtitleParts.join(', ');
-
         return {
           title,
           subtitle,
-          fullAddress: `${title}, ${subtitle}`,
-          lat: item.geometry.coordinates[1],
-          lng: item.geometry.coordinates[0]
+          fullAddress: item.display_name,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon)
         };
       });
 
@@ -477,10 +478,10 @@ export default function RiderDashboard() {
                 <div style={{ position: 'absolute', left: '26px', top: '34px', bottom: '34px', width: '2px', background: '#E2E8F0', zIndex: 1 }} />
 
                 {/* 🟢 Pickup Search Row */}
-                <div style={{ position: 'relative', zIndex: pickupSuggestions.length > 0 ? 10 : 2, marginBottom: '12px' }}>
+                <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
                   <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '8px' }}>
+                  <div ref={pickupInputRef} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: `1.5px solid ${pickupSuggestions.length > 0 ? '#2563EB' : '#CBD5E1'}`, padding: '10px 14px', borderRadius: '8px', transition: 'border-color 0.2s' }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 0 2px #E2E8F0', flexShrink: 0 }} />
                     <input
                       type="text"
@@ -488,36 +489,38 @@ export default function RiderDashboard() {
                       value={pickupInput}
                       onChange={(e) => {
                         setPickupInput(e.target.value);
-                        searchAddress(e.target.value, 'pickup');
+                        searchAddress(e.target.value, 'pickup', pickupInputRef);
                       }}
                       style={{ width: '100%', background: 'transparent', border: 'none', color: '#0F172A', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                     />
                     {pickupInput ? (
-                      <X size={16} onClick={() => { setPickupInput(''); setPickup(null); }} style={{ cursor: 'pointer', color: '#64748B' }} />
+                      <X size={16} onClick={() => { setPickupInput(''); setPickup(null); setPickupSuggestions([]); setDropdownRect(null); }} style={{ cursor: 'pointer', color: '#64748B' }} />
                     ) : (
                       <LocateFixed size={16} onClick={handleUseCurrentLocation} style={{ cursor: 'pointer', color: '#2563EB' }} />
                     )}
                   </div>
 
-                  {/* Pickup Autocomplete Dropdown List (Screenshot #3 Match) */}
-                  {pickupSuggestions.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', marginTop: '4px', zIndex: 20, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', maxHeight: '250px', overflowY: 'auto' }}>
+                  {/* Pickup Autocomplete Dropdown — position:fixed to escape overflow:auto clipping */}
+                  {pickupSuggestions.length > 0 && dropdownRect?.type === 'pickup' && (
+                    <div style={{ position: 'fixed', top: dropdownRect.top, left: dropdownRect.left, width: dropdownRect.width, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', zIndex: 9999, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.15)', maxHeight: '260px', overflowY: 'auto' }}>
                       {pickupSuggestions.map((item, idx) => (
                         <div
                           key={idx}
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
-                            setPickup({ lat: item.lat, lng: item.lng, address: item.title });
+                            setPickup({ lat: item.lat, lng: item.lng, address: item.fullAddress });
                             setPickupInput(item.title);
                             setPickupSuggestions([]);
+                            setDropdownRect(null);
                           }}
-                          style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: 'transparent' }}
+                          style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
                         >
                           <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <MapPin size={16} style={{ color: '#2563EB' }} />
                           </div>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>{item.title}</div>
-                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{item.subtitle}</div>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
+                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subtitle}</div>
                           </div>
                         </div>
                       ))}
