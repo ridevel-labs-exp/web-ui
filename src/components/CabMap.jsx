@@ -109,7 +109,7 @@ export default function CabMap({ pickup, drop, driver }) {
   const hasRoute = pickup && drop;
 
   return (
-    <div className="map-container" style={{ height: '100%', borderRadius: 0, border: 'none', boxShadow: 'none' }}>
+    <div className="map-container" style={{ height: '100%', borderRadius: 'inherit', border: 'none', boxShadow: 'none' }}>
       <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true}>
         {/* Sleek Light CartoDB Map Tiles to match our light theme */}
         <TileLayer

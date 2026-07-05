@@ -191,8 +191,23 @@ export default function RiderDashboard() {
     else setSearchingDrop(true);
 
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' ' + selectedCity + ' India')}&countrycodes=in&limit=6`);
-      const data = await res.json();
+      const cityData = CITIES_DATA[selectedCity] || CITIES_DATA['Chennai'];
+      const lat = cityData.center.lat;
+      const lng = cityData.center.lng;
+      const x1 = lng - 0.4;
+      const y1 = lat + 0.4;
+      const x2 = lng + 0.4;
+      const y2 = lat - 0.4;
+      const viewboxStr = `${x1},${y1},${x2},${y2}`;
+
+      let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(query)}&countrycodes=in&limit=6&viewbox=${viewboxStr}&bounded=1`);
+      let data = await res.json();
+      
+      if (!data || data.length === 0) {
+        // Fallback to unbounded search with city name appended if no local results are found
+        res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(query + ' ' + selectedCity)}&countrycodes=in&limit=6`);
+        data = await res.json();
+      }
       
       const formatted = data.map((item) => {
         const parts = item.display_name.split(',');
@@ -368,10 +383,10 @@ export default function RiderDashboard() {
       </header>
 
       {/* Main Grid: Left Control Panel + Right Full Height Map */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '430px 1fr', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '430px 1fr', gap: '20px', padding: '20px', background: '#F8FAFC', overflow: 'hidden' }}>
         
         {/* Left Control Column */}
-        <div style={{ padding: '24px', overflowY: 'auto', background: '#FFFFFF', borderRight: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <div style={{ padding: '24px', overflowY: 'auto', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '18px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
           
           {!activeTrip && !invoice && (
             <>
@@ -447,7 +462,7 @@ export default function RiderDashboard() {
                 <div style={{ position: 'absolute', left: '26px', top: '34px', bottom: '34px', width: '2px', background: '#E2E8F0', zIndex: 1 }} />
 
                 {/* 🟢 Pickup Search Row */}
-                <div style={{ position: 'relative', zIndex: 2, marginBottom: '12px' }}>
+                <div style={{ position: 'relative', zIndex: pickupSuggestions.length > 0 ? 10 : 2, marginBottom: '12px' }}>
                   <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Pickup location</div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '8px' }}>
@@ -496,7 +511,7 @@ export default function RiderDashboard() {
                 </div>
 
                 {/* 🔴 Drop Search Row */}
-                <div style={{ position: 'relative', zIndex: 2 }}>
+                <div style={{ position: 'relative', zIndex: dropSuggestions.length > 0 ? 10 : 1 }}>
                   <div style={{ fontSize: '10px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px', marginLeft: '26px' }}>Dropoff location</div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '8px' }}>
@@ -708,7 +723,7 @@ export default function RiderDashboard() {
         </div>
 
         {/* Right Map View */}
-        <div style={{ position: 'relative', height: '100%' }}>
+        <div style={{ position: 'relative', height: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
           <CabMap pickup={pickup} drop={drop} driver={driverLoc} />
         </div>
 
