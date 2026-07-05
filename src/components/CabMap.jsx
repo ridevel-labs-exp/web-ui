@@ -14,35 +14,29 @@ L.Icon.Default.mergeOptions({
 const pickupIcon = L.divIcon({
   className: 'custom-pickup-pin',
   html: `
-    <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-      <div style="position: absolute; width: 40px; height: 40px; background: rgba(16, 185, 129, 0.35); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
-      <div style="background: #10b981; color: #ffffff; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.6); display: flex; align-items: center; justify-content: center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
+    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
+      <div style="position: absolute; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.3); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <div style="position: relative; background: #10b981; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 14px rgba(16, 185, 129, 0.85); display: flex; align-items: center; justify-content: center; z-index: 2;">
+        <div style="background: #ffffff; width: 6px; height: 6px; border-radius: 50%;"></div>
       </div>
     </div>
   `,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
 });
 
 const dropIcon = L.divIcon({
   className: 'custom-drop-pin',
   html: `
-    <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-      <div style="position: absolute; width: 40px; height: 40px; background: rgba(239, 68, 68, 0.35); border-radius: 50%;"></div>
-      <div style="background: #ef4444; color: #ffffff; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.6); display: flex; align-items: center; justify-content: center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-          <line x1="4" x2="4" y1="22" y2="15"/>
-        </svg>
-      </div>
+    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
+      <div style="position: absolute; width: 36px; height: 36px; background: rgba(239, 68, 68, 0.3); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" style="position: relative; z-index: 2; filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.85));">
+        <path d="M12 3l9 16H3L12 3z"/>
+      </svg>
     </div>
   `,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
 });
 
 // Dezire Sedan Car Icon with glowing aura for Driver
@@ -84,6 +78,28 @@ export default function CabMap({ pickup, drop, driver }) {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [driverRouteCoordinates, setDriverRouteCoordinates] = useState([]);
+
+  useEffect(() => {
+    // Inject the pulse-ring animation style dynamically if not already present
+    const styleId = 'pulse-ring-animation-style';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(0.5);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1.4);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
 
   useEffect(() => {
     // Automatically detect user's live browser GPS location on startup
