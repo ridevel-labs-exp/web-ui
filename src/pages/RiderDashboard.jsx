@@ -4,7 +4,7 @@ import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
 import BrandedLoader from '../components/BrandedLoader';
-import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronRight, AlertTriangle, X, Calendar, Filter, UserCheck, Car } from 'lucide-react';
+import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronRight, ChevronDown, AlertTriangle, X, Calendar, Filter, UserCheck, Car, RefreshCw, Download, LocateFixed, Info, User, LogOut } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
