@@ -4,7 +4,7 @@ import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
-import { Upload, CheckCircle2, AlertTriangle, Play, Pause, Power, Navigation, FileText, Check, KeyRound, X, RefreshCw } from 'lucide-react';
+import { Upload, CheckCircle2, AlertTriangle, Power, Navigation, FileText, KeyRound, X, RefreshCw, Clock, History, DollarSign, MapPin } from 'lucide-react';
 
 export default function DriverOnboarding() {
   const user = authService.getCurrentUser();
@@ -12,6 +12,7 @@ export default function DriverOnboarding() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [driverTab, setDriverTab] = useState('live'); // 'live' or 'history'
 
   // Form Fields
   const [licenseNumber, setLicenseNumber] = useState('');
@@ -31,22 +32,10 @@ export default function DriverOnboarding() {
   const [otpTripId, setOtpTripId] = useState(null);
   const [otpInput, setOtpInput] = useState('');
   const [otpError, setOtpError] = useState(null);
-  
-  // GPS Simulator State
-  const [simulating, setSimulating] = useState(false);
-  const simulationIntervalRef = useRef(null);
-  const simulationStepRef = useRef(0);
 
-  // Mock Route Coordinates (Bangalore Core Path for Demonstration)
-  const mockRoute = [
-    { lat: 12.9716, lng: 77.5946 }, // Bangalore Palace
-    { lat: 12.9750, lng: 77.5980 },
-    { lat: 12.9780, lng: 77.6020 },
-    { lat: 12.9810, lng: 77.6060 },
-    { lat: 12.9850, lng: 77.6100 }, // Commercial Street
-    { lat: 12.9890, lng: 77.6150 },
-    { lat: 12.9920, lng: 77.6200 }  // Ulsoor Lake
-  ];
+  // 30-Second Uber-Style Ride Offer Popup State
+  const [incomingOffer, setIncomingOffer] = useState(null);
+  const [offerTimer, setOfferTimer] = useState(30);
 
   const fetchProfile = async () => {
     try {
@@ -57,7 +46,6 @@ export default function DriverOnboarding() {
         fetchTrips();
       }
     } catch (err) {
-      // Profile not found means they haven't onboarded yet
       setProfile(null);
     } finally {
       setLoading(false);
@@ -67,7 +55,7 @@ export default function DriverOnboarding() {
   const fetchTrips = async () => {
     try {
       const data = await tripService.getDriverTrips();
-      setAssignedTrips(data);
+      setAssignedTrips(data || []);
     } catch (err) {
       console.error('Failed to load trips', err);
     }
@@ -76,7 +64,6 @@ export default function DriverOnboarding() {
   useEffect(() => {
     fetchProfile();
 
-    // Auto-detect driver's browser GPS coordinates on login
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -89,9 +76,46 @@ export default function DriverOnboarding() {
         (err) => console.log('Driver geolocation fallback: ', err)
       );
     }
-
-    return () => stopLocationSimulation();
   }, []);
+
+  // Poll for nearby pending ride offers when online
+  useEffect(() => {
+    if (!isOnline || profile?.onboardingStatus !== 'APPROVED') return;
+
+    const offerInterval = setInterval(async () => {
+      const hasActiveTrip = assignedTrips.some(t => t.status === 'ACCEPTED' || t.status === 'ARRIVED' || t.status === 'STARTED');
+      if (hasActiveTrip || incomingOffer) return;
+
+      try {
+        const data = await tripService.getDriverTrips();
+        const pending = (data || []).find(t => t.status === 'REQUESTED');
+        if (pending) {
+          setIncomingOffer(pending);
+          setOfferTimer(30);
+        }
+      } catch (e) {
+        // quiet fail
+      }
+    }, 4000);
+
+    return () => clearInterval(offerInterval);
+  }, [isOnline, profile?.onboardingStatus, assignedTrips, incomingOffer]);
+
+  // 30-Second Offer Countdown Timer
+  useEffect(() => {
+    if (!incomingOffer) return;
+
+    if (offerTimer <= 0) {
+      setIncomingOffer(null);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setOfferTimer(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [incomingOffer, offerTimer]);
 
   const handleFileChange = (e, setFile) => {
     if (e.target.files && e.target.files[0]) {
@@ -130,45 +154,12 @@ export default function DriverOnboarding() {
   const toggleOnline = async () => {
     const nextOnlineState = !isOnline;
     try {
-      const startCoord = mockRoute[0];
-      await telemetryService.sendMockLocation(profile.id, startCoord.lat, startCoord.lng, nextOnlineState);
+      await telemetryService.sendMockLocation(profile.id, driverLoc.lat, driverLoc.lng, nextOnlineState);
       setIsOnline(nextOnlineState);
       setDriverLoc(prev => ({ ...prev, isAvailable: nextOnlineState }));
       setProfile(prev => ({ ...prev, isAvailable: nextOnlineState }));
     } catch (err) {
       console.error('Failed to toggle online status', err);
-    }
-  };
-
-  const startLocationSimulation = () => {
-    if (simulating) return;
-    setSimulating(true);
-    simulationStepRef.current = 0;
-
-    sendCoordPing(mockRoute[0]);
-
-    simulationIntervalRef.current = setInterval(() => {
-      simulationStepRef.current = (simulationStepRef.current + 1) % mockRoute.length;
-      const nextCoord = mockRoute[simulationStepRef.current];
-      sendCoordPing(nextCoord);
-    }, 4000);
-  };
-
-  const stopLocationSimulation = () => {
-    if (simulationIntervalRef.current) {
-      clearInterval(simulationIntervalRef.current);
-      simulationIntervalRef.current = null;
-    }
-    setSimulating(false);
-  };
-
-  const sendCoordPing = async (coord) => {
-    try {
-      await telemetryService.sendMockLocation(profile.id, coord.lat, coord.lng, isOnline);
-      setDriverLoc({ lat: coord.lat, lng: coord.lng, isAvailable: isOnline });
-      console.log('Telemetry Ping Sent:', coord);
-    } catch (err) {
-      console.error('Failed to send mock telemetry ping', err);
     }
   };
 
@@ -201,50 +192,6 @@ export default function DriverOnboarding() {
     }
   };
 
-  // 30-Second Uber-Style Ride Offer Popup State
-  const [incomingOffer, setIncomingOffer] = useState(null);
-  const [offerTimer, setOfferTimer] = useState(30);
-
-  // Poll for nearby pending ride offers when online
-  useEffect(() => {
-    if (!isOnline || profile?.onboardingStatus !== 'APPROVED') return;
-
-    const offerInterval = setInterval(async () => {
-      // Avoid fetching if already having active trip or open offer modal
-      const hasActiveTrip = assignedTrips.some(t => t.status === 'ACCEPTED' || t.status === 'ARRIVED' || t.status === 'STARTED');
-      if (hasActiveTrip || incomingOffer) return;
-
-      try {
-        const data = await tripService.getDriverTrips();
-        const pending = data.find(t => t.status === 'REQUESTED');
-        if (pending) {
-          setIncomingOffer(pending);
-          setOfferTimer(30);
-        }
-      } catch (e) {
-        // quiet fail
-      }
-    }, 4000);
-
-    return () => clearInterval(offerInterval);
-  }, [isOnline, profile?.onboardingStatus, assignedTrips, incomingOffer]);
-
-  // 30-Second Offer Countdown Timer
-  useEffect(() => {
-    if (!incomingOffer) return;
-
-    if (offerTimer <= 0) {
-      setIncomingOffer(null);
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setOfferTimer(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [incomingOffer, offerTimer]);
-
   const acceptRideOffer = async (tripId) => {
     try {
       await handleUpdateStatus(tripId, 'ACCEPTED');
@@ -261,143 +208,174 @@ export default function DriverOnboarding() {
   if (loading) {
     return (
       <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#F8FAFC' }}>
-        <RefreshCw className="animate-spin" size={32} style={{ color: 'var(--accent-blue)' }} />
+        <RefreshCw className="animate-spin" size={32} style={{ color: '#2563EB' }} />
       </div>
     );
   }
 
+  // Calculate total earnings & completed trips for history
+  const completedTrips = assignedTrips.filter(t => t.status === 'COMPLETED');
+  const totalEarnings = completedTrips.reduce((sum, t) => sum + (parseFloat(t.fare) || 0), 0);
+
   return (
     <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Clean Uber-style Top Header (No left sidebar clutter) */}
-      <header style={{ height: '70px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Ridevel <span style={{ fontSize: '13px', background: '#EFF6FF', color: '#2563EB', padding: '3px 10px', borderRadius: '12px', fontWeight: '800' }}>DRIVER</span></div>
+      {/* Concise Uber-Style Header */}
+      <header style={{ height: '64px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+          <div style={{ fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Ridevel <span style={{ fontSize: '11px', background: '#EFF6FF', color: '#2563EB', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>DRIVER</span></div>
+          
+          {profile && profile.onboardingStatus === 'APPROVED' && (
+            <nav style={{ display: 'flex', gap: '6px' }}>
+              <button
+                onClick={() => setDriverTab('live')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: driverTab === 'live' ? '#EFF6FF' : 'transparent',
+                  color: driverTab === 'live' ? '#2563EB' : '#64748B',
+                  fontWeight: '800',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Navigation size={15} /> Live Map
+              </button>
+
+              <button
+                onClick={() => setDriverTab('history')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: driverTab === 'history' ? '#EFF6FF' : 'transparent',
+                  color: driverTab === 'history' ? '#2563EB' : '#64748B',
+                  fontWeight: '800',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <History size={15} /> Trip History ({assignedTrips.length})
+              </button>
+            </nav>
+          )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           {profile && profile.onboardingStatus === 'APPROVED' && (
             <button
               onClick={toggleOnline}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '6px',
                 background: isOnline ? '#10B981' : '#FFFFFF',
                 color: isOnline ? '#FFFFFF' : '#0F172A',
                 border: isOnline ? 'none' : '1px solid #CBD5E1',
-                padding: '10px 24px',
-                borderRadius: '30px',
+                padding: '6px 16px',
+                borderRadius: '20px',
                 fontWeight: '800',
-                fontSize: '14px',
+                fontSize: '12px',
                 cursor: 'pointer',
-                boxShadow: isOnline ? '0 4px 14px rgba(16, 185, 129, 0.4)' : '0 1px 3px rgba(0,0,0,0.05)',
-                transition: 'all 0.2s ease'
+                boxShadow: isOnline ? '0 2px 8px rgba(16, 185, 129, 0.3)' : 'none',
+                transition: 'all 0.15s ease'
               }}
             >
-              <Power size={18} /> {isOnline ? 'YOU ARE ONLINE' : 'GO ONLINE'}
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? '#FFFFFF' : '#94A3B8' }} />
+              {isOnline ? 'ONLINE' : 'OFFLINE'}
             </button>
           )}
 
-          <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+          <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
             Logout
           </button>
         </div>
       </header>
 
-      {/* Main Container */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 32px' }}>
+      {/* Main Area */}
+      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px' }}>
 
-        {/* 1. Onboarding Form (If profile not created yet) */}
+        {/* Onboarding Document Upload Form */}
         {!profile && (
-          <div className="glass-card" style={{ maxWidth: '640px' }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText style={{ color: 'var(--accent-blue)' }} /> Submit Onboarding Documents
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '32px', maxWidth: '600px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText style={{ color: '#2563EB' }} /> Driver Registration & Onboarding
             </h2>
 
             {error && (
-              <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--accent-error)', padding: '12px', borderRadius: '8px', marginBottom: '20px' }}>
+              <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#EF4444', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '13px' }}>
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleOnboardingSubmit}>
-              <div className="input-group">
-                <label className="input-label">Driver License Number</label>
-                <input type="text" className="input-field" placeholder="DL-1234567890" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} required />
+            <form onSubmit={handleOnboardingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '6px' }}>Driving License Number</label>
+                <input type="text" placeholder="DL-1234567890" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} required style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', outline: 'none' }} />
               </div>
 
-              <div className="input-group">
-                <label className="input-label">Vehicle Registration Certificate (RC) Number</label>
-                <input type="text" className="input-field" placeholder="KA-01-AB-1234" value={rcNumber} onChange={(e) => setRcNumber(e.target.value)} required />
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '6px' }}>Vehicle RC Number</label>
+                <input type="text" placeholder="KA-01-AB-1234" value={rcNumber} onChange={(e) => setRcNumber(e.target.value)} required style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', outline: 'none' }} />
               </div>
 
-              <div className="input-group">
-                <label className="input-label">Insurance Policy Number</label>
-                <input type="text" className="input-field" placeholder="POL-987654321" value={insurancePolicy} onChange={(e) => setInsurancePolicy(e.target.value)} required />
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '6px' }}>Insurance Policy Number</label>
+                <input type="text" placeholder="POL-987654321" value={insurancePolicy} onChange={(e) => setInsurancePolicy(e.target.value)} required style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', outline: 'none' }} />
               </div>
 
-              {/* Document Photo Uploads */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <label className="btn-secondary" style={{ width: '100%', cursor: 'pointer', flexDirection: 'column', height: '100px', display: 'flex', justifyContent: 'center' }}>
-                     <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-blue)' }} />
-                     <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoFront ? photoFront.name.substring(0, 10) + '...' : 'Front Photo'}</span>
-                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoFront)} />
-                  </label>
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginTop: '10px' }}>
+                <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                  <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                  <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoFront ? photoFront.name.substring(0, 8) + '...' : 'Front Photo'}</span>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoFront)} />
+                </label>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <label className="btn-secondary" style={{ width: '100%', cursor: 'pointer', flexDirection: 'column', height: '100px', display: 'flex', justifyContent: 'center' }}>
-                     <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-blue)' }} />
-                     <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoSide ? photoSide.name.substring(0, 10) + '...' : 'Side Photo'}</span>
-                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoSide)} />
-                  </label>
-                </div>
+                <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                  <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                  <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoSide ? photoSide.name.substring(0, 8) + '...' : 'Side Photo'}</span>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoSide)} />
+                </label>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <label className="btn-secondary" style={{ width: '100%', cursor: 'pointer', flexDirection: 'column', height: '100px', display: 'flex', justifyContent: 'center' }}>
-                     <Upload size={20} style={{ marginBottom: '8px', color: 'var(--accent-blue)' }} />
-                     <span style={{ fontSize: '11px', textAlign: 'center' }}>{photoBack ? photoBack.name.substring(0, 10) + '...' : 'Back Photo'}</span>
-                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoBack)} />
-                  </label>
-                </div>
+                <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                  <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                  <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoBack ? photoBack.name.substring(0, 8) + '...' : 'Back Photo'}</span>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoBack)} />
+                </label>
               </div>
 
-              <button type="submit" className="btn-primary" style={{ width: '100%' }} disabled={submitting}>
-                {submitting ? 'Uploading Documents...' : 'Submit Documents'}
+              <button type="submit" disabled={submitting} style={{ padding: '14px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '15px', cursor: 'pointer', marginTop: '10px' }}>
+                {submitting ? 'Uploading Documents...' : 'Submit Registration'}
               </button>
             </form>
           </div>
         )}
 
-        {/* 2. Onboarding Status is Pending/Rejected */}
+        {/* Verification Pending / Rejected Screen */}
         {profile && profile.onboardingStatus !== 'APPROVED' && (
-          <div className="glass-card" style={{ maxWidth: '600px', textAlign: 'center', padding: '40px' }}>
-            {profile.onboardingStatus === 'PENDING' ? (
-              <div>
-                <AlertTriangle size={56} style={{ color: 'var(--accent-warning)', margin: '0 auto 20px auto' }} />
-                <h2 style={{ marginBottom: '12px' }}>Review in Progress</h2>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                  Your documents (License: {profile.licenseNumber}) and vehicle details ({profile.rcNumber}) have been uploaded successfully.
-                  An administrator is reviewing your registration. You will receive an email verification update shortly.
-                </p>
-              </div>
-            ) : (
-              <div>
-                <AlertTriangle size={56} style={{ color: 'var(--accent-error)', margin: '0 auto 20px auto' }} />
-                <h2 style={{ marginBottom: '12px', color: 'var(--accent-error)' }}>Application Rejected</h2>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                  Unfortunately, your driver application has been rejected due to invalid document pictures. Please contact help@ridevel.in to re-apply.
-                </p>
-              </div>
-            )}
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '40px', maxWidth: '540px', margin: '0 auto', textAlign: 'center' }}>
+            <AlertTriangle size={48} style={{ color: profile.onboardingStatus === 'PENDING' ? '#D97706' : '#EF4444', margin: '0 auto 16px auto' }} />
+            <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '10px' }}>
+              {profile.onboardingStatus === 'PENDING' ? 'Registration Under Review' : 'Application Rejected'}
+            </h2>
+            <p style={{ color: '#64748B', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
+              {profile.onboardingStatus === 'PENDING'
+                ? `Your documents (License: ${profile.licenseNumber}) are being verified by our administration team. You will be activated shortly.`
+                : 'Your driver registration was rejected due to invalid photos. Please contact help@ridevel.in.'}
+            </p>
           </div>
         )}
 
-        {/* 3. Driver Workspace (APPROVED) */}
+        {/* Approved Driver Workspace */}
         {profile && profile.onboardingStatus === 'APPROVED' && (() => {
           const activeTrip = assignedTrips.find(t => t.status !== 'COMPLETED' && t.status !== 'CANCELLED');
-          
+
           let mapPickup = null;
           let mapDrop = null;
           if (activeTrip) {
@@ -408,221 +386,215 @@ export default function DriverOnboarding() {
           }
 
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '32px' }}>
-              {/* Left side: Live Driver Navigation Map & Trips Queue */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div className="glass-card" style={{ padding: '16px' }}>
-                  <h2 style={{ fontSize: '16px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Navigation size={18} style={{ color: 'var(--accent-blue)' }} />
-                    {activeTrip 
-                      ? (activeTrip.status === 'STARTED' ? 'Trip in Progress (Heading to Destination)' : 'Heading to Rider Pickup')
-                      : 'Live Driver GPS Position'}
-                  </h2>
-                  <CabMap pickup={mapPickup} drop={mapDrop} driver={driverLoc} />
-                </div>
-
-                <div className="glass-card">
-                  <h2 style={{ fontSize: '18px', marginBottom: '20px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '12px' }}>
-                    Your Trips Queue
-                  </h2>
-                  {assignedTrips.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)' }}>No trips assigned yet. Go Online to accept ride matching requests.</p>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      {assignedTrips.map(trip => (
-                        <div key={trip.id} style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '16px', background: '#F8FAFC' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Trip Ref: {trip.id.substring(0, 8)}...</span>
-                            <span className={`badge ${trip.status === 'ACCEPTED' ? 'badge-approved' : 'badge-pending'}`}>{trip.status}</span>
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', marginBottom: '16px' }}>
-                            <div>🟢 <strong>Pickup:</strong> {trip.pickupAddress}</div>
-                            <div>🔴 <strong>Drop:</strong> {trip.dropAddress}</div>
-                            <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--accent-blue)', marginTop: '6px' }}>Fare: ₹{trip.fare}</div>
-                          </div>
-
-                          {/* Status update controls */}
-                          <div style={{ display: 'flex', gap: '10px' }}>
-                            {trip.status === 'ACCEPTED' && (
-                              <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px', flexGrow: 1 }} onClick={() => handleUpdateStatus(trip.id, 'ARRIVED')}>
-                                Mark as Arrived
-                              </button>
-                            )}
-                            {trip.status === 'ARRIVED' && (
-                              <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px', flexGrow: 1, gap: '6px' }} onClick={() => triggerStartTripWithOtp(trip.id)}>
-                                <KeyRound size={16} /> Enter OTP & Start Trip
-                              </button>
-                            )}
-                            {trip.status === 'STARTED' && (
-                              <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px', flexGrow: 1 }} onClick={() => handleUpdateStatus(trip.id, 'COMPLETED')}>
-                                Complete Trip
-                              </button>
-                            )}
-                            {trip.status !== 'COMPLETED' && trip.status !== 'CANCELLED' && (
-                              <button className="btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', color: 'var(--accent-error)' }} onClick={() => handleUpdateStatus(trip.id, 'CANCELLED')}>
-                                Cancel
-                              </button>
-                            )}
-                          </div>
+            <div>
+              {/* TAB 1: LIVE MAP & DISPATCH */}
+              {driverTab === 'live' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Full-width Prominent Leaflet Map Container (Fixed height 480px) */}
+                  <div style={{ background: '#FFFFFF', borderRadius: '20px', border: '1px solid #E2E8F0', padding: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Navigation size={18} style={{ color: '#2563EB' }} />
+                        {activeTrip
+                          ? (activeTrip.status === 'STARTED' ? 'Trip in Progress (Heading to Destination)' : 'Heading to Rider Pickup Location')
+                          : 'Live Driver GPS Navigation'}
+                      </div>
+                      
+                      {activeTrip && (
+                        <div style={{ fontSize: '12px', fontWeight: '800', background: '#EFF6FF', color: '#2563EB', padding: '4px 12px', borderRadius: '12px' }}>
+                          ACTIVE TRIP #{activeTrip.id.substring(0, 8).toUpperCase()}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right side: Live GPS mock telemetry broadcaster */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div className="glass-card">
-                  <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Navigation style={{ color: 'var(--accent-blue)' }} /> GPS Telemetry Simulator
-                  </h2>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6', marginBottom: '20px' }}>
-                    Demonstrate live coordinates tracking! Pinging coordinates triggers the WebSocket and updates the map layout in real-time.
-                  </p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-glass)', fontSize: '14px' }}>
-                      <span>Simulator Status:</span>
-                      <span style={{ fontWeight: '700', color: simulating ? 'var(--accent-success)' : 'var(--text-secondary)' }}>
-                        {simulating ? 'Simulating Movement' : 'Inactive'}
-                      </span>
+                      )}
                     </div>
 
-                    {!simulating ? (
-                      <button
-                        onClick={startLocationSimulation}
-                        disabled={!isOnline}
-                        className="btn-primary"
-                        style={{ width: '100%', gap: '8px' }}
-                      >
-                        <Play size={18} /> Start Route GPS Simulation
-                      </button>
+                    {/* Prominent Map Box */}
+                    <div style={{ height: '460px', borderRadius: '14px', overflow: 'hidden', border: '1px solid #CBD5E1' }}>
+                      <CabMap pickup={mapPickup} drop={mapDrop} driver={driverLoc} />
+                    </div>
+                  </div>
+
+                  {/* Driver Active Ride Card / Queue */}
+                  <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                    <h3 style={{ fontSize: '17px', fontWeight: '800', margin: '0 0 16px 0', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px' }}>
+                      {activeTrip ? 'Current Active Trip' : 'Your Ride Queue'}
+                    </h3>
+
+                    {!activeTrip ? (
+                      <div style={{ padding: '20px', textAlign: 'center', color: '#64748B', background: '#F8FAFC', borderRadius: '12px', border: '1px dashed #CBD5E1' }}>
+                        {isOnline 
+                          ? '🟢 You are ONLINE. Waiting for incoming ride requests within 10km...' 
+                          : '🔴 You are OFFLINE. Click "GO ONLINE" in the top header to accept rides.'}
+                      </div>
                     ) : (
-                      <button
-                        onClick={stopLocationSimulation}
-                        className="btn-secondary"
-                        style={{ width: '100%', gap: '8px', background: '#FEF2F2', color: 'var(--accent-error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
-                      >
-                        <Pause size={18} /> Stop Simulation
-                      </button>
-                    )}
+                      <div style={{ background: '#F8FAFC', border: '1.5px solid #2563EB', borderRadius: '14px', padding: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '800', color: '#475569' }}>TRIP REF #{activeTrip.id.substring(0, 8).toUpperCase()}</span>
+                          <span style={{ fontSize: '12px', fontWeight: '800', background: '#EFF6FF', color: '#2563EB', padding: '4px 12px', borderRadius: '12px' }}>
+                            {activeTrip.status}
+                          </span>
+                        </div>
 
-                    {!isOnline && (
-                      <p style={{ fontSize: '12px', color: 'var(--accent-warning)', textAlign: 'center' }}>
-                        * You must go ONLINE before enabling the telemetry simulation.
-                      </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', marginBottom: '20px' }}>
+                          <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
+                          <div>🔴 <strong>Dropoff:</strong> {activeTrip.dropAddress}</div>
+                          <div style={{ fontSize: '18px', fontWeight: '900', color: '#2563EB', marginTop: '4px' }}>Fare: ₹{activeTrip.fare}</div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          {activeTrip.status === 'ACCEPTED' && (
+                            <button onClick={() => handleUpdateStatus(activeTrip.id, 'ARRIVED')} style={{ width: '100%', padding: '14px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '14px', cursor: 'pointer' }}>
+                              Mark as Arrived at Pickup Location
+                            </button>
+                          )}
+
+                          {activeTrip.status === 'ARRIVED' && (
+                            <button onClick={() => triggerStartTripWithOtp(activeTrip.id)} style={{ width: '100%', padding: '14px', background: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                              <KeyRound size={18} /> Verify Rider OTP & Start Trip
+                            </button>
+                          )}
+
+                          {activeTrip.status === 'STARTED' && (
+                            <button onClick={() => handleUpdateStatus(activeTrip.id, 'COMPLETED')} style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '14px', cursor: 'pointer' }}>
+                              Complete Ride & Collect Fare (₹{activeTrip.fare})
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* TAB 2: DRIVER TRIP HISTORY (Uber Style) */}
+              {driverTab === 'history' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Earnings Overview Card */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                      <div style={{ fontSize: '12px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Total Completed Trips</div>
+                      <div style={{ fontSize: '28px', fontWeight: '900', color: '#0F172A', marginTop: '4px' }}>{completedTrips.length}</div>
+                    </div>
+
+                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                      <div style={{ fontSize: '12px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Total Earnings</div>
+                      <div style={{ fontSize: '28px', fontWeight: '900', color: '#10B981', marginTop: '4px' }}>₹{totalEarnings.toFixed(2)}</div>
+                    </div>
+                  </div>
+
+                  {/* Past Trips List */}
+                  <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 20px 0', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px' }}>
+                      Completed Ride Logs
+                    </h3>
+
+                    {assignedTrips.length === 0 ? (
+                      <div style={{ padding: '30px', textAlign: 'center', color: '#64748B' }}>No trip logs recorded yet.</div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {assignedTrips.map(trip => (
+                          <div key={trip.id} style={{ border: '1px solid #E2E8F0', borderRadius: '14px', padding: '18px', background: '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '12px', fontWeight: '800', background: '#E2E8F0', padding: '3px 8px', borderRadius: '6px' }}>
+                                  #TRIP-{trip.id.substring(0, 8).toUpperCase()}
+                                </span>
+                                <span style={{ fontSize: '11px', fontWeight: '800', background: trip.status === 'COMPLETED' ? '#ECFDF5' : '#EFF6FF', color: trip.status === 'COMPLETED' ? '#10B981' : '#2563EB', padding: '3px 10px', borderRadius: '12px' }}>
+                                  {trip.status}
+                                </span>
+                              </div>
+
+                              <div style={{ fontSize: '13px', color: '#0F172A', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div>🟢 <strong>Pickup:</strong> {trip.pickupAddress}</div>
+                                <div>🔴 <strong>Drop:</strong> {trip.dropAddress}</div>
+                              </div>
+                            </div>
+
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '20px', fontWeight: '900', color: '#10B981' }}>₹{trip.fare}</div>
+                              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>Ridevel Swift Dzire</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
             </div>
           );
         })()}
 
-        {/* 4. OTP Verification Modal Overlay */}
-        {showOtpModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(15, 23, 42, 0.4)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-            padding: '20px'
-          }}>
-            <div className="glass-card" style={{ maxWidth: '420px', width: '100%', position: 'relative' }}>
-              <button 
-                onClick={() => setShowOtpModal(false)} 
-                style={{ position: 'absolute', right: '16px', top: '16px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-              >
-                <X size={20} />
-              </button>
-
-              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <KeyRound size={48} style={{ color: 'var(--accent-blue)', margin: '0 auto 12px auto' }} />
-                <h3 style={{ fontSize: '20px' }}>Verify Rider OTP</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '6px' }}>
-                  Ask the rider for the 4-digit Ride Start OTP shown on their screen.
-                </p>
-              </div>
-
-              {otpError && (
-                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--accent-error)', padding: '12px', borderRadius: '8px', fontSize: '13px', marginBottom: '20px' }}>
-                  {otpError}
-                </div>
-              )}
-
-              <form onSubmit={handleVerifyOtpAndStart}>
-                <div className="input-group">
-                  <label className="input-label" style={{ textAlign: 'center' }}>Enter 4-Digit OTP Code</label>
-                  <input
-                    type="text"
-                    maxLength={4}
-                    className="input-field"
-                    placeholder="••••"
-                    style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px', fontWeight: '800' }}
-                    value={otpInput}
-                    onChange={(e) => setOtpInput(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '10px' }}>
-                  Verify OTP & Start Trip
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-        {/* 5. 30-Second Uber-Style Ride Offer Popup Overlay */}
-        {incomingOffer && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '440px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB', position: 'relative' }}>
-              
-              {/* Animated 30s Countdown Ring */}
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#EFF6FF', border: '4px solid #2563EB', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '28px', fontWeight: '900' }}>
-                {offerTimer}s
-              </div>
-
-              <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563EB', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>New Ride Request Nearby</div>
-              <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#0F172A', margin: '0 0 20px 0' }}>₹{incomingOffer.fare}</h2>
-
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '16px', textAlign: 'left', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div>
-                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>🟢 Pickup Location</div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{incomingOffer.pickupAddress}</div>
-                </div>
-                <div style={{ borderTop: '1px dashed #CBD5E1', pt: '8px' }}>
-                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>🔴 Dropoff Destination</div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{incomingOffer.dropAddress}</div>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <button
-                  onClick={declineRideOffer}
-                  style={{ padding: '16px', background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer' }}
-                >
-                  Decline
-                </button>
-                <button
-                  onClick={() => acceptRideOffer(incomingOffer.id)}
-                  style={{ padding: '16px', background: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16,185,129,0.4)' }}
-                >
-                  ACCEPT RIDE ({offerTimer}s)
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* OTP Verification Modal */}
+      {showOtpModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '28px', width: '380px', maxWidth: '90vw' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>Enter Rider OTP</h3>
+              <X size={20} onClick={() => setShowOtpModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
+            </div>
+
+            {otpError && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#EF4444', padding: '10px', borderRadius: '8px', fontSize: '12px', marginBottom: '14px' }}>
+                {otpError}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtpAndStart}>
+              <input
+                type="text"
+                maxLength={4}
+                placeholder="4-digit OTP"
+                value={otpInput}
+                onChange={(e) => setOtpInput(e.target.value)}
+                style={{ width: '100%', padding: '12px', fontSize: '24px', textAlign: 'center', letterSpacing: '8px', fontWeight: '900', border: '2px solid #CBD5E1', borderRadius: '10px', marginBottom: '16px', outline: 'none' }}
+                required
+              />
+              <button type="submit" style={{ width: '100%', padding: '14px', background: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '14px', cursor: 'pointer' }}>
+                Verify & Start Journey
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 30-Second Uber Offer Modal Popup */}
+      {incomingOffer && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '440px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#EFF6FF', border: '4px solid #2563EB', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '28px', fontWeight: '900' }}>
+              {offerTimer}s
+            </div>
+
+            <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563EB', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>New Ride Request Nearby</div>
+            <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#0F172A', margin: '0 0 20px 0' }}>₹{incomingOffer.fare}</h2>
+
+            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '16px', textAlign: 'left', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>🟢 Pickup Location</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{incomingOffer.pickupAddress}</div>
+              </div>
+              <div style={{ borderTop: '1px dashed #CBD5E1', pt: '8px' }}>
+                <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>🔴 Dropoff Destination</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{incomingOffer.dropAddress}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <button onClick={declineRideOffer} style={{ padding: '16px', background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer' }}>
+                Decline
+              </button>
+              <button onClick={() => acceptRideOffer(incomingOffer.id)} style={{ padding: '16px', background: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '900', cursor: 'pointer' }}>
+                ACCEPT RIDE ({offerTimer}s)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
