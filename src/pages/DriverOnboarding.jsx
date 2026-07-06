@@ -201,6 +201,63 @@ export default function DriverOnboarding() {
     }
   };
 
+  // 30-Second Uber-Style Ride Offer Popup State
+  const [incomingOffer, setIncomingOffer] = useState(null);
+  const [offerTimer, setOfferTimer] = useState(30);
+
+  // Poll for nearby pending ride offers when online
+  useEffect(() => {
+    if (!isOnline || profile?.onboardingStatus !== 'APPROVED') return;
+
+    const offerInterval = setInterval(async () => {
+      // Avoid fetching if already having active trip or open offer modal
+      const hasActiveTrip = assignedTrips.some(t => t.status === 'ACCEPTED' || t.status === 'ARRIVED' || t.status === 'STARTED');
+      if (hasActiveTrip || incomingOffer) return;
+
+      try {
+        const data = await tripService.getDriverTrips();
+        const pending = data.find(t => t.status === 'REQUESTED');
+        if (pending) {
+          setIncomingOffer(pending);
+          setOfferTimer(30);
+        }
+      } catch (e) {
+        // quiet fail
+      }
+    }, 4000);
+
+    return () => clearInterval(offerInterval);
+  }, [isOnline, profile?.onboardingStatus, assignedTrips, incomingOffer]);
+
+  // 30-Second Offer Countdown Timer
+  useEffect(() => {
+    if (!incomingOffer) return;
+
+    if (offerTimer <= 0) {
+      setIncomingOffer(null);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setOfferTimer(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [incomingOffer, offerTimer]);
+
+  const acceptRideOffer = async (tripId) => {
+    try {
+      await handleUpdateStatus(tripId, 'ACCEPTED');
+      setIncomingOffer(null);
+    } catch (e) {
+      console.error('Error accepting ride offer', e);
+    }
+  };
+
+  const declineRideOffer = () => {
+    setIncomingOffer(null);
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#F8FAFC' }}>
@@ -210,43 +267,45 @@ export default function DriverOnboarding() {
   }
 
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <div className="sidebar">
-        <div className="sidebar-logo">Ridevel</div>
-        <div className="sidebar-menu">
-          <div className="menu-item active">
-            <Navigation size={18} /> Onboarding & Drive
-          </div>
+    <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {/* Clean Uber-style Top Header (No left sidebar clutter) */}
+      <header style={{ height: '70px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <div style={{ fontSize: '24px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Ridevel <span style={{ fontSize: '13px', background: '#EFF6FF', color: '#2563EB', padding: '3px 10px', borderRadius: '12px', fontWeight: '800' }}>DRIVER</span></div>
         </div>
-        <button onClick={authService.logout} className="btn-secondary" style={{ marginTop: 'auto' }}>
-          Logout
-        </button>
-      </div>
 
-      {/* Main Panel */}
-      <div className="main-content">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <div>
-            <h1 style={{ fontSize: '28px', color: 'var(--text-primary)' }}>Driver Workspace</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>Manage your registration, vehicle documents, and trips</p>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {profile && profile.onboardingStatus === 'APPROVED' && (
             <button
               onClick={toggleOnline}
-              className="btn-primary"
               style={{
-                background: isOnline ? 'var(--accent-success)' : '#FFFFFF',
-                color: isOnline ? '#ffffff' : 'var(--text-primary)',
-                border: isOnline ? 'none' : '1px solid var(--border-glass)',
-                padding: '10px 20px',
-                boxShadow: isOnline ? '0 0 15px rgba(16,185,129,0.3)' : '0 1px 3px rgba(0,0,0,0.05)'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: isOnline ? '#10B981' : '#FFFFFF',
+                color: isOnline ? '#FFFFFF' : '#0F172A',
+                border: isOnline ? 'none' : '1px solid #CBD5E1',
+                padding: '10px 24px',
+                borderRadius: '30px',
+                fontWeight: '800',
+                fontSize: '14px',
+                cursor: 'pointer',
+                boxShadow: isOnline ? '0 4px 14px rgba(16, 185, 129, 0.4)' : '0 1px 3px rgba(0,0,0,0.05)',
+                transition: 'all 0.2s ease'
               }}
             >
-              <Power size={18} /> {isOnline ? 'Go Offline' : 'Go Online'}
+              <Power size={18} /> {isOnline ? 'YOU ARE ONLINE' : 'GO ONLINE'}
             </button>
           )}
+
+          <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+            Logout
+          </button>
         </div>
+      </header>
+
+      {/* Main Container */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 32px' }}>
 
         {/* 1. Onboarding Form (If profile not created yet) */}
         {!profile && (
@@ -519,6 +578,47 @@ export default function DriverOnboarding() {
                   Verify OTP & Start Trip
                 </button>
               </form>
+            </div>
+          </div>
+        )}
+        {/* 5. 30-Second Uber-Style Ride Offer Popup Overlay */}
+        {incomingOffer && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '440px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB', position: 'relative' }}>
+              
+              {/* Animated 30s Countdown Ring */}
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#EFF6FF', border: '4px solid #2563EB', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '28px', fontWeight: '900' }}>
+                {offerTimer}s
+              </div>
+
+              <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563EB', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>New Ride Request Nearby</div>
+              <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#0F172A', margin: '0 0 20px 0' }}>₹{incomingOffer.fare}</h2>
+
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '16px', textAlign: 'left', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>🟢 Pickup Location</div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{incomingOffer.pickupAddress}</div>
+                </div>
+                <div style={{ borderTop: '1px dashed #CBD5E1', pt: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>🔴 Dropoff Destination</div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>{incomingOffer.dropAddress}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <button
+                  onClick={declineRideOffer}
+                  style={{ padding: '16px', background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer' }}
+                >
+                  Decline
+                </button>
+                <button
+                  onClick={() => acceptRideOffer(incomingOffer.id)}
+                  style={{ padding: '16px', background: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16,185,129,0.4)' }}
+                >
+                  ACCEPT RIDE ({offerTimer}s)
+                </button>
+              </div>
             </div>
           </div>
         )}

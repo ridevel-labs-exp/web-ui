@@ -63,36 +63,36 @@ const CITIES_DATA = {
 const VEHICLE_TYPES = [
   {
     id: 'SEDAN',
-    name: 'Go Sedan',
-    tagline: 'Affordable sedans',
+    name: 'Dzire Sedan',
+    tagline: 'Comfortable 4-seater Swift Dzire',
     baseFare: 50,
-    ratePerKm: 18,
+    ratePerKm: 22,
     etaMin: '3 mins away',
     capacity: 4,
     color: '#FACC15',
-    image: '/assets/sedan.png'
+    active: true
   },
   {
     id: 'HATCHBACK',
-    name: 'Ridevel Go',
-    tagline: 'Compact daily rides',
+    name: 'Ridevel Mini',
+    tagline: 'Coming Soon',
     baseFare: 30,
     ratePerKm: 14,
-    etaMin: '2 mins away',
+    etaMin: 'Unavailable',
     capacity: 4,
-    color: '#4ADE80',
-    image: '/assets/hatchback.png'
+    color: '#94A3B8',
+    active: false
   },
   {
     id: 'SUV',
     name: 'Ridevel XL',
-    tagline: 'Spacious 6-seater for family',
+    tagline: 'Coming Soon',
     baseFare: 80,
-    ratePerKm: 24,
-    etaMin: '5 mins away',
+    ratePerKm: 28,
+    etaMin: 'Unavailable',
     capacity: 6,
-    color: '#EF4444',
-    image: '/assets/suv.png'
+    color: '#94A3B8',
+    active: false
   },
   {
     id: 'PREMIER',
@@ -368,6 +368,8 @@ export default function RiderDashboard() {
 
   const tripDistanceKm = pickup && drop ? calculateHaversineKm(pickup.lat, pickup.lng, drop.lat, drop.lng) : 0;
 
+  const [noDriverModal, setNoDriverModal] = useState(false);
+
   const handleBookTrip = async () => {
     if (!pickup || !drop) {
       setError('Please select both pickup and destination locations.');
@@ -390,9 +392,19 @@ export default function RiderDashboard() {
         isScheduled: bookingMode === 'RESERVE',
         scheduledDateTime: bookingMode === 'RESERVE' ? `${scheduledDate} ${scheduledTime}` : null
       });
-      setActiveTrip(response);
+
+      // If instant booking (NOW) and no driver matched within 10km, display unavailability modal
+      if (bookingMode === 'NOW' && !response.driverId) {
+        setNoDriverModal(true);
+      } else {
+        setActiveTrip(response);
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'No drivers available in your area. Try again.');
+      if (bookingMode === 'NOW') {
+        setNoDriverModal(true);
+      } else {
+        setError(err.response?.data?.error || 'No drivers available in your area. Try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -739,12 +751,11 @@ export default function RiderDashboard() {
                   {VEHICLE_TYPES.map((v, idx) => {
                     const isSelected = selectedVehicle === v.id;
                     const estimatedFare = (v.baseFare + (tripDistanceKm > 0 ? v.ratePerKm * tripDistanceKm : 0)).toFixed(2);
-                    const etaTime = getEtaTimeString(3 + idx * 2);
 
                     return (
                       <div
                         key={v.id}
-                        onClick={() => setSelectedVehicle(v.id)}
+                        onClick={() => v.active && setSelectedVehicle(v.id)}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -752,30 +763,38 @@ export default function RiderDashboard() {
                           padding: '14px 16px',
                           borderRadius: '12px',
                           border: isSelected ? '2px solid #2563EB' : '1px solid #E2E8F0',
-                          background: isSelected ? '#EFF6FF' : '#FFFFFF',
-                          cursor: 'pointer',
+                          background: !v.active ? '#F1F5F9' : (isSelected ? '#EFF6FF' : '#FFFFFF'),
+                          opacity: !v.active ? 0.6 : 1,
+                          cursor: !v.active ? 'not-allowed' : 'pointer',
                           transition: 'all 0.15s ease'
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <img src={v.image} alt={v.name} style={{ width: '64px', height: '40px', objectFit: 'contain' }} />
+                          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: v.color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Car size={26} style={{ color: v.active ? '#0F172A' : '#64748B' }} />
+                          </div>
                           <div>
-                            <div style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
                               {v.name}
-                              <span style={{ fontSize: '12px', fontWeight: '500', color: '#475569', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                                <Users size={12} /> {v.capacity}
-                              </span>
+                              {v.active ? (
+                                <span style={{ fontSize: '11px', fontWeight: '600', color: '#475569', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                  <Users size={12} /> {v.capacity}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '10px', background: '#E2E8F0', color: '#475569', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
+                                  Coming Soon
+                                </span>
+                              )}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
-                              {v.etaMin} • {etaTime}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#64748B' }}>{v.tagline}</div>
+                            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{v.tagline}</div>
                           </div>
                         </div>
 
-                        <div style={{ fontSize: '20px', fontWeight: '900', color: '#0F172A' }}>
-                          ₹{estimatedFare}
-                        </div>
+                        {v.active && (
+                          <div style={{ fontSize: '20px', fontWeight: '900', color: '#2563EB' }}>
+                            ₹{estimatedFare}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -992,6 +1011,26 @@ export default function RiderDashboard() {
         </div>
       )}
 
+      {/* No Driver Available 10km Radius Modal Popup */}
+      {noDriverModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '28px', width: '420px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#FEF2F2', border: '2px solid #FCA5A5', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+              <AlertTriangle size={32} />
+            </div>
+            <h3 style={{ margin: '0 0 10px 0', fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>No Drivers Nearby</h3>
+            <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: '#475569', lineHeight: 1.6 }}>
+              Sorry, due to driver unavailability, your ride cannot be taken right now. Please try again shortly or schedule a pickup for later.
+            </p>
+            <button
+              onClick={() => setNoDriverModal(false)}
+              style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}
+            >
+              Understand & Dismiss
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
