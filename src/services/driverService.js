@@ -9,6 +9,13 @@ export const driverService = {
     formData.append('photoFront', onboardingData.photoFront);
     formData.append('photoSide', onboardingData.photoSide);
     formData.append('photoBack', onboardingData.photoBack);
+    formData.append('photoRcFront', onboardingData.photoRcFront);
+    formData.append('photoRcBack', onboardingData.photoRcBack);
+    formData.append('photoLicense', onboardingData.photoLicense);
+    formData.append('photoInsurance', onboardingData.photoInsurance);
+    if (onboardingData.photoPollution) {
+      formData.append('photoPollution', onboardingData.photoPollution);
+    }
 
     const response = await api.post('/api/drivers/onboarding', formData, {
       headers: {

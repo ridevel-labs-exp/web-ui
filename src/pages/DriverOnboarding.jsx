@@ -22,6 +22,11 @@ export default function DriverOnboarding() {
   const [photoFront, setPhotoFront] = useState(null);
   const [photoSide, setPhotoSide] = useState(null);
   const [photoBack, setPhotoBack] = useState(null);
+  const [photoRcFront, setPhotoRcFront] = useState(null);
+  const [photoRcBack, setPhotoRcBack] = useState(null);
+  const [photoLicense, setPhotoLicense] = useState(null);
+  const [photoInsurance, setPhotoInsurance] = useState(null);
+  const [photoPollution, setPhotoPollution] = useState(null);
 
   // Active Driver State
   const [isOnline, setIsOnline] = useState(false);
@@ -129,8 +134,8 @@ export default function DriverOnboarding() {
     setSubmitting(true);
     setError(null);
 
-    if (!photoFront || !photoSide || !photoBack) {
-      setError('Please upload all three vehicle photos.');
+    if (!photoFront || !photoSide || !photoBack || !photoRcFront || !photoRcBack || !photoLicense || !photoInsurance) {
+      setError('Please upload all required driver documents & vehicle photos.');
       setSubmitting(false);
       return;
     }
@@ -142,11 +147,16 @@ export default function DriverOnboarding() {
         rcNumber,
         photoFront,
         photoSide,
-        photoBack
+        photoBack,
+        photoRcFront,
+        photoRcBack,
+        photoLicense,
+        photoInsurance,
+        photoPollution
       });
       setProfile(response);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to submit onboarding files. Please try again.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to submit onboarding files. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -327,24 +337,75 @@ export default function DriverOnboarding() {
                 <input type="text" placeholder="POL-987654321" value={insurancePolicy} onChange={(e) => setInsurancePolicy(e.target.value)} required style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', outline: 'none' }} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginTop: '10px' }}>
-                <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
-                  <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
-                  <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoFront ? photoFront.name.substring(0, 8) + '...' : 'Front Photo'}</span>
-                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoFront)} />
-                </label>
+              {/* Document Photo Uploads */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '10px' }}>
+                
+                {/* Section 1: Vehicle Pictures */}
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Vehicle Photos (Required)</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoFront ? photoFront.name.substring(0, 8) + '...' : 'Front Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoFront)} />
+                    </label>
 
-                <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
-                  <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
-                  <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoSide ? photoSide.name.substring(0, 8) + '...' : 'Side Photo'}</span>
-                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoSide)} />
-                </label>
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoSide ? photoSide.name.substring(0, 8) + '...' : 'Side Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoSide)} />
+                    </label>
 
-                <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
-                  <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
-                  <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoBack ? photoBack.name.substring(0, 8) + '...' : 'Back Photo'}</span>
-                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoBack)} />
-                </label>
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoBack ? photoBack.name.substring(0, 8) + '...' : 'Back Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoBack)} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Section 2: RC Book */}
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Registration Certificate (RC Book - Required)</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoRcFront ? photoRcFront.name.substring(0, 8) + '...' : 'RC Front Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoRcFront)} />
+                    </label>
+
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoRcBack ? photoRcBack.name.substring(0, 8) + '...' : 'RC Back Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoRcBack)} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Section 3: Driver License & Other Certificates */}
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Driver Credentials & Pollution</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoLicense ? photoLicense.name.substring(0, 8) + '...' : 'License Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoLicense)} />
+                    </label>
+
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoInsurance ? photoInsurance.name.substring(0, 8) + '...' : 'Insurance Photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoInsurance)} />
+                    </label>
+
+                    <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+                      <Upload size={18} style={{ color: '#64748B', marginBottom: '4px' }} />
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoPollution ? photoPollution.name.substring(0, 8) + '...' : 'Pollution Doc (Opt)'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e, setPhotoPollution)} />
+                    </label>
+                  </div>
+                </div>
+
               </div>
 
               <button type="submit" disabled={submitting} style={{ padding: '14px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '15px', cursor: 'pointer', marginTop: '10px' }}>

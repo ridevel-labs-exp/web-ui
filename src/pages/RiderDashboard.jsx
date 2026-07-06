@@ -124,6 +124,7 @@ export default function RiderDashboard() {
   const [pickup, setPickup] = useState(null);
   const [drop, setDrop] = useState(null);
   const [driverLoc, setDriverLoc] = useState(null);
+  const [isRerouting, setIsRerouting] = useState(false);
 
   // Address Input & Autocomplete State
   const [pickupInput, setPickupInput] = useState('');
@@ -991,7 +992,38 @@ export default function RiderDashboard() {
 
         {/* Right Map View */}
         <div style={{ position: 'relative', height: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-          <CabMap pickup={pickup} drop={drop} driver={driverLoc} onMapClick={handleMapClick} />
+          <CabMap 
+            pickup={pickup} 
+            drop={drop} 
+            driver={driverLoc} 
+            onMapClick={handleMapClick} 
+            onReroutingAlert={setIsRerouting}
+          />
+
+          {/* Reroute Safety Warning Banner */}
+          {isRerouting && activeTrip && activeTrip.status === 'STARTED' && (
+            <div style={{
+              position: 'absolute',
+              top: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#EF4444',
+              color: '#FFFFFF',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              fontWeight: '800',
+              fontSize: '14px',
+              zIndex: 1000,
+              boxShadow: '0 8px 30px rgba(239, 68, 68, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              border: '2px solid #FFFFFF'
+            }}>
+              <AlertTriangle size={18} />
+              <span>Safety Alert: Driver deviated from the suggested route!</span>
+            </div>
+          )}
 
           {/* Floating Map Selection Banner */}
           {mapSelectMode && (

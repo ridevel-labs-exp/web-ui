@@ -84,12 +84,45 @@ function RecenterMap({ center, bounds }) {
   return null;
 }
 
-export default function CabMap({ pickup, drop, driver, onMapClick }) {
+export default function CabMap({ pickup, drop, driver, onMapClick, onReroutingAlert }) {
   // Default map center set to Bangalore
   const defaultCenter = [12.9716, 77.5946];
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [driverRouteCoordinates, setDriverRouteCoordinates] = useState([]);
+
+  const calculateHaversineKm = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  useEffect(() => {
+    if (driver && pickup && drop && routeCoordinates.length > 0 && onReroutingAlert) {
+      let minD = Infinity;
+      for (let i = 0; i < routeCoordinates.length; i++) {
+        const pt = routeCoordinates[i];
+        const dist = calculateHaversineKm(driver.lat, driver.lng, pt[0], pt[1]);
+        if (dist < minD) {
+          minD = dist;
+        }
+      }
+      // Trigger rerouting alert if driver is more than 300 meters (0.3 km) from route path
+      if (minD > 0.3) {
+        onReroutingAlert(true);
+      } else {
+        onReroutingAlert(false);
+      }
+    } else if (onReroutingAlert) {
+      onReroutingAlert(false);
+    }
+  }, [driver, pickup, drop, routeCoordinates, onReroutingAlert]);
 
   useEffect(() => {
     // Inject the pulse-ring animation style dynamically if not already present
