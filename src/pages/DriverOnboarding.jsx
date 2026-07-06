@@ -4,6 +4,7 @@ import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
+import BrandedLoader from '../components/BrandedLoader';
 import { Upload, CheckCircle2, AlertTriangle, Power, Navigation, FileText, KeyRound, X, RefreshCw, Clock, History, DollarSign, MapPin } from 'lucide-react';
 
 export default function DriverOnboarding() {
@@ -206,11 +207,7 @@ export default function DriverOnboarding() {
   };
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#F8FAFC' }}>
-        <RefreshCw className="animate-spin" size={32} style={{ color: '#2563EB' }} />
-      </div>
-    );
+    return <BrandedLoader text="Loading Ridevel Driver Workspace..." />;
   }
 
   // Calculate total earnings & completed trips for history

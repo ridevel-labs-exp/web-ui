@@ -3,7 +3,8 @@ import { tripService } from '../services/tripService';
 import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
-import { MapPin, Navigation, Compass, CheckCircle2, Download, RefreshCw, Calendar, Clock, LocateFixed, Info, User, LogOut, Search, X, Users } from 'lucide-react';
+import BrandedLoader from '../components/BrandedLoader';
+import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronRight, AlertTriangle, X, Calendar, Filter, UserCheck, Car } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
@@ -898,42 +899,92 @@ export default function RiderDashboard() {
             </>
           )}
 
-          {/* Active Trip Status Card */}
+          {/* Active Trip Status Card (100% Uber Standard Match) */}
           {activeTrip && !invoice && (
-            <div style={{ background: '#FFFFFF', borderLeft: '4px solid #2563EB', padding: '18px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '18px', fontWeight: '800', marginBottom: '14px', color: '#0F172A' }}>Ride Status</div>
+            <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.08)' }}>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', marginBottom: '14px' }}>
-                <span>Matching Status:</span>
-                <span style={{ fontWeight: '800', color: '#2563EB' }}>{activeTrip.status}</span>
+              {/* Header Status & Live ETA Banner */}
+              <div style={{ background: activeTrip.status === 'STARTED' ? '#ECFDF5' : '#EFF6FF', borderRadius: '12px', padding: '14px', border: activeTrip.status === 'STARTED' ? '1px solid #A7F3D0' : '1px solid #BFDBFE', marginBottom: '16px' }}>
+                <div style={{ fontSize: '11px', fontWeight: '800', color: activeTrip.status === 'STARTED' ? '#059669' : '#2563EB', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {activeTrip.status === 'REQUESTED' && '🔍 MATCHING DRIVER'}
+                  {activeTrip.status === 'ACCEPTED' && '🚖 DRIVER EN ROUTE TO PICKUP'}
+                  {activeTrip.status === 'ARRIVED' && '📍 DRIVER ARRIVED AT PICKUP'}
+                  {activeTrip.status === 'STARTED' && '🟢 TRIP IN PROGRESS'}
+                </div>
+                <div style={{ fontSize: '17px', fontWeight: '900', color: '#0F172A', marginTop: '2px' }}>
+                  {activeTrip.status === 'REQUESTED' && 'Connecting to nearest driver...'}
+                  {activeTrip.status === 'ACCEPTED' && 'Driver is heading to your location (~3 mins)'}
+                  {activeTrip.status === 'ARRIVED' && 'Your driver is waiting outside!'}
+                  {activeTrip.status === 'STARTED' && 'Heading to your destination'}
+                </div>
               </div>
 
-              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px', color: '#334155' }}>
-                <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
-                <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
-              </div>
-
+              {/* Assigned Driver Profile Card (Uber Standard) */}
               {activeTrip.driverId ? (
-                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '14px' }}>
-                  <div style={{ fontSize: '12px', color: '#64748B' }}>Assigned Driver:</div>
-                  <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
-                    Driver Ref: {activeTrip.driverId.substring(0, 8)}...
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#1E293B', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '18px' }}>
+                        D
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>Verified Driver</div>
+                        <div style={{ fontSize: '12px', color: '#64748B', fontWeight: '600' }}>⭐ 4.9 (500+ rides) • Dzire Sedan</div>
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '900', color: '#0F172A' }}>KA 01 AB 1234</div>
+                      <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: '700' }}>White Dzire</div>
+                    </div>
                   </div>
 
+                  {/* Rider OTP Share Badge */}
                   {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
-                    <div style={{ background: '#FEF9C3', border: '1px solid #FEF08A', borderRadius: '10px', padding: '14px', textAlign: 'center', marginTop: '14px' }}>
-                      <div style={{ fontSize: '11px', color: '#854D0E', textTransform: 'uppercase', fontWeight: '600' }}>Share Start OTP with Driver:</div>
-                      <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '6px', color: '#854D0E', margin: '6px 0' }}>
+                    <div style={{ background: '#FEF9C3', border: '1px solid #FEF08A', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', margin: '12px 0 4px 0' }}>
+                      <div style={{ fontSize: '11px', color: '#854D0E', fontWeight: '800', textTransform: 'uppercase' }}>SHARE START OTP WITH DRIVER</div>
+                      <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '8px', color: '#854D0E', margin: '4px 0' }}>
                         {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#475569' }}>
-                  <RefreshCw className="animate-spin" size={16} /> Searching for nearest Ridevel driver...
+                <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px', textAlign: 'center', color: '#64748B', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <RefreshCw className="animate-spin" size={16} /> Contacting nearest online Ridevel driver...
                 </div>
               )}
+
+              {/* Trip Addresses & Selected Payment Method */}
+              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px', padding: '12px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
+                <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #E2E8F0', paddingTop: '8px', marginTop: '4px' }}>
+                  <span>Payment: <strong>{paymentMethod === 'UPI' ? '📱 GPay / UPI' : '💵 Cash'}</strong></span>
+                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#2563EB' }}>₹{activeTrip.fare}</span>
+                </div>
+              </div>
+
+              {/* Action Control Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <a
+                  href="tel:+919876543210"
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px', background: '#EFF6FF', color: '#2563EB', borderRadius: '10px', fontWeight: '800', fontSize: '13px', border: '1px solid #BFDBFE' }}
+                >
+                  📞 Call Driver
+                </a>
+                <button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to cancel this ride request?')) {
+                      setActiveTrip(null);
+                    }
+                  }}
+                  style={{ padding: '12px', background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', borderRadius: '10px', fontWeight: '800', fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Cancel Ride
+                </button>
+              </div>
+
             </div>
           )}
 
@@ -1140,6 +1191,8 @@ export default function RiderDashboard() {
           </div>
         </div>
       )}
+      {/* Branded "R" Loading Screen */}
+      {loading && <BrandedLoader text="Connecting you to nearest Ridevel driver..." />}
     </div>
   );
 };
