@@ -26,6 +26,11 @@ export const tripService = {
     return response.data;
   },
 
+  getAllTrips: async () => {
+    const response = await api.get('/api/trips/all');
+    return response.data;
+  },
+
   // 📈 Audit timeline logs (consumed from cab-audit-service)
   getTripHistoryTimeline: async (tripId) => {
     const response = await api.get(`/api/audit/trip/${tripId}`);

@@ -41,8 +41,7 @@ export default function AdminDashboard() {
   const fetchTrips = async () => {
     setTripsLoading(true);
     try {
-      // Mock/fallback trips combined with API data
-      const data = await tripService.getDriverTrips();
+      const data = await tripService.getAllTrips();
       setTrips(data || []);
     } catch (err) {
       console.error('Failed to fetch trips', err);
