@@ -803,50 +803,61 @@ export default function RiderDashboard() {
                 </div>
               </div>
 
-              {/* Payment Method Option Selector (Uber Style) */}
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px 16px', borderRadius: '12px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span>Payment Method</span>
-                  <span style={{ fontSize: '11px', color: '#2563EB', fontWeight: '700' }}>{paymentMethod === 'UPI' ? 'Google Pay / PhonePe' : 'Cash on Ride'}</span>
+              {/* Payment Method Option Selector (100% Uber Style Match) */}
+              <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '12px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  Payment Method
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {/* Cash Option */}
                   <div
                     onClick={() => setPaymentMethod('CASH')}
                     style={{
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: paymentMethod === 'CASH' ? '2px solid #2563EB' : '1px solid #CBD5E1',
-                      background: paymentMethod === 'CASH' ? '#EFF6FF' : '#FFFFFF',
-                      cursor: 'pointer',
+                      flex: 1,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      color: paymentMethod === 'CASH' ? '#2563EB' : '#475569'
+                      gap: '10px',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: paymentMethod === 'CASH' ? '2px solid #0F172A' : '1px solid #E2E8F0',
+                      background: paymentMethod === 'CASH' ? '#F8FAFC' : '#FFFFFF',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    💵 Cash to Driver
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: paymentMethod === 'CASH' ? '#DCFCE7' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
+                      💵
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Cash</div>
+                      <div style={{ fontSize: '10px', color: '#64748B', fontWeight: '500' }}>Pay driver directly</div>
+                    </div>
                   </div>
 
+                  {/* Google Pay / UPI Option */}
                   <div
                     onClick={() => setPaymentMethod('UPI')}
                     style={{
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: paymentMethod === 'UPI' ? '2px solid #2563EB' : '1px solid #CBD5E1',
-                      background: paymentMethod === 'UPI' ? '#EFF6FF' : '#FFFFFF',
-                      cursor: 'pointer',
+                      flex: 1,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      color: paymentMethod === 'UPI' ? '#2563EB' : '#475569'
+                      gap: '10px',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: paymentMethod === 'UPI' ? '2px solid #2563EB' : '1px solid #E2E8F0',
+                      background: paymentMethod === 'UPI' ? '#EFF6FF' : '#FFFFFF',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    📱 GPay / UPI
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: paymentMethod === 'UPI' ? '#DBEAFE' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
+                      📱
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: paymentMethod === 'UPI' ? '#2563EB' : '#0F172A' }}>Google Pay</div>
+                      <div style={{ fontSize: '10px', color: '#64748B', fontWeight: '500' }}>Instant UPI</div>
+                    </div>
                   </div>
                 </div>
               </div>
