@@ -369,6 +369,8 @@ export default function RiderDashboard() {
   const tripDistanceKm = pickup && drop ? calculateHaversineKm(pickup.lat, pickup.lng, drop.lat, drop.lng) : 0;
 
   const [noDriverModal, setNoDriverModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('CASH'); // 'CASH' or 'UPI'
+  const [showUpiQrModal, setShowUpiQrModal] = useState(false);
 
   const handleBookTrip = async () => {
     if (!pickup || !drop) {
@@ -801,9 +803,70 @@ export default function RiderDashboard() {
                 </div>
               </div>
 
+              {/* Payment Method Option Selector (Uber Style) */}
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px 16px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>Payment Method</span>
+                  <span style={{ fontSize: '11px', color: '#2563EB', fontWeight: '700' }}>{paymentMethod === 'UPI' ? 'Google Pay / PhonePe' : 'Cash on Ride'}</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div
+                    onClick={() => setPaymentMethod('CASH')}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: paymentMethod === 'CASH' ? '2px solid #2563EB' : '1px solid #CBD5E1',
+                      background: paymentMethod === 'CASH' ? '#EFF6FF' : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      color: paymentMethod === 'CASH' ? '#2563EB' : '#475569'
+                    }}
+                  >
+                    💵 Cash to Driver
+                  </div>
+
+                  <div
+                    onClick={() => setPaymentMethod('UPI')}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: paymentMethod === 'UPI' ? '2px solid #2563EB' : '1px solid #CBD5E1',
+                      background: paymentMethod === 'UPI' ? '#EFF6FF' : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      color: paymentMethod === 'UPI' ? '#2563EB' : '#475569'
+                    }}
+                  >
+                    📱 GPay / UPI
+                  </div>
+                </div>
+              </div>
+
               {/* Confirm Ride Button */}
               <button
-                onClick={handleBookTrip}
+                onClick={() => {
+                  if (paymentMethod === 'UPI' && (pickup && drop)) {
+                    const activeV = VEHICLE_TYPES.find(v => v.id === selectedVehicle);
+                    const fare = (activeV.baseFare + (tripDistanceKm * activeV.ratePerKm)).toFixed(2);
+                    const upiUri = `upi://pay?pa=ridevel@okicici&pn=Ridevel%20Mobility&am=${fare}&cu=INR&tn=Ridevel%20Cab%20Booking`;
+                    // Automatically navigate to Google Pay on mobile devices
+                    if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                      window.location.href = upiUri;
+                    } else {
+                      setShowUpiQrModal(true);
+                    }
+                  }
+                  handleBookTrip();
+                }}
                 disabled={loading}
                 style={{
                   width: '100%',
@@ -1027,6 +1090,41 @@ export default function RiderDashboard() {
               style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}
             >
               Understand & Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Google Pay / UPI Desktop QR Code Modal Overlay */}
+      {showUpiQrModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '420px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ fontSize: '18px', fontWeight: '900', color: '#0F172A' }}>Pay with GPay / UPI</div>
+              <X size={20} onClick={() => setShowUpiQrModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 20px 0' }}>
+              Scan this QR code using <strong>Google Pay</strong>, PhonePe, or Paytm on your phone to complete payment:
+            </p>
+
+            <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', display: 'inline-block', marginBottom: '20px' }}>
+              {(() => {
+                const activeV = VEHICLE_TYPES.find(v => v.id === selectedVehicle);
+                const fare = (activeV.baseFare + (tripDistanceKm * activeV.ratePerKm)).toFixed(2);
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=ridevel@okicici&pn=Ridevel%20Mobility&am=${fare}&cu=INR&tn=Ridevel%20Cab%20Booking`)}`;
+                return <img src={qrUrl} alt="GPay QR Code" style={{ width: '200px', height: '200px', borderRadius: '8px' }} />;
+              })()}
+            </div>
+
+            <div style={{ fontSize: '13px', fontWeight: '800', color: '#10B981', marginBottom: '20px' }}>
+              📱 Open GPay → Scan QR Code → Pay
+            </div>
+
+            <button
+              onClick={() => setShowUpiQrModal(false)}
+              style={{ width: '100%', padding: '14px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '800', cursor: 'pointer' }}
+            >
+              Done & Continue
             </button>
           </div>
         </div>
