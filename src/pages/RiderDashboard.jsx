@@ -804,187 +804,152 @@ export default function RiderDashboard() {
                 </div>
               </div>
 
-              {/* Payment Method Option Selector (100% Uber Style Match) */}
-              <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '12px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
-                  Payment Method
+              {/* Payment Pill & Request Dzire Sedan Button (100% Screenshot #1 Match) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+                {/* Payment Selector Pill */}
+                <div
+                  onClick={() => setPaymentMethod(prev => prev === 'CASH' ? 'UPI' : 'CASH')}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    background: '#FFFFFF',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '32px', height: '28px', borderRadius: '6px', background: paymentMethod === 'CASH' ? '#DCFCE7' : '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {paymentMethod === 'CASH' ? '💵' : '📱'}
+                    </div>
+                    <span style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
+                      {paymentMethod === 'CASH' ? 'Cash' : 'GPay'}
+                    </span>
+                  </div>
+                  <ChevronDown size={18} style={{ color: '#64748B' }} />
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  {/* Cash Option */}
-                  <div
-                    onClick={() => setPaymentMethod('CASH')}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 12px',
-                      borderRadius: '10px',
-                      border: paymentMethod === 'CASH' ? '2px solid #0F172A' : '1px solid #E2E8F0',
-                      background: paymentMethod === 'CASH' ? '#F8FAFC' : '#FFFFFF',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: paymentMethod === 'CASH' ? '#DCFCE7' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
-                      💵
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Cash</div>
-                      <div style={{ fontSize: '10px', color: '#64748B', fontWeight: '500' }}>Pay driver directly</div>
-                    </div>
-                  </div>
-
-                  {/* Google Pay / UPI Option */}
-                  <div
-                    onClick={() => setPaymentMethod('UPI')}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 12px',
-                      borderRadius: '10px',
-                      border: paymentMethod === 'UPI' ? '2px solid #2563EB' : '1px solid #E2E8F0',
-                      background: paymentMethod === 'UPI' ? '#EFF6FF' : '#FFFFFF',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: paymentMethod === 'UPI' ? '#DBEAFE' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
-                      📱
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '800', color: paymentMethod === 'UPI' ? '#2563EB' : '#0F172A' }}>Google Pay</div>
-                      <div style={{ fontSize: '10px', color: '#64748B', fontWeight: '500' }}>Instant UPI</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Confirm Ride Button */}
-              <button
-                onClick={() => {
-                  if (paymentMethod === 'UPI' && (pickup && drop)) {
-                    const activeV = VEHICLE_TYPES.find(v => v.id === selectedVehicle);
-                    const fare = (activeV.baseFare + (tripDistanceKm * activeV.ratePerKm)).toFixed(2);
-                    const upiUri = `upi://pay?pa=ridevel@okicici&pn=Ridevel%20Mobility&am=${fare}&cu=INR&tn=Ridevel%20Cab%20Booking`;
-                    // Automatically navigate to Google Pay on mobile devices
-                    if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
-                      window.location.href = upiUri;
-                    } else {
-                      setShowUpiQrModal(true);
+                {/* Solid Black Request Button */}
+                <button
+                  onClick={() => {
+                    if (paymentMethod === 'UPI' && (pickup && drop)) {
+                      const activeV = VEHICLE_TYPES.find(v => v.id === selectedVehicle);
+                      const fare = (activeV.baseFare + (tripDistanceKm * activeV.ratePerKm)).toFixed(2);
+                      const upiUri = `upi://pay?pa=ridevel@okicici&pn=Ridevel%20Mobility&am=${fare}&cu=INR&tn=Ridevel%20Cab%20Booking`;
+                      if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                        window.location.href = upiUri;
+                      } else {
+                        setShowUpiQrModal(true);
+                      }
                     }
-                  }
-                  handleBookTrip();
-                }}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  background: '#2563EB',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '12px',
-                  fontSize: '17px',
-                  fontWeight: '900',
-                  cursor: 'pointer',
-                  marginTop: '6px',
-                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
-                }}
-              >
-                {loading ? <RefreshCw className="animate-spin" size={20} /> : `Request ${selectedVehicle} Ride`}
-              </button>
+                    handleBookTrip();
+                  }}
+                  disabled={loading}
+                  style={{
+                    flex: 1.4,
+                    padding: '14px 18px',
+                    background: '#000000',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  {loading ? 'Requesting...' : 'Request Dzire Sedan'}
+                </button>
+              </div>
             </>
           )}
 
-          {/* Active Trip Status Card (100% Uber Standard Match) */}
+          {/* Active Ride Tracking Card (100% Screenshot #2 Match) */}
           {activeTrip && !invoice && (
-            <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.08)' }}>
+            <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
               
-              {/* Header Status & Live ETA Banner */}
-              <div style={{ background: activeTrip.status === 'STARTED' ? '#ECFDF5' : '#EFF6FF', borderRadius: '12px', padding: '14px', border: activeTrip.status === 'STARTED' ? '1px solid #A7F3D0' : '1px solid #BFDBFE', marginBottom: '16px' }}>
-                <div style={{ fontSize: '11px', fontWeight: '800', color: activeTrip.status === 'STARTED' ? '#059669' : '#2563EB', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {activeTrip.status === 'REQUESTED' && '🔍 MATCHING DRIVER'}
-                  {activeTrip.status === 'ACCEPTED' && '🚖 DRIVER EN ROUTE TO PICKUP'}
-                  {activeTrip.status === 'ARRIVED' && '📍 DRIVER ARRIVED AT PICKUP'}
-                  {activeTrip.status === 'STARTED' && '🟢 TRIP IN PROGRESS'}
-                </div>
-                <div style={{ fontSize: '17px', fontWeight: '900', color: '#0F172A', marginTop: '2px' }}>
-                  {activeTrip.status === 'REQUESTED' && 'Connecting to nearest driver...'}
-                  {activeTrip.status === 'ACCEPTED' && 'Driver is heading to your location (~3 mins)'}
-                  {activeTrip.status === 'ARRIVED' && 'Your driver is waiting outside!'}
-                  {activeTrip.status === 'STARTED' && 'Heading to your destination'}
-                </div>
+              {/* Header */}
+              <div style={{ fontSize: '18px', fontWeight: '900', color: '#0F172A', marginBottom: '2px' }}>
+                {activeTrip.status === 'REQUESTED' ? 'Ride requested' : (activeTrip.status === 'STARTED' ? 'Trip in progress' : 'Driver on the way')}
+              </div>
+              <div style={{ fontSize: '13px', color: '#64748B', marginBottom: '12px' }}>
+                {activeTrip.status === 'REQUESTED' ? 'Finding drivers nearby' : 'Your vehicle is en route'}
               </div>
 
-              {/* Assigned Driver Profile Card (Uber Standard) */}
-              {activeTrip.driverId ? (
-                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#1E293B', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '18px' }}>
-                        D
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>Verified Driver</div>
-                        <div style={{ fontSize: '12px', color: '#64748B', fontWeight: '600' }}>⭐ 4.9 (500+ rides) • Dzire Sedan</div>
-                      </div>
-                    </div>
+              {/* Animated Progress Bar */}
+              <div style={{ height: '3px', background: '#F1F5F9', borderRadius: '2px', overflow: 'hidden', marginBottom: '24px' }}>
+                <div style={{ width: '45%', height: '100%', background: '#2563EB', borderRadius: '2px' }} />
+              </div>
 
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: '900', color: '#0F172A' }}>KA 01 AB 1234</div>
-                      <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: '700' }}>White Dzire</div>
+              {/* Location Timeline */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', marginBottom: '24px', paddingLeft: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#0F172A', marginTop: '4px', flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700' }}>PICKUP POINT</div>
+                    <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>{pickup?.address || activeTrip.pickupAddress}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+                  <div style={{ width: '12px', height: '12px', background: '#0F172A', marginTop: '4px', flexShrink: 0 }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700' }}>DROP DESTINATION</div>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>{drop?.address || activeTrip.dropAddress}</div>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Rider OTP Share Badge */}
-                  {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
-                    <div style={{ background: '#FEF9C3', border: '1px solid #FEF08A', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', margin: '12px 0 4px 0' }}>
-                      <div style={{ fontSize: '11px', color: '#854D0E', fontWeight: '800', textTransform: 'uppercase' }}>SHARE START OTP WITH DRIVER</div>
-                      <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '8px', color: '#854D0E', margin: '4px 0' }}>
-                        {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
-                      </div>
+              {/* Fare & Payment Row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E2E8F0', paddingTop: '16px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '28px', height: '24px', borderRadius: '4px', background: paymentMethod === 'CASH' ? '#DCFCE7' : '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
+                    {paymentMethod === 'CASH' ? '💵' : '📱'}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '18px', fontWeight: '900', color: '#0F172A' }}>₹{activeTrip.fare}</div>
+                    <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '700' }}>{paymentMethod === 'CASH' ? 'Cash' : 'GPay'}</div>
+                  </div>
+                </div>
+
+                {/* OTP Share Badge if assigned */}
+                {(activeTrip.status === 'ACCEPTED' || activeTrip.status === 'ARRIVED') && (
+                  <div style={{ background: '#FEF9C3', border: '1px solid #FEF08A', padding: '6px 14px', borderRadius: '10px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '9px', fontWeight: '800', color: '#854D0E', textTransform: 'uppercase' }}>START OTP</div>
+                    <div style={{ fontSize: '18px', fontWeight: '900', color: '#854D0E', letterSpacing: '3px' }}>
+                      {String(parseInt(activeTrip.id.replace(/-/g, '').substring(0, 4), 16) % 9000 + 1000)}
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px', textAlign: 'center', color: '#64748B', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <RefreshCw className="animate-spin" size={16} /> Contacting nearest online Ridevel driver...
-                </div>
-              )}
-
-              {/* Trip Addresses & Selected Payment Method */}
-              <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px', padding: '12px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                <div>🟢 <strong>Pickup:</strong> {activeTrip.pickupAddress}</div>
-                <div>🔴 <strong>Drop:</strong> {activeTrip.dropAddress}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #E2E8F0', paddingTop: '8px', marginTop: '4px' }}>
-                  <span>Payment: <strong>{paymentMethod === 'UPI' ? '📱 GPay / UPI' : '💵 Cash'}</strong></span>
-                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#2563EB' }}>₹{activeTrip.fare}</span>
-                </div>
+                  </div>
+                )}
               </div>
 
-              {/* Action Control Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <a
-                  href="tel:+919876543210"
-                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px', background: '#EFF6FF', color: '#2563EB', borderRadius: '10px', fontWeight: '800', fontSize: '13px', border: '1px solid #BFDBFE' }}
-                >
-                  📞 Call Driver
-                </a>
-                <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to cancel this ride request?')) {
-                      setActiveTrip(null);
-                    }
-                  }}
-                  style={{ padding: '12px', background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', borderRadius: '10px', fontWeight: '800', fontSize: '13px', cursor: 'pointer' }}
-                >
-                  Cancel Ride
-                </button>
-              </div>
-
+              {/* Cancel Button (Screenshot #2 Match) */}
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to cancel this ride request?')) {
+                    setActiveTrip(null);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#F8FAFC',
+                  color: '#DC2626',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: '800',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel ride
+              </button>
             </div>
           )}
 
