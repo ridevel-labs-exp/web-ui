@@ -804,36 +804,30 @@ export default function RiderDashboard() {
                 </div>
               </div>
 
-              {/* Payment Pill & Request Dzire Sedan Button (100% Screenshot #1 Match) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-                {/* Payment Selector Pill */}
+              {/* Unified Payment & Request Bar (100% Uber Screenshot Match) */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', background: '#FFFFFF', padding: '4px 0' }}>
+                {/* Left: Cash / GPay Selector (No inner border, clean Uber style) */}
                 <div
                   onClick={() => setPaymentMethod(prev => prev === 'CASH' ? 'UPI' : 'CASH')}
                   style={{
-                    flex: 1,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 14px',
-                    background: '#FFFFFF',
-                    border: '1px solid #CBD5E1',
-                    borderRadius: '12px',
+                    gap: '12px',
                     cursor: 'pointer',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                    userSelect: 'none',
+                    padding: '6px 8px'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '32px', height: '28px', borderRadius: '6px', background: paymentMethod === 'CASH' ? '#DCFCE7' : '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {paymentMethod === 'CASH' ? '💵' : '📱'}
-                    </div>
-                    <span style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
-                      {paymentMethod === 'CASH' ? 'Cash' : 'GPay'}
-                    </span>
+                  <div style={{ width: '40px', height: '34px', borderRadius: '8px', background: paymentMethod === 'CASH' ? '#DCFCE7' : '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+                    {paymentMethod === 'CASH' ? '💵' : '📱'}
                   </div>
-                  <ChevronDown size={18} style={{ color: '#64748B' }} />
+                  <span style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+                    {paymentMethod === 'CASH' ? 'Cash' : 'GPay'}
+                  </span>
+                  <ChevronDown size={18} style={{ color: '#0F172A', strokeWidth: '2.5' }} />
                 </div>
 
-                {/* Solid Black Request Button */}
+                {/* Right: Solid Black Request Button (Single line, fixed height) */}
                 <button
                   onClick={() => {
                     if (paymentMethod === 'UPI' && (pickup && drop)) {
@@ -850,15 +844,19 @@ export default function RiderDashboard() {
                   }}
                   disabled={loading}
                   style={{
-                    flex: 1.4,
-                    padding: '14px 18px',
+                    height: '52px',
+                    padding: '0 24px',
                     background: '#000000',
                     color: '#FFFFFF',
                     border: 'none',
                     borderRadius: '12px',
-                    fontSize: '15px',
+                    fontSize: '16px',
                     fontWeight: '800',
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                   }}
                 >
