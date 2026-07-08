@@ -5,7 +5,7 @@ import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
 import BrandedLoader from '../components/BrandedLoader';
-import { Upload, CheckCircle2, AlertTriangle, Power, Navigation, FileText, KeyRound, X, RefreshCw, Clock, History, DollarSign, MapPin } from 'lucide-react';
+import { Upload, CheckCircle2, AlertTriangle, Power, Navigation, FileText, KeyRound, X, RefreshCw, Clock, History, DollarSign, MapPin, Bell } from 'lucide-react';
 
 export default function DriverOnboarding() {
   const user = authService.getCurrentUser();
@@ -14,6 +14,10 @@ export default function DriverOnboarding() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [driverTab, setDriverTab] = useState('live'); // 'live' or 'history'
+  
+  // Rejection editing & notifications state
+  const [isEditingRejection, setIsEditingRejection] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Form Fields
   const [licenseNumber, setLicenseNumber] = useState('');
@@ -48,6 +52,11 @@ export default function DriverOnboarding() {
       const data = await driverService.getProfile();
       setProfile(data);
       setIsOnline(data.isAvailable);
+      if (data.onboardingStatus === 'REJECTED') {
+        setLicenseNumber(data.licenseNumber || '');
+        setInsurancePolicy(data.insurancePolicy || '');
+        setRcNumber(data.rcNumber || '');
+      }
       if (data.onboardingStatus === 'APPROVED') {
         fetchTrips();
       }
@@ -155,6 +164,7 @@ export default function DriverOnboarding() {
         photoPollution
       });
       setProfile(response);
+      setIsEditingRejection(false);
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to submit onboarding files. Please try again.');
     } finally {
@@ -299,9 +309,102 @@ export default function DriverOnboarding() {
             </button>
           )}
 
-          <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
-            Logout
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }}>
+            {/* Notification Bell */}
+            {profile && (
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748B',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}
+                >
+                  <Bell size={20} />
+                  {profile.onboardingStatus === 'REJECTED' && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '6px',
+                      right: '6px',
+                      width: '10px',
+                      height: '10px',
+                      background: '#EF4444',
+                      borderRadius: '50%',
+                      border: '2px solid #FFFFFF'
+                    }} />
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '44px',
+                    right: 0,
+                    width: '300px',
+                    background: '#FFFFFF',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                    border: '1px solid #E2E8F0',
+                    padding: '16px',
+                    zIndex: 200,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '8px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Notifications</span>
+                      <button onClick={() => setShowNotifications(false)} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer' }}><X size={14} /></button>
+                    </div>
+                    
+                    {profile.onboardingStatus === 'REJECTED' ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                        <div style={{ fontSize: '12px', fontWeight: '700', color: '#EF4444' }}>🚨 Onboarding Rejected</div>
+                        <div style={{ fontSize: '12px', color: '#475569', lineHeight: '1.4' }}>
+                          <strong>Reason:</strong> {profile.rejectionReason || "No details provided."}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setIsEditingRejection(true);
+                            setShowNotifications(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            background: '#EFF6FF',
+                            color: '#2563EB',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            marginTop: '4px'
+                          }}
+                        >
+                          Action: Re-submit Documents
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: '#64748B', textAlign: 'center', padding: '12px 0' }}>
+                        No new notifications
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -309,7 +412,7 @@ export default function DriverOnboarding() {
       <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px' }}>
 
         {/* Onboarding Document Upload Form */}
-        {!profile && (
+        {(!profile || isEditingRejection) && (
           <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '32px', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText style={{ color: '#2563EB' }} /> Driver Registration & Onboarding
@@ -416,17 +519,35 @@ export default function DriverOnboarding() {
         )}
 
         {/* Verification Pending / Rejected Screen */}
-        {profile && profile.onboardingStatus !== 'APPROVED' && (
+        {profile && profile.onboardingStatus !== 'APPROVED' && !isEditingRejection && (
           <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '40px', maxWidth: '540px', margin: '0 auto', textAlign: 'center' }}>
             <AlertTriangle size={48} style={{ color: profile.onboardingStatus === 'PENDING' ? '#D97706' : '#EF4444', margin: '0 auto 16px auto' }} />
             <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '10px' }}>
               {profile.onboardingStatus === 'PENDING' ? 'Registration Under Review' : 'Application Rejected'}
             </h2>
-            <p style={{ color: '#64748B', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
+            <p style={{ color: '#64748B', fontSize: '14px', lineHeight: '1.6', margin: '0 0 20px 0' }}>
               {profile.onboardingStatus === 'PENDING'
                 ? `Your documents (License: ${profile.licenseNumber}) are being verified by our administration team. You will be activated shortly.`
-                : 'Your driver registration was rejected due to invalid photos. Please contact help@ridevel.in.'}
+                : `Your driver registration was rejected. Reason: "${profile.rejectionReason || 'No details provided'}"`}
             </p>
+            {profile.onboardingStatus === 'REJECTED' && (
+              <button
+                onClick={() => setIsEditingRejection(true)}
+                style={{
+                  padding: '10px 24px',
+                  background: '#2563EB',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                Re-submit Documents
+              </button>
+            )}
           </div>
         )}
 

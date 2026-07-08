@@ -57,8 +57,17 @@ export default function AdminDashboard() {
   }, []);
 
   const handleReviewDriver = async (driverId, status) => {
+    let reason = null;
+    if (status === 'REJECTED') {
+      reason = prompt("Please enter the reason for rejecting this driver onboarding application:");
+      if (reason === null) return;
+      if (!reason.trim()) {
+        alert("A rejection reason is required to reject the driver onboarding.");
+        return;
+      }
+    }
     try {
-      await driverService.reviewOnboarding(driverId, status);
+      await driverService.reviewOnboarding(driverId, status, reason);
       fetchDrivers();
       setSelectedDriverModal(null);
     } catch (err) {

@@ -35,8 +35,8 @@ export const driverService = {
     return response.data;
   },
 
-  reviewOnboarding: async (driverId, status) => {
-    const response = await api.put(`/api/drivers/onboarding/review/${driverId}`, { status });
+  reviewOnboarding: async (driverId, status, rejectionReason) => {
+    const response = await api.put(`/api/drivers/onboarding/review/${driverId}`, { status, rejectionReason });
     return response.data;
   },
 
