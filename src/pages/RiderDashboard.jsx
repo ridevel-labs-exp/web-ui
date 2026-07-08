@@ -114,6 +114,27 @@ export default function RiderDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Profile & Ride History State
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [riderHistory, setRiderHistory] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+
+  const handleOpenActivity = async () => {
+    setShowActivityModal(true);
+    setActivityLoading(true);
+    try {
+      const history = await tripService.getRiderTrips();
+      // Sort history descending by creation date (newest first)
+      const sortedHistory = (history || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setRiderHistory(sortedHistory);
+    } catch (err) {
+      console.error("Failed to load rider history", err);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
   // City Selection & Change City Modal
   const [selectedCity, setSelectedCity] = useState('Chennai');
   const [showCityModal, setShowCityModal] = useState(false);
@@ -510,13 +531,134 @@ export default function RiderDashboard() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ fontSize: '13px', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
-            <User size={16} /> {user?.name || user?.email || 'Karthi'}
-          </div>
-          <button onClick={authService.logout} style={{ background: '#F1F5F9', border: '1px solid #CBD5E1', color: '#0F172A', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>
-            <LogOut size={13} /> Logout
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Activity / Ride History Button */}
+          <button
+            onClick={handleOpenActivity}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'none',
+              border: 'none',
+              color: '#475569',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              padding: '8px 14px',
+              borderRadius: '20px',
+              transition: 'background 0.15s ease'
+            }}
+          >
+            <Clock size={16} /> Activity
           </button>
+
+          {/* Profile Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#F1F5F9',
+                border: 'none',
+                color: '#0F172A',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: '#2563EB',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '11px',
+                fontWeight: '800'
+              }}>
+                {user?.name ? user.name.substring(0, 1).toUpperCase() : 'U'}
+              </div>
+              <span>{user?.name || 'Rider'}</span>
+              <ChevronDown size={14} style={{ color: '#64748B' }} />
+            </button>
+
+            {showProfileDropdown && (
+              <div style={{
+                position: 'absolute',
+                top: '44px',
+                right: 0,
+                width: '260px',
+                background: '#FFFFFF',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                border: '1px solid #E2E8F0',
+                padding: '16px',
+                zIndex: 200,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                textAlign: 'left'
+              }}>
+                <div style={{ borderBottom: '1px solid #F1F5F9', paddingBottom: '8px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>{user?.name || 'Rider'}</div>
+                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', wordBreak: 'break-all' }}>{user?.email}</div>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    handleOpenActivity();
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#475569',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 0',
+                    width: '100%',
+                    textAlign: 'left'
+                  }}
+                >
+                  <Clock size={14} /> My Trips / Activity
+                </button>
+
+                <button
+                  onClick={authService.logout}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    background: '#FEF2F2',
+                    color: '#EF4444',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    marginTop: '4px'
+                  }}
+                >
+                  <LogOut size={13} /> Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -1183,9 +1325,95 @@ export default function RiderDashboard() {
             >
               Done & Continue
             </button>
+        </div>
+      )}
+
+      {/* Rider Activity / Ride History Modal */}
+      {showActivityModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '560px', maxWidth: '90vw', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #E2E8F0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#0F172A' }}>Your Activity</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>View your past rides and download invoices</p>
+              </div>
+              <X size={24} onClick={() => setShowActivityModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
+              {activityLoading ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#64748B', fontSize: '14px' }}>Loading your ride history...</div>
+              ) : riderHistory.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#64748B', fontSize: '14px' }}>
+                  No past rides found. Start booking to see your activity here!
+                </div>
+              ) : (
+                riderHistory.map((trip) => (
+                  <div key={trip.id} style={{ border: '1px solid #E2E8F0', borderRadius: '16px', padding: '16px', background: '#F8FAFC', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Car size={16} style={{ color: '#2563EB' }} /> Dzire Sedan
+                      </div>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: '800',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        background: trip.status === 'COMPLETED' ? '#D1FAE5' : trip.status === 'CANCELLED' ? '#FEE2E2' : '#DBEAFE',
+                        color: trip.status === 'COMPLETED' ? '#065F46' : trip.status === 'CANCELLED' ? '#991B1B' : '#1E40AF'
+                      }}>
+                        {trip.status}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: '2px solid #CBD5E1', paddingLeft: '10px', margin: '4px 0' }}>
+                      <div>🟢 <strong>Pickup:</strong> {trip.pickupAddress}</div>
+                      <div>🔴 <strong>Drop:</strong> {trip.dropAddress}</div>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
+                        Date: {new Date(trip.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '10px', marginTop: '4px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>
+                        Fare: ₹{trip.fare}
+                      </div>
+                      
+                      {trip.status === 'COMPLETED' && (
+                        <a
+                          href={tripService.getInvoicePdfUrl(trip.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            color: '#2563EB',
+                            textDecoration: 'none',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Download size={14} /> Invoice PDF
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowActivityModal(false)}
+              style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', marginTop: '20px' }}
+            >
+              Close Activity
+            </button>
           </div>
         </div>
       )}
+
       {/* Branded "R" Loading Screen */}
       {loading && <BrandedLoader text="Connecting you to nearest Ridevel driver..." />}
     </div>
