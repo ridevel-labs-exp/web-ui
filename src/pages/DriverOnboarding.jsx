@@ -132,6 +132,58 @@ export default function DriverOnboarding() {
     return () => clearInterval(timer);
   }, [incomingOffer, offerTimer]);
 
+  const compressImage = (file, maxW = 1200, maxH = 1200, quality = 0.8) => {
+    return new Promise((resolve) => {
+      if (!file || !file.type.startsWith('image/')) {
+        resolve(file);
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxW) {
+              height = Math.round((height * maxW) / width);
+              width = maxW;
+            }
+          } else {
+            if (height > maxH) {
+              width = Math.round((width * maxH) / height);
+              height = maxH;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const compressedFile = new File([blob], file.name, {
+              type: file.type || 'image/jpeg',
+              lastModified: Date.now()
+            });
+            resolve(compressedFile);
+          }, file.type || 'image/jpeg', quality);
+        };
+        img.onerror = () => resolve(file);
+      };
+      reader.onerror = () => resolve(file);
+    });
+  };
+
   const handleFileChange = (e, setFile) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -150,18 +202,39 @@ export default function DriverOnboarding() {
     }
 
     try {
+      // Compress all images in parallel to ensure file sizes are under 1MB while preserving high quality
+      const [
+        compFront,
+        compSide,
+        compBack,
+        compRcFront,
+        compRcBack,
+        compLicense,
+        compInsurance,
+        compPollution
+      ] = await Promise.all([
+        compressImage(photoFront),
+        compressImage(photoSide),
+        compressImage(photoBack),
+        compressImage(photoRcFront),
+        compressImage(photoRcBack),
+        compressImage(photoLicense),
+        compressImage(photoInsurance),
+        photoPollution ? compressImage(photoPollution) : Promise.resolve(null)
+      ]);
+
       const response = await driverService.submitOnboarding({
         licenseNumber,
         insurancePolicy,
         rcNumber,
-        photoFront,
-        photoSide,
-        photoBack,
-        photoRcFront,
-        photoRcBack,
-        photoLicense,
-        photoInsurance,
-        photoPollution
+        photoFront: compFront,
+        photoSide: compSide,
+        photoBack: compBack,
+        photoRcFront: compRcFront,
+        photoRcBack: compRcBack,
+        photoLicense: compLicense,
+        photoInsurance: compInsurance,
+        photoPollution: compPollution
       });
       setProfile(response);
       setIsEditingRejection(false);
