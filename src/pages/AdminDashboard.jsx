@@ -417,18 +417,74 @@ export default function AdminDashboard() {
               <X size={20} onClick={() => setSelectedDriverModal(null)} style={{ cursor: 'pointer', color: '#64748B' }} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textAlign: 'center', marginBottom: '4px' }}>Front Photo</div>
-                <img src={driverService.getFileUrl(selectedDriverModal.photoFrontUrl)} alt="Front" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+            {/* Group 1: Vehicle Pictures */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Vehicle Photos</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Front</div>
+                  <img src={driverService.getFileUrl(selectedDriverModal.photoFrontUrl)} alt="Front" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Side</div>
+                  <img src={driverService.getFileUrl(selectedDriverModal.photoSideUrl)} alt="Side" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Back</div>
+                  <img src={driverService.getFileUrl(selectedDriverModal.photoBackUrl)} alt="Back" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textAlign: 'center', marginBottom: '4px' }}>Side Photo</div>
-                <img src={driverService.getFileUrl(selectedDriverModal.photoSideUrl)} alt="Side" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+            </div>
+
+            {/* Group 2: RC Book */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Registration Certificate (RC Book)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {selectedDriverModal.photoRcFrontUrl ? (
+                  <div>
+                    <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>RC Front</div>
+                    <img src={driverService.getFileUrl(selectedDriverModal.photoRcFrontUrl)} alt="RC Front" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                  </div>
+                ) : <div style={{ fontSize: '12px', color: '#94A3B8', padding: '10px' }}>No RC Front Uploaded</div>}
+                
+                {selectedDriverModal.photoRcBackUrl ? (
+                  <div>
+                    <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>RC Back</div>
+                    <img src={driverService.getFileUrl(selectedDriverModal.photoRcBackUrl)} alt="RC Back" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                  </div>
+                ) : <div style={{ fontSize: '12px', color: '#94A3B8', padding: '10px' }}>No RC Back Uploaded</div>}
               </div>
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textAlign: 'center', marginBottom: '4px' }}>Back Photo</div>
-                <img src={driverService.getFileUrl(selectedDriverModal.photoBackUrl)} alt="Back" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+            </div>
+
+            {/* Group 3: License & Insurance & Pollution */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Driver Credentials & Certificates</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                {selectedDriverModal.photoLicenseUrl ? (
+                  <div>
+                    <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Driving License</div>
+                    <img src={driverService.getFileUrl(selectedDriverModal.photoLicenseUrl)} alt="License" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                  </div>
+                ) : <div style={{ fontSize: '12px', color: '#94A3B8', padding: '10px' }}>No License Uploaded</div>}
+
+                {selectedDriverModal.photoInsuranceUrl ? (
+                  <div>
+                    <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Insurance Policy</div>
+                    <img src={driverService.getFileUrl(selectedDriverModal.photoInsuranceUrl)} alt="Insurance" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                  </div>
+                ) : <div style={{ fontSize: '12px', color: '#94A3B8', padding: '10px' }}>No Insurance Uploaded</div>}
+
+                {selectedDriverModal.photoPollutionUrl ? (
+                  <div>
+                    <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Pollution (PUC)</div>
+                    <img src={driverService.getFileUrl(selectedDriverModal.photoPollutionUrl)} alt="Pollution" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Pollution (PUC)</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '110px', border: '1px dashed #CBD5E1', borderRadius: '8px', fontSize: '12px', color: '#94A3B8', background: '#F8FAFC' }}>Not Provided</div>
+                  </div>
+                )}
               </div>
             </div>
 
