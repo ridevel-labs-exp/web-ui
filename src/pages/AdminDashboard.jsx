@@ -6,6 +6,17 @@ import CabMap from '../components/CabMap';
 import { Check, X, ShieldAlert, List, Clock, Eye, Calendar, Filter, UserCheck, MapPin, Search } from 'lucide-react';
 
 export default function AdminDashboard() {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 992 : false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [activeMainTab, setActiveMainTab] = useState('bookings'); // 'bookings' or 'drivers'
   const [bookingSubTab, setBookingSubTab] = useState('NOW'); // 'NOW' or 'LATER'
   
@@ -136,11 +147,24 @@ export default function AdminDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Clean Header Bar */}
-      <header style={{ height: '70px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Ridevel <span style={{ fontSize: '13px', background: '#1E293B', color: '#FFFFFF', padding: '3px 10px', borderRadius: '12px', fontWeight: '800' }}>ADMIN</span></div>
+      <header style={{
+        height: isMobile ? 'auto' : '70px',
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E2E8F0',
+        padding: isMobile ? '16px' : '0 32px',
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'stretch' : 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
+      }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? '12px' : '24px' }}>
+          <div style={{ fontSize: '24px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px', textAlign: isMobile ? 'center' : 'left' }}>Ridevel <span style={{ fontSize: '13px', background: '#1E293B', color: '#FFFFFF', padding: '3px 10px', borderRadius: '12px', fontWeight: '800' }}>ADMIN</span></div>
           
-          <nav style={{ display: 'flex', gap: '8px' }}>
+          <nav style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '8px' }}>
             <button
               onClick={() => setActiveMainTab('bookings')}
               style={{
@@ -154,6 +178,7 @@ export default function AdminDashboard() {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '6px'
               }}
             >
@@ -173,6 +198,7 @@ export default function AdminDashboard() {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '6px'
               }}
             >
@@ -181,25 +207,25 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+        <button onClick={authService.logout} style={{ background: '#F1F5F9', border: 'none', color: '#64748B', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', width: isMobile ? '100%' : 'auto' }}>
           Logout
         </button>
       </header>
 
       {/* Main Container */}
-      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '32px' }}>
+      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: isMobile ? '16px' : '32px' }}>
         
         {/* 1. BOOKINGS OVERVIEW TAB */}
         {activeMainTab === 'bookings' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '16px' : '0', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', marginBottom: '24px' }}>
               <div>
                 <h1 style={{ fontSize: '26px', fontWeight: '900', color: '#0F172A', margin: 0 }}>Ride Bookings Control Panel</h1>
                 <p style={{ color: '#64748B', margin: '4px 0 0 0', fontSize: '14px' }}>Manage Pick-Up Now and Pick-Up Later requests & assign verified drivers</p>
               </div>
 
               {/* Date Filters */}
-              <div style={{ display: 'flex', gap: '8px', background: '#FFFFFF', padding: '4px', borderRadius: '10px', border: '1px solid #CBD5E1' }}>
+              <div style={{ display: 'flex', gap: '8px', background: '#FFFFFF', padding: '4px', borderRadius: '10px', border: '1px solid #CBD5E1', alignSelf: isMobile ? 'flex-start' : 'center' }}>
                 <button onClick={() => setDateFilter('ALL')} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: dateFilter === 'ALL' ? '#1E293B' : 'transparent', color: dateFilter === 'ALL' ? '#FFFFFF' : '#64748B', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}>All Dates</button>
                 <button onClick={() => setDateFilter('DAILY')} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: dateFilter === 'DAILY' ? '#1E293B' : 'transparent', color: dateFilter === 'DAILY' ? '#FFFFFF' : '#64748B', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}>Today Only</button>
                 <button onClick={() => setDateFilter('MONTHLY')} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: dateFilter === 'MONTHLY' ? '#1E293B' : 'transparent', color: dateFilter === 'MONTHLY' ? '#FFFFFF' : '#64748B', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}>This Month</button>
@@ -207,14 +233,15 @@ export default function AdminDashboard() {
             </div>
 
             {/* Horizontal Sub-Tabs: Pick-Up Now vs Pick-Up Later */}
-            <div style={{ display: 'flex', borderBottom: '2px solid #E2E8F0', marginBottom: '24px', gap: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', borderBottom: isMobile ? 'none' : '2px solid #E2E8F0', marginBottom: '24px', gap: isMobile ? '8px' : '24px' }}>
               <button
                 onClick={() => { setBookingSubTab('NOW'); setCurrentPage(1); }}
                 style={{
                   padding: '12px 24px',
                   border: 'none',
-                  background: 'transparent',
-                  borderBottom: bookingSubTab === 'NOW' ? '3px solid #2563EB' : '3px solid transparent',
+                  background: isMobile && bookingSubTab === 'NOW' ? '#EFF6FF' : 'transparent',
+                  borderBottom: !isMobile && bookingSubTab === 'NOW' ? '3px solid #2563EB' : '3px solid transparent',
+                  borderRadius: isMobile ? '8px' : '0',
                   color: bookingSubTab === 'NOW' ? '#2563EB' : '#64748B',
                   fontWeight: '800',
                   fontSize: '15px',
@@ -233,8 +260,9 @@ export default function AdminDashboard() {
                 style={{
                   padding: '12px 24px',
                   border: 'none',
-                  background: 'transparent',
-                  borderBottom: bookingSubTab === 'LATER' ? '3px solid #D97706' : '3px solid transparent',
+                  background: isMobile && bookingSubTab === 'LATER' ? '#FFFBEB' : 'transparent',
+                  borderBottom: !isMobile && bookingSubTab === 'LATER' ? '3px solid #D97706' : '3px solid transparent',
+                  borderRadius: isMobile ? '8px' : '0',
                   color: bookingSubTab === 'LATER' ? '#D97706' : '#64748B',
                   fontWeight: '800',
                   fontSize: '15px',
@@ -259,7 +287,7 @@ export default function AdminDashboard() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {paginatedTrips.map(trip => (
-                  <div key={trip.id} style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', display: 'grid', gridTemplateColumns: '260px 1fr 280px', gap: '24px', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                  <div key={trip.id} style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '260px 1fr 280px', gap: '24px', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                     
                     {/* Embedded Mini Map Preview */}
                     <div style={{ height: '160px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #CBD5E1' }}>
@@ -363,14 +391,14 @@ export default function AdminDashboard() {
         {/* 2. DRIVERS MANAGEMENT TAB */}
         {activeMainTab === 'drivers' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '16px' : '0', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', marginBottom: '24px' }}>
               <div>
                 <h1 style={{ fontSize: '26px', fontWeight: '900', color: '#0F172A', margin: 0 }}>Driver Profiles & Documents</h1>
                 <p style={{ color: '#64748B', margin: '4px 0 0 0', fontSize: '14px' }}>Search and review driver onboarding licenses and uploaded vehicle documents</p>
               </div>
 
               {/* Search Driver Bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '8px 14px', width: '320px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '8px 14px', width: isMobile ? '100%' : '320px' }}>
                 <Search size={16} style={{ color: '#64748B' }} />
                 <input
                   type="text"
@@ -387,7 +415,7 @@ export default function AdminDashboard() {
             ) : filteredDrivers.length === 0 ? (
               <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '40px', textAlign: 'center', color: '#64748B', border: '1px solid #E2E8F0' }}>No drivers match your search query.</div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
                 {filteredDrivers.map(drv => (
                   <div key={drv.id} style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -420,7 +448,7 @@ export default function AdminDashboard() {
       {/* Driver Document Modal */}
       {selectedDriverModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '32px', width: '680px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: isMobile ? '16px' : '32px', width: '680px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>Driver Document Verification</h3>
               <X size={20} onClick={() => setSelectedDriverModal(null)} style={{ cursor: 'pointer', color: '#64748B' }} />
@@ -445,7 +473,7 @@ export default function AdminDashboard() {
             {/* Group 1: Vehicle Pictures */}
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Vehicle Photos</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '12px' }}>
                 <div>
                   <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Front</div>
                   <img src={driverService.getFileUrl(selectedDriverModal.photoFrontUrl)} alt="Front" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
@@ -464,7 +492,7 @@ export default function AdminDashboard() {
             {/* Group 2: RC Book */}
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Registration Certificate (RC Book)</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                 {selectedDriverModal.photoRcFrontUrl ? (
                   <div>
                     <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>RC Front</div>
@@ -484,7 +512,7 @@ export default function AdminDashboard() {
             {/* Group 3: License & Insurance & Pollution */}
             <div style={{ marginBottom: '24px' }}>
               <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Driver Credentials & Certificates</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '12px' }}>
                 {selectedDriverModal.photoLicenseUrl ? (
                   <div>
                     <div style={{ fontSize: '10px', color: '#94A3B8', textAlign: 'center', marginBottom: '2px' }}>Driving License</div>
@@ -514,7 +542,7 @@ export default function AdminDashboard() {
             </div>
 
             {selectedDriverModal.onboardingStatus === 'PENDING' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                 <button onClick={() => handleReviewDriver(selectedDriverModal.id, 'APPROVED')} style={{ padding: '12px', background: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '800', cursor: 'pointer' }}>
                   Approve Application
                 </button>

@@ -9,6 +9,17 @@ import { Upload, CheckCircle2, AlertTriangle, Power, Navigation, FileText, KeyRo
 
 export default function DriverOnboarding() {
   const user = authService.getCurrentUser();
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 992 : false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -313,12 +324,25 @@ export default function DriverOnboarding() {
     <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {submitting && <BrandedLoader text="Uploading & validating documents with AI..." />}
       {/* Concise Uber-Style Header */}
-      <header style={{ height: '64px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-          <div style={{ fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Ridevel <span style={{ fontSize: '11px', background: '#EFF6FF', color: '#2563EB', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>DRIVER</span></div>
+      <header style={{
+        height: isMobile ? 'auto' : '64px',
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E2E8F0',
+        padding: isMobile ? '12px 16px' : '0 28px',
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'stretch' : 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
+      }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? '12px' : '28px' }}>
+          <div style={{ fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px', textAlign: isMobile ? 'center' : 'left' }}>Ridevel <span style={{ fontSize: '11px', background: '#EFF6FF', color: '#2563EB', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>DRIVER</span></div>
           
           {profile && profile.onboardingStatus === 'APPROVED' && (
-            <nav style={{ display: 'flex', gap: '6px' }}>
+            <nav style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '6px' }}>
               <button
                 onClick={() => setDriverTab('live')}
                 style={{
@@ -332,6 +356,7 @@ export default function DriverOnboarding() {
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px'
                 }}
               >
@@ -351,6 +376,7 @@ export default function DriverOnboarding() {
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px'
                 }}
               >
@@ -360,7 +386,7 @@ export default function DriverOnboarding() {
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: '14px', width: isMobile ? '100%' : 'auto' }}>
           {profile && profile.onboardingStatus === 'APPROVED' && (
             <button
               onClick={toggleOnline}
@@ -485,11 +511,11 @@ export default function DriverOnboarding() {
       </header>
 
       {/* Main Area */}
-      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px' }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: isMobile ? '16px' : '24px' }}>
 
         {/* Onboarding Document Upload Form */}
         {(!profile || isEditingRejection) && (
-          <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '32px', maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: isMobile ? '16px' : '32px', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText style={{ color: '#2563EB' }} /> Driver Registration & Onboarding
             </h2>
@@ -522,7 +548,7 @@ export default function DriverOnboarding() {
                 {/* Section 1: Vehicle Pictures */}
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Vehicle Photos (Required)</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '12px' }}>
                     <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
                       <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
                       <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoFront ? photoFront.name.substring(0, 8) + '...' : 'Front Photo'}</span>
@@ -546,7 +572,7 @@ export default function DriverOnboarding() {
                 {/* Section 2: RC Book */}
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Registration Certificate (RC Book - Required)</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                     <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
                       <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
                       <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoRcFront ? photoRcFront.name.substring(0, 8) + '...' : 'RC Front Photo'}</span>
@@ -564,7 +590,7 @@ export default function DriverOnboarding() {
                 {/* Section 3: Driver License & Other Certificates */}
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Driver Credentials & Pollution</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '12px' }}>
                     <label style={{ border: '1px dashed #CBD5E1', borderRadius: '8px', height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
                       <Upload size={18} style={{ color: '#2563EB', marginBottom: '4px' }} />
                       <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>{photoLicense ? photoLicense.name.substring(0, 8) + '...' : 'License Photo'}</span>
@@ -664,7 +690,7 @@ export default function DriverOnboarding() {
                     </div>
 
                     {/* Prominent Map Box */}
-                    <div style={{ height: '460px', borderRadius: '14px', overflow: 'hidden', border: '1px solid #CBD5E1' }}>
+                    <div style={{ height: isMobile ? '300px' : '460px', borderRadius: '14px', overflow: 'hidden', border: '1px solid #CBD5E1' }}>
                       <CabMap pickup={mapPickup} drop={mapDrop} driver={driverLoc} />
                     </div>
                   </div>
@@ -726,7 +752,7 @@ export default function DriverOnboarding() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   
                   {/* Earnings Overview Card */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                     <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                       <div style={{ fontSize: '12px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Total Completed Trips</div>
                       <div style={{ fontSize: '28px', fontWeight: '900', color: '#0F172A', marginTop: '4px' }}>{completedTrips.length}</div>
@@ -749,7 +775,7 @@ export default function DriverOnboarding() {
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         {assignedTrips.map(trip => (
-                          <div key={trip.id} style={{ border: '1px solid #E2E8F0', borderRadius: '14px', padding: '18px', background: '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div key={trip.id} style={{ border: '1px solid #E2E8F0', borderRadius: '14px', padding: '18px', background: '#F8FAFC', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '12px' : '0', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center' }}>
                             <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                                 <span style={{ fontSize: '12px', fontWeight: '800', background: '#E2E8F0', padding: '3px 8px', borderRadius: '6px' }}>
@@ -766,7 +792,7 @@ export default function DriverOnboarding() {
                               </div>
                             </div>
 
-                            <div style={{ textAlign: 'right' }}>
+                            <div style={{ textAlign: isMobile ? 'left' : 'right', borderTop: isMobile ? '1px solid #E2E8F0' : 'none', paddingTop: isMobile ? '12px' : '0' }}>
                               <div style={{ fontSize: '20px', fontWeight: '900', color: '#10B981' }}>₹{trip.fare}</div>
                               <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>Ridevel Swift Dzire</div>
                             </div>
@@ -787,7 +813,7 @@ export default function DriverOnboarding() {
       {/* OTP Verification Modal */}
       {showOtpModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '28px', width: '380px', maxWidth: '90vw' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: isMobile ? '16px' : '28px', width: '380px', maxWidth: '95vw' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>Enter Rider OTP</h3>
               <X size={20} onClick={() => setShowOtpModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
@@ -820,7 +846,7 @@ export default function DriverOnboarding() {
       {/* 30-Second Uber Offer Modal Popup */}
       {incomingOffer && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '440px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '20px' : '32px', width: '440px', maxWidth: '95vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB' }}>
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#EFF6FF', border: '4px solid #2563EB', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '28px', fontWeight: '900' }}>
               {offerTimer}s
             </div>
@@ -839,7 +865,7 @@ export default function DriverOnboarding() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
               <button onClick={declineRideOffer} style={{ padding: '16px', background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer' }}>
                 Decline
               </button>
