@@ -623,7 +623,7 @@ export default function RiderDashboard() {
           )}
         </div>
 
-        {/* Center: rider logo (always centered on mobile if route exists) */}
+        {/* Center: ridevel logo (always centered on mobile if route exists) */}
         {isMobile && (pickup || drop) && (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '1px', fontFamily: "'Outfit', sans-serif", fontWeight: '900', fontSize: '28px', color: '#000000', letterSpacing: '-1.5px' }}>
@@ -635,7 +635,7 @@ export default function RiderDashboard() {
                   <span style={{ width: '2px', height: '5px', background: '#2563EB', marginTop: '-1px' }} />
                 </span>
               </span>
-              der
+              devel
             </span>
           </div>
         )}
