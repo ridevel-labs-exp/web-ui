@@ -623,22 +623,6 @@ export default function RiderDashboard() {
           )}
         </div>
 
-        {/* Center: ridevel logo (always centered on mobile if route exists) */}
-        {isMobile && (pickup || drop) && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '1px', fontFamily: "'Outfit', sans-serif", fontWeight: '900', fontSize: '28px', color: '#000000', letterSpacing: '-1.5px' }}>
-              r
-              <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', color: '#000000', width: '8px' }}>
-                ı
-                <span style={{ position: 'absolute', top: '1px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2563EB', border: '1.5px solid #FFFFFF', boxShadow: '0 2px 4px rgba(37,99,235,0.3)' }} />
-                  <span style={{ width: '2px', height: '5px', background: '#2563EB', marginTop: '-1px' }} />
-                </span>
-              </span>
-              devel
-            </span>
-          </div>
-        )}
 
         {/* Right Side: Profile dropdown or Activity button */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px', width: (isMobile && (pickup || drop)) ? '40px' : 'auto' }}>
