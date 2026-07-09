@@ -4,7 +4,7 @@ import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
 import BrandedLoader from '../components/BrandedLoader';
-import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronRight, ChevronDown, AlertTriangle, X, Calendar, Filter, UserCheck, Car, RefreshCw, Download, LocateFixed, Info, User, LogOut, HelpCircle, LifeBuoy } from 'lucide-react';
+import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronLeft, ChevronRight, ChevronDown, AlertTriangle, X, Calendar, Filter, UserCheck, Car, RefreshCw, Download, LocateFixed, Info, User, LogOut, HelpCircle, LifeBuoy } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
@@ -585,77 +585,119 @@ export default function RiderDashboard() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: isMobile ? '0 16px' : '0 24px',
-        background: '#FFFFFF',
+        background: (isMobile && (pickup || drop)) ? 'transparent' : '#FFFFFF',
         zIndex: 1000,
-        boxShadow: isMobile ? '0 4px 20px rgba(0, 0, 0, 0.08)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        boxShadow: (isMobile && (pickup || drop)) ? 'none' : (isMobile ? '0 4px 20px rgba(0, 0, 0, 0.08)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)'),
         position: isMobile ? 'absolute' : 'relative',
         top: isMobile ? '12px' : '0',
         left: isMobile ? '12px' : '0',
         right: isMobile ? '12px' : '0',
         borderRadius: isMobile ? '30px' : '0',
-        border: isMobile ? '1px solid #E2E8F0' : 'none'
+        border: (isMobile && (pickup || drop)) ? 'none' : (isMobile ? '1px solid #E2E8F0' : 'none')
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            Ridevel
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Activity / Ride History Button */}
-          <button
-            onClick={handleOpenActivity}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'none',
-              border: 'none',
-              color: '#475569',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              padding: '8px 14px',
-              borderRadius: '20px',
-              transition: 'background 0.15s ease'
-            }}
-          >
-            <Clock size={16} /> Activity
-          </button>
-
-          {/* Profile Dropdown */}
-          <div style={{ position: 'relative' }}>
+        {/* Left Side: Back button or Default Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', width: (isMobile && (pickup || drop)) ? '40px' : 'auto' }}>
+          {isMobile && (pickup || drop) ? (
             <button
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              onClick={resetDashboard}
               style={{
-                width: '42px',
-                height: '42px',
+                width: '40px',
+                height: '40px',
                 borderRadius: '50%',
-                background: '#F1F5F9',
-                border: 'none',
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                padding: 0,
-                overflow: 'hidden'
+                flexShrink: 0
               }}
             >
-              <div style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                background: '#E2E8F0',
-                color: '#475569',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <User size={20} />
-              </div>
+              <ChevronLeft size={20} color="#0F172A" />
             </button>
+          ) : (
+            <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              Ridevel
+            </div>
+          )}
+        </div>
+
+        {/* Center: rider logo (always centered on mobile if route exists) */}
+        {isMobile && (pickup || drop) && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '1px', fontFamily: "'Outfit', sans-serif", fontWeight: '900', fontSize: '28px', color: '#000000', letterSpacing: '-1.5px' }}>
+              r
+              <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', color: '#000000', width: '8px' }}>
+                ı
+                <span style={{ position: 'absolute', top: '1px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2563EB', border: '1.5px solid #FFFFFF', boxShadow: '0 2px 4px rgba(37,99,235,0.3)' }} />
+                  <span style={{ width: '2px', height: '5px', background: '#2563EB', marginTop: '-1px' }} />
+                </span>
+              </span>
+              der
+            </span>
+          </div>
+        )}
+
+        {/* Right Side: Profile dropdown or Activity button */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px', width: (isMobile && (pickup || drop)) ? '40px' : 'auto' }}>
+          {!(isMobile && (pickup || drop)) && (
+            <>
+              {/* Activity / Ride History Button */}
+              <button
+                onClick={handleOpenActivity}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#475569',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  padding: '8px 14px',
+                  borderRadius: '20px',
+                  transition: 'background 0.15s ease'
+                }}
+              >
+                <Clock size={16} /> Activity
+              </button>
+
+              {/* Profile Dropdown */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    background: '#F1F5F9',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    padding: 0,
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    background: '#E2E8F0',
+                    color: '#475569',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <User size={20} />
+                  </div>
+                </button>
 
             {showProfileDropdown && (
               <div style={{
@@ -868,6 +910,8 @@ export default function RiderDashboard() {
               </div>
             )}
           </div>
+        </>
+      )}
         </div>
       </header>
 

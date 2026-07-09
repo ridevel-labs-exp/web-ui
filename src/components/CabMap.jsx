@@ -10,34 +10,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom Modern Premium Map Pins
-const pickupIcon = L.divIcon({
-  className: 'custom-pickup-pin',
-  html: `
-    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
-      <div style="position: absolute; width: 36px; height: 36px; background: rgba(0, 0, 0, 0.15); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" style="position: relative; z-index: 2; filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));">
-        <path d="M12 3l9 16H3L12 3z"/>
-      </svg>
-    </div>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
-
-const dropIcon = L.divIcon({
-  className: 'custom-drop-pin',
-  html: `
-    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
-      <div style="position: absolute; width: 36px; height: 36px; background: rgba(0, 0, 0, 0.15); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
-      <div style="position: relative; background: #000000; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 2;">
-        <div style="background: #ffffff; width: 6px; height: 6px; border-radius: 50%;"></div>
-      </div>
-    </div>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
+// Dynamic modern map pins will be constructed inside the component using addresses
 
 // Dezire Sedan Car Icon with glowing aura for Driver
 const driverIcon = L.divIcon({
@@ -133,6 +106,57 @@ function RecenterMap({ center, bounds }) {
 }
 
 export default function CabMap({ pickup, drop, driver, onMapClick, onReroutingAlert }) {
+  const getPickupIcon = (address) => {
+    const displayName = address ? (address.split(',')[0] || address) : 'Union Coop...';
+    const displayTruncated = displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName;
+    return L.divIcon({
+      className: 'custom-pickup-pin-bubble',
+      html: `
+        <div style="display: flex; align-items: center; position: relative; width: max-content;">
+          <!-- Pin circle -->
+          <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; background: #072235; border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 4px 12px rgba(7,34,53,0.3); z-index: 10;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </div>
+          
+          <!-- Tooltip speech-bubble card -->
+          <div style="margin-left: -8px; background: #ffffff; border-radius: 12px; padding: 6px 12px 6px 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1.5px solid #E2E8F0; display: flex; flex-direction: column; text-align: left;">
+            <span style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; font-family: system-ui, sans-serif;">Pick up point</span>
+            <span style="font-size: 13px; color: #072235; font-weight: 800; line-height: 1.4; margin-top: 1px; font-family: system-ui, sans-serif;">${displayTruncated}</span>
+          </div>
+        </div>
+      `,
+      iconSize: [200, 44],
+      iconAnchor: [17, 17]
+    });
+  };
+
+  const getDropIcon = (address) => {
+    const displayName = address ? (address.split(',')[0] || address) : 'Emaar Dub...';
+    const displayTruncated = displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName;
+    return L.divIcon({
+      className: 'custom-drop-pin-bubble',
+      html: `
+        <div style="display: flex; align-items: center; position: relative; width: max-content;">
+          <!-- Pin circle -->
+          <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; background: #072235; border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 4px 12px rgba(7,34,53,0.3); z-index: 10;">
+            <div style="background: #ffffff; width: 8px; height: 8px; border-radius: 50%;"></div>
+          </div>
+          
+          <!-- Tooltip speech-bubble card -->
+          <div style="margin-left: -8px; background: #072235; border-radius: 12px; padding: 6px 12px 6px 18px; box-shadow: 0 8px 24px rgba(7,34,53,0.25); border: 1.5px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; text-align: left;">
+            <span style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; font-family: system-ui, sans-serif;">Destination</span>
+            <span style="font-size: 13px; color: #ffffff; font-weight: 800; line-height: 1.4; margin-top: 1px; font-family: system-ui, sans-serif;">${displayTruncated}</span>
+          </div>
+        </div>
+      `,
+      iconSize: [200, 44],
+      iconAnchor: [17, 17]
+    });
+  };
+
   // Default map center set to Bangalore
   const defaultCenter = [12.9716, 77.5946];
   const [mapCenter, setMapCenter] = useState(defaultCenter);
@@ -286,18 +310,18 @@ export default function CabMap({ pickup, drop, driver, onMapClick, onReroutingAl
 
         {/* Pickup Pin */}
         {pickup && (
-          <Marker position={[pickup.lat, pickup.lng]} icon={pickupIcon}>
+          <Marker position={[pickup.lat, pickup.lng]} icon={getPickupIcon(pickup.address)}>
             <Popup>
-              <div style={{ color: '#0f172a' }}><strong>Pickup Location</strong></div>
+              <div style={{ color: '#0f172a' }}><strong>Pickup Location:</strong> {pickup.address}</div>
             </Popup>
           </Marker>
         )}
 
         {/* Drop-off Pin */}
         {drop && (
-          <Marker position={[drop.lat, drop.lng]} icon={dropIcon}>
+          <Marker position={[drop.lat, drop.lng]} icon={getDropIcon(drop.address)}>
             <Popup>
-              <div style={{ color: '#0f172a' }}><strong>Drop-off Destination</strong></div>
+              <div style={{ color: '#0f172a' }}><strong>Drop-off Destination:</strong> {drop.address}</div>
             </Popup>
           </Marker>
         )}
@@ -345,6 +369,40 @@ export default function CabMap({ pickup, drop, driver, onMapClick, onReroutingAl
           </>
         )}
       </MapContainer>
+
+      {/* Floating Recenter Compass Button */}
+      <button
+        onClick={() => {
+          if (pickup) {
+            setMapCenter([pickup.lat, pickup.lng]);
+          } else if (driver) {
+            setMapCenter([driver.lat, driver.lng]);
+          }
+        }}
+        style={{
+          position: 'absolute',
+          bottom: '24px',
+          right: '24px',
+          width: '52px',
+          height: '52px',
+          borderRadius: '50%',
+          background: '#FFFFFF',
+          border: 'none',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 1000,
+          transition: 'transform 0.15s ease'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#072235" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="3 11 22 2 13 21 11 13 3 11" />
+        </svg>
+      </button>
     </div>
   );
 }
