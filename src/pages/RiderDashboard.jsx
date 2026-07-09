@@ -4,7 +4,7 @@ import { telemetryService } from '../services/telemetryService';
 import { authService } from '../services/authService';
 import CabMap from '../components/CabMap';
 import BrandedLoader from '../components/BrandedLoader';
-import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronRight, ChevronDown, AlertTriangle, X, Calendar, Filter, UserCheck, Car, RefreshCw, Download, LocateFixed, Info, User, LogOut } from 'lucide-react';
+import { Search, MapPin, Navigation, ArrowRight, CheckCircle2, ShieldCheck, Clock, Award, Users, ChevronRight, ChevronDown, AlertTriangle, X, Calendar, Filter, UserCheck, Car, RefreshCw, Download, LocateFixed, Info, User, LogOut, HelpCircle, LifeBuoy } from 'lucide-react';
 
 // City Database with popular locations across India
 const CITIES_DATA = {
@@ -119,6 +119,49 @@ export default function RiderDashboard() {
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [riderHistory, setRiderHistory] = useState([]);
   const [activityLoading, setActivityLoading] = useState(false);
+
+  // Manage Account & Privacy, Legal, Help Modals State
+  const [showManageAccountModal, setShowManageAccountModal] = useState(false);
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [privacyTab, setPrivacyTab] = useState('data'); // 'data' | 'other'
+  const [privacySettings, setPrivacySettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ridevel_privacy_settings');
+      return saved ? JSON.parse(saved) : {
+        shareLocation: true,
+        personalizedAds: false,
+        thirdPartySharing: false,
+        twoFactorAuth: false,
+        incognito: false,
+        marketingEmails: true
+      };
+    } catch (e) {
+      return {
+        shareLocation: true,
+        personalizedAds: false,
+        thirdPartySharing: false,
+        twoFactorAuth: false,
+        incognito: false,
+        marketingEmails: true
+      };
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ridevel_privacy_settings', JSON.stringify(privacySettings));
+    } catch (e) {
+      console.error('Failed to save privacy settings', e);
+    }
+  }, [privacySettings]);
+
+  const handleTogglePrivacy = (key) => {
+    setPrivacySettings(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   const handleOpenActivity = async () => {
     setShowActivityModal(true);
@@ -558,103 +601,242 @@ export default function RiderDashboard() {
             <button
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
                 background: '#F1F5F9',
                 border: 'none',
-                color: '#0F172A',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                fontSize: '13px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: '#2563EB',
-                color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '11px',
-                fontWeight: '800'
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                padding: 0,
+                overflow: 'hidden'
+              }}
+            >
+              <div style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                background: '#E2E8F0',
+                color: '#475569',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {user?.name ? user.name.substring(0, 1).toUpperCase() : 'U'}
+                <User size={20} />
               </div>
-              <span>{user?.name || 'Rider'}</span>
-              <ChevronDown size={14} style={{ color: '#64748B' }} />
             </button>
 
             {showProfileDropdown && (
               <div style={{
                 position: 'absolute',
-                top: '44px',
+                top: '50px',
                 right: 0,
-                width: '260px',
+                width: '320px',
                 background: '#FFFFFF',
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
-                border: '1px solid #E2E8F0',
-                padding: '16px',
+                borderRadius: '24px',
+                boxShadow: '0 20px 40px -10px rgba(15,23,42,0.22)',
+                border: '1px solid #F1F5F9',
+                padding: '24px',
                 zIndex: 200,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
+                gap: '20px',
                 textAlign: 'left'
               }}>
-                <div style={{ borderBottom: '1px solid #F1F5F9', paddingBottom: '8px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>{user?.name || 'Rider'}</div>
-                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', wordBreak: 'break-all' }}>{user?.email}</div>
-                </div>
-                
-                <button
-                  onClick={() => {
-                    setShowProfileDropdown(false);
-                    handleOpenActivity();
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#475569',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
+                {/* Header: Name and Avatar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ 
+                      fontSize: '24px', 
+                      fontWeight: '900', 
+                      color: '#0F172A', 
+                      letterSpacing: '-0.5px',
+                      wordBreak: 'break-word',
+                      lineHeight: '1.2'
+                    }}>
+                      {user?.name || 'Rider'}
+                    </div>
+                  </div>
+                  
+                  {/* Large Profile Silhouette Avatar (Yellow Circle highlight in image) */}
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: '#F1F5F9',
+                    border: '1px solid #E2E8F0',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 0',
-                    width: '100%',
-                    textAlign: 'left'
-                  }}
-                >
-                  <Clock size={14} /> My Trips / Activity
-                </button>
+                    justifyContent: 'center',
+                    color: '#94A3B8',
+                    flexShrink: 0
+                  }}>
+                    <User size={36} />
+                  </div>
+                </div>
 
+                {/* Quick Actions Grid (Help & Activity) */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => {
+                      setShowProfileDropdown(false);
+                      setShowHelpModal(true);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '16px 12px',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#F1F5F9';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#F8FAFC';
+                      e.currentTarget.style.transform = 'none';
+                    }}
+                  >
+                    <LifeBuoy size={20} style={{ color: '#0F172A' }} />
+                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Help</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowProfileDropdown(false);
+                      handleOpenActivity();
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '16px 12px',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#F1F5F9';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#F8FAFC';
+                      e.currentTarget.style.transform = 'none';
+                    }}
+                  >
+                    <Clock size={20} style={{ color: '#0F172A' }} />
+                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Activity</span>
+                  </button>
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: '1px', background: '#F1F5F9' }} />
+
+                {/* Navigation Options List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {/* Manage account option */}
+                  <button
+                    onClick={() => {
+                      setShowProfileDropdown(false);
+                      setShowManageAccountModal(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: 'none',
+                      border: 'none',
+                      padding: '10px 8px',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left',
+                      transition: 'background 0.15s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <User size={18} style={{ color: '#64748B' }} />
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Manage account</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: '#94A3B8' }} />
+                  </button>
+
+                  {/* Legal option */}
+                  <button
+                    onClick={() => {
+                      setShowProfileDropdown(false);
+                      setShowLegalModal(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: 'none',
+                      border: 'none',
+                      padding: '10px 8px',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left',
+                      transition: 'background 0.15s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <Info size={18} style={{ color: '#64748B' }} />
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Legal</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: '#94A3B8' }} />
+                  </button>
+                </div>
+
+                {/* Sign out button at the bottom */}
                 <button
                   onClick={authService.logout}
                   style={{
                     width: '100%',
-                    padding: '8px 12px',
-                    background: '#FEF2F2',
+                    padding: '14px',
+                    background: '#F1F5F9',
                     color: '#EF4444',
                     border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '12px',
+                    borderRadius: '14px',
+                    fontSize: '14px',
                     fontWeight: '800',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
-                    marginTop: '4px'
+                    gap: '8px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#FEF2F2';
+                    e.currentTarget.style.color = '#DC2626';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#F1F5F9';
+                    e.currentTarget.style.color = '#EF4444';
                   }}
                 >
-                  <LogOut size={13} /> Logout
+                  <LogOut size={16} /> Sign out
                 </button>
               </div>
             )}
@@ -1415,8 +1597,497 @@ export default function RiderDashboard() {
         </div>
       )}
 
+      {/* Manage Account & Privacy Modal */}
+      {showManageAccountModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '560px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '20px', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Account & Privacy Settings</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>Manage your data privacy and account preferences</p>
+              </div>
+              <button 
+                onClick={() => setShowManageAccountModal(false)} 
+                style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B', transition: 'background 0.2s' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#E2E8F0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#F1F5F9'}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Tabs Selector */}
+            <div style={{ display: 'flex', background: '#F1F5F9', padding: '4px', borderRadius: '12px', marginBottom: '24px' }}>
+              <button
+                onClick={() => setPrivacyTab('data')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: privacyTab === 'data' ? '#FFFFFF' : 'transparent',
+                  color: privacyTab === 'data' ? '#0F172A' : '#64748B',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                🔒 Data Privacy
+              </button>
+              <button
+                onClick={() => setPrivacyTab('other')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: privacyTab === 'other' ? '#FFFFFF' : 'transparent',
+                  color: privacyTab === 'other' ? '#0F172A' : '#64748B',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                ⚙️ Other Privacy / Security
+              </button>
+            </div>
+
+            {/* Tab Contents */}
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '4px' }}>
+              {privacyTab === 'data' ? (
+                <>
+                  {/* Share Location */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>Share Location with Emergency Contacts</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.5' }}>Automatically share your real-time GPS coordinates with your selected trusted contacts during active trips.</div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePrivacy('shareLocation')}
+                      style={{
+                        width: '44px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: privacySettings.shareLocation ? '#2563EB' : '#CBD5E1',
+                        border: 'none',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        padding: 0,
+                        flexShrink: 0,
+                        marginTop: '4px'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF',
+                        position: 'absolute',
+                        top: '3px',
+                        left: privacySettings.shareLocation ? '23px' : '3px',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                      }} />
+                    </button>
+                  </div>
+
+                  {/* Personalized Ads */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>Personalized Ads & Promotions</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.5' }}>Allow Ridevel to analyze your ride frequency and popular destinations to provide custom partner discounts and relevant ads.</div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePrivacy('personalizedAds')}
+                      style={{
+                        width: '44px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: privacySettings.personalizedAds ? '#2563EB' : '#CBD5E1',
+                        border: 'none',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        padding: 0,
+                        flexShrink: 0,
+                        marginTop: '4px'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF',
+                        position: 'absolute',
+                        top: '3px',
+                        left: privacySettings.personalizedAds ? '23px' : '3px',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                      }} />
+                    </button>
+                  </div>
+
+                  {/* Third Party Data Sharing */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>Share Aggregated Route Data</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.5' }}>Share anonymized and aggregated route details with municipal transport agencies to help improve public roads and reduce city traffic.</div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePrivacy('thirdPartySharing')}
+                      style={{
+                        width: '44px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: privacySettings.thirdPartySharing ? '#2563EB' : '#CBD5E1',
+                        border: 'none',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        padding: 0,
+                        flexShrink: 0,
+                        marginTop: '4px'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF',
+                        position: 'absolute',
+                        top: '3px',
+                        left: privacySettings.thirdPartySharing ? '23px' : '3px',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                      }} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Two Factor Authentication */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>Two-Factor Login Authentication (2FA)</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.5' }}>Request a one-time verification passcode via email or SMS when signing in from unrecognized web browsers or mobile devices.</div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePrivacy('twoFactorAuth')}
+                      style={{
+                        width: '44px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: privacySettings.twoFactorAuth ? '#2563EB' : '#CBD5E1',
+                        border: 'none',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        padding: 0,
+                        flexShrink: 0,
+                        marginTop: '4px'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF',
+                        position: 'absolute',
+                        top: '3px',
+                        left: privacySettings.twoFactorAuth ? '23px' : '3px',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                      }} />
+                    </button>
+                  </div>
+
+                  {/* Incognito Search */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>Incognito Mode (Hide Search History)</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.5' }}>Do not save address searches, pickup/drop coordinates, or location inputs to the recent search queries list on this device.</div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePrivacy('incognito')}
+                      style={{
+                        width: '44px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: privacySettings.incognito ? '#2563EB' : '#CBD5E1',
+                        border: 'none',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        padding: 0,
+                        flexShrink: 0,
+                        marginTop: '4px'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF',
+                        position: 'absolute',
+                        top: '3px',
+                        left: privacySettings.incognito ? '23px' : '3px',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                      }} />
+                    </button>
+                  </div>
+
+                  {/* Marketing Communications */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>Marketing Emails & SMS Notifications</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.5' }}>Opt in to receive marketing newsletters, product announcements, discount offers, and customer satisfaction surveys.</div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePrivacy('marketingEmails')}
+                      style={{
+                        width: '44px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: privacySettings.marketingEmails ? '#2563EB' : '#CBD5E1',
+                        border: 'none',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        padding: 0,
+                        flexShrink: 0,
+                        marginTop: '4px'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF',
+                        position: 'absolute',
+                        top: '3px',
+                        left: privacySettings.marketingEmails ? '23px' : '3px',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                      }} />
+                    </button>
+                  </div>
+
+                  {/* Account Deletion */}
+                  <div style={{ border: '1px dashed #FCA5A5', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', background: '#FFF5F5', marginTop: '8px' }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#EF4444' }}>Danger Zone: Delete Account</div>
+                      <div style={{ fontSize: '12px', color: '#7F1D1D', marginTop: '4px', lineHeight: '1.5' }}>Permanently erase your Ridevel user profile, ride analytics, invoices, and active wallet balances. This action is irreversible.</div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (confirm("Are you absolutely sure you want to request permanent account deletion? This will deactivate your profile immediately.")) {
+                          alert("A verification link and deletion confirmation code have been sent to your registered email address.");
+                        }
+                      }}
+                      style={{
+                        alignSelf: 'flex-start',
+                        padding: '10px 16px',
+                        background: '#DC2626',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#B91C1C'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#DC2626'}
+                    >
+                      Request Account Deletion
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Bottom Button */}
+            <button
+              onClick={() => setShowManageAccountModal(false)}
+              style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', marginTop: '24px', transition: 'opacity 0.2s' }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              Save & Close Settings
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Legal Modal */}
+      {showLegalModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '600px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '20px', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Legal Information</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>Review Ridevel terms, privacy agreements, and licenses</p>
+              </div>
+              <button 
+                onClick={() => setShowLegalModal(false)} 
+                style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justify: 'center', cursor: 'pointer', color: '#64748B', transition: 'background 0.2s' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#E2E8F0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#F1F5F9'}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px', paddingRight: '4px', textAlign: 'left' }}>
+              {/* Section 1: Privacy Policy */}
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: '900', color: '#0F172A' }}>1. Data Privacy Policy</h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
+                  Ridevel is committed to safeguarding customer data. We collect location data only to track active trips, match riders with drivers, and calculate fares. Your details are encrypted end-to-end and stored securely. We do not sell user data to advertising firms.
+                </p>
+              </div>
+
+              {/* Section 2: Terms of Service */}
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: '900', color: '#0F172A' }}>2. Terms & Conditions</h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
+                  By booking a ride through Ridevel, you agree to treat the driver with respect, cooperate with safety standards, and pay the calculated fare. Cancellation charges may apply if a trip is cancelled more than 5 minutes after acceptance by the driver.
+                </p>
+              </div>
+
+              {/* Section 3: Community Guidelines */}
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: '900', color: '#0F172A' }}>3. Community Guidelines</h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
+                  Our platform works on trust and mutual safety. Discriminatory behavior, violence, or damage to driver property will lead to immediate, permanent deactivation of your Ridevel account and legal reporting to law enforcement authorities.
+                </p>
+              </div>
+
+              {/* Section 4: Cookie Policy */}
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: '900', color: '#0F172A' }}>4. Cookie Usage Policy</h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
+                  We use browser cookies to securely save your authentication tokens, store recent address searches locally, and save user theme/city configurations to deliver a smooth user experience.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowLegalModal(false)}
+              style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', marginTop: '24px' }}
+            >
+              I Understand & Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Help & Support Modal */}
+      {showHelpModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '560px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '20px', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Help & Support Center</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>Get quick answers, safety guidance, and submit tickets</p>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)} 
+                style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justify: 'center', cursor: 'pointer', color: '#64748B', transition: 'background 0.2s' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#E2E8F0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#F1F5F9'}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '4px', textAlign: 'left' }}>
+              
+              {/* Emergency Assistance Button */}
+              <div style={{ background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '900', color: '#EF4444' }}>🚨 Emergency Safety Hotline</div>
+                  <div style={{ fontSize: '11px', color: '#991B1B', marginTop: '2px' }}>Are you in immediate danger or have a roadside emergency?</div>
+                </div>
+                <button
+                  onClick={() => alert("Simulating call to emergency support helpline (112 / Ridevel Emergency Response System). Support agents notified.")}
+                  style={{ padding: '8px 16px', background: '#EF4444', color: '#FFFFFF', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}
+                >
+                  Alert Support
+                </button>
+              </div>
+
+              {/* FAQs */}
+              <div>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '15px', fontWeight: '900', color: '#0F172A' }}>Frequently Asked Questions</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ border: '1px solid #E2E8F0', borderRadius: '12px', padding: '12px 16px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Q: How do I report a lost item in a cab?</div>
+                    <div style={{ fontSize: '12px', color: '#475569', marginTop: '4px', lineHeight: 1.5 }}>A: Go to your Activity history, click on the trip, and select "Report Lost Item". We will immediately contact the driver.</div>
+                  </div>
+                  <div style={{ border: '1px solid #E2E8F0', borderRadius: '12px', padding: '12px 16px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Q: How are ride cancellation fees calculated?</div>
+                    <div style={{ fontSize: '12px', color: '#475569', marginTop: '4px', lineHeight: 1.5 }}>A: Fares cancelled within 5 minutes are free. After that, a flat ₹50 fee applies to compensate driver fuel and time.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Support Form */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', borderTop: '1px solid #F1F5F9', paddingTop: '16px' }}>
+                <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '900', color: '#0F172A' }}>Write to our support team</h4>
+                <textarea
+                  placeholder="Describe your issue or query (e.g. fare billing, driver feedback, app issues)..."
+                  rows={3}
+                  style={{ width: '100%', padding: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', color: '#0F172A', fontSize: '13px', resize: 'none', outline: 'none' }}
+                />
+                <button
+                  onClick={(e) => {
+                    const area = e.currentTarget.previousElementSibling;
+                    if (area && area.value.trim() !== '') {
+                      alert("Your support request has been logged successfully. Ticket ID: RDV-" + Math.floor(100000 + Math.random() * 900000));
+                      area.value = '';
+                    } else {
+                      alert("Please type a message first.");
+                    }
+                  }}
+                  style={{
+                    alignSelf: 'flex-start',
+                    padding: '10px 20px',
+                    background: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '13px',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  Send Support Request
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowHelpModal(false)}
+              style={{ width: '100%', padding: '14px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', marginTop: '20px' }}
+            >
+              Close Support
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Branded "R" Loading Screen */}
       {loading && <BrandedLoader text="Connecting you to nearest Ridevel driver..." />}
     </div>
   );
 };
+
