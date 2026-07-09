@@ -1203,110 +1203,131 @@ export default function RiderDashboard() {
                                 return (
                                   <svg viewBox="0 0 100 65" width="60" height="42" style={{ display: 'block' }}>
                                     {/* Shadow */}
-                                    <ellipse cx="50" cy="56" rx="42" ry="7" fill="#0F172A" opacity="0.25" />
+                                    <ellipse cx="50" cy="54" rx="42" ry="7" fill="#0F172A" opacity="0.3" />
                                     
                                     {/* Wheels */}
-                                    <ellipse cx="26" cy="49" rx="9" ry="8.5" fill="#1E293B" />
-                                    <circle cx="26" cy="49" r="4" fill="#64748B" />
-                                    <circle cx="26" cy="49" r="2" fill="#E2E8F0" />
-                                    <ellipse cx="68" cy="51" rx="9" ry="8.5" fill="#1E293B" />
-                                    <circle cx="68" cy="51" r="4" fill="#64748B" />
-                                    <circle cx="68" cy="51" r="2" fill="#E2E8F0" />
+                                    <g fill="#1E293B" stroke="#64748B" strokeWidth="0.5">
+                                      <ellipse cx="28" cy="46" rx="9" ry="8" />
+                                      <circle cx="28" cy="46" r="3.5" fill="#E2E8F0" />
+                                      <ellipse cx="68" cy="48" rx="9" ry="8" />
+                                      <circle cx="68" cy="48" r="3.5" fill="#E2E8F0" />
+                                    </g>
 
-                                    {/* Main body (White Hatchback) */}
-                                    <path d="M 12,36 
-                                             C 12,36 10,24 15,21 
-                                             C 18,19 22,19 22,19 
-                                             L 40,15 
-                                             C 40,15 54,11 70,21 
-                                             L 86,27 
-                                             C 90,29 94,33 94,38 
-                                             L 94,43 
-                                             C 94,46 90,48 82,49 
-                                             C 74,50 58,51 50,51 
-                                             C 40,50 18,47 14,43 
-                                             C 11,40 12,36 12,36 Z" 
+                                    {/* White Body */}
+                                    <path d="M 12,34
+                                             C 12,26 16,24 22,24
+                                             L 28,24
+                                             L 34,14
+                                             C 36,12 46,10 58,10
+                                             L 70,16
+                                             L 82,24
+                                             L 90,26
+                                             C 93,27 94,30 94,33
+                                             L 92,37
+                                             C 90,39 86,40 82,40
+                                             L 76,40
+                                             C 76,34 74,33 68,33
+                                             C 62,33 60,34 60,40
+                                             L 36,38
+                                             C 36,32 34,31 28,31
+                                             C 22,31 20,32 20,38
+                                             L 14,37
+                                             C 12,36 12,34 12,34 Z" 
                                           fill="#FFFFFF" 
-                                          stroke="#CBD5E1" 
-                                          strokeWidth="1" />
+                                          stroke="#94A3B8" 
+                                          strokeWidth="1.2" />
 
-                                    {/* Blue Tall Roof */}
-                                    <path d="M 18,21 
-                                             C 22,13 36,8 50,8 
-                                             C 64,8 72,12 72,12 
+                                    {/* Blue Roof Panel (Tall Hatchback style) */}
+                                    <path d="M 22,24 
+                                             L 32,12 
+                                             C 34,10 46,8 58,8 
+                                             L 70,14 
                                              L 62,25 
-                                             C 62,25 52,27 42,26 
-                                             C 30,25 22,22 22,22 Z" 
-                                          fill="#2A5C7A" />
+                                             L 22,24 Z" 
+                                          fill="#1A5072" />
 
                                     {/* Windows */}
-                                    <path d="M 22,22 
-                                             L 28,17 
-                                             C 28,17 36,12 46,12 
-                                             L 56,16 
-                                             L 58,20 
-                                             C 58,20 52,23 44,22 
-                                             C 36,21 22,22 22,22 Z" 
+                                    <path d="M 26,23 
+                                             L 33,14 
+                                             L 48,11
+                                             L 48,23 Z" 
                                           fill="#1E293B" />
+                                    <path d="M 50,11
+                                             L 56,10
+                                             L 66,15
+                                             L 60,23
+                                             L 50,23 Z" 
+                                          fill="#1E293B" />
+                                    <rect x="48" y="11" width="2" height="12" fill="#FFFFFF" />
 
-                                    {/* Cute Front details */}
-                                    <ellipse cx="88" cy="39" rx="3" ry="2" fill="#E2E8F0" stroke="#94A3B8" />
-                                    <rect x="76" y="41" width="10" height="3" rx="1.5" fill="#334155" />
+                                    {/* Grille & Headlight */}
+                                    <circle cx="86" cy="31" r="3" fill="#E2E8F0" stroke="#94A3B8" />
+                                    <rect x="76" y="33" width="10" height="3" rx="1.5" fill="#334155" />
                                   </svg>
                                 );
                               } else if (v.id === 'SUV') {
                                 return (
                                   <svg viewBox="0 0 100 65" width="60" height="42" style={{ display: 'block' }}>
                                     {/* Shadow */}
-                                    <ellipse cx="50" cy="52" rx="44" ry="7" fill="#0F172A" opacity="0.25" />
+                                    <ellipse cx="50" cy="54" rx="45" ry="7" fill="#0F172A" opacity="0.3" />
                                     
                                     {/* Wheels */}
-                                    <ellipse cx="27" cy="45" rx="9.5" ry="9" fill="#1E293B" />
-                                    <circle cx="27" cy="45" r="4.5" fill="#475569" />
-                                    <circle cx="27" cy="45" r="2" fill="#E2E8F0" />
-                                    <ellipse cx="69" cy="47" rx="9.5" ry="9" fill="#1E293B" />
-                                    <circle cx="69" cy="47" r="4.5" fill="#475569" />
-                                    <circle cx="69" cy="47" r="2" fill="#E2E8F0" />
+                                    <g fill="#1E293B" stroke="#64748B" strokeWidth="0.5">
+                                      <ellipse cx="28" cy="46" rx="9.5" ry="9" />
+                                      <circle cx="28" cy="46" r="3.5" fill="#E2E8F0" />
+                                      <ellipse cx="69" cy="48" rx="9.5" ry="9" />
+                                      <circle cx="69" cy="48" r="3.5" fill="#E2E8F0" />
+                                    </g>
 
-                                    {/* Main body (White SUV) */}
-                                    <path d="M 12,34 
-                                             C 12,34 10,22 16,19 
-                                             C 20,16 26,16 26,16 
-                                             L 42,13 
-                                             C 42,13 55,9 71,20 
-                                             L 87,27 
-                                             C 91,29 95,33 95,37 
-                                             L 95,42 
-                                             C 95,45 90,47 82,48 
-                                             C 74,49 58,50 52,50 
-                                             C 45,50 19,46 14,42 
-                                             C 10,39 12,34 12,34 Z" 
+                                    {/* White SUV Body */}
+                                    <path d="M 10,34
+                                             C 10,26 15,24 20,24
+                                             L 26,24
+                                             L 34,12
+                                             C 36,10 48,8 60,8
+                                             L 72,14
+                                             L 84,24
+                                             L 92,26
+                                             C 95,27 96,30 96,33
+                                             L 94,37
+                                             C 92,39 88,40 84,40
+                                             L 78,40
+                                             C 78,34 76,33 70,33
+                                             C 64,33 62,34 62,40
+                                             L 36,38
+                                             C 36,32 34,31 28,31
+                                             C 22,31 20,32 20,38
+                                             L 12,37
+                                             C 10,36 10,34 10,34 Z" 
                                           fill="#FFFFFF" 
-                                          stroke="#CBD5E1" 
-                                          strokeWidth="1" />
+                                          stroke="#94A3B8" 
+                                          strokeWidth="1.2" />
 
                                     {/* Blue SUV Roof */}
-                                    <path d="M 20,17 
-                                             C 24,11 38,7 52,7 
-                                             C 66,7 74,11 74,11 
-                                             L 64,24 
-                                             C 64,24 55,27 44,26 
-                                             C 32,25 24,21 24,21 Z" 
-                                          fill="#2A5C7A" />
+                                    <path d="M 22,24 
+                                             L 32,10 
+                                             C 34,8 48,6 60,6 
+                                             L 72,12 
+                                             L 62,25 
+                                             L 22,24 Z" 
+                                          fill="#1A5072" />
 
                                     {/* Windows */}
-                                    <path d="M 24,21 
-                                             L 30,16 
-                                             C 30,16 38,11 48,11 
-                                             L 58,16 
-                                             L 60,20 
-                                             C 60,20 54,23 45,22 
-                                             C 36,21 24,21 24,21 Z" 
+                                    <path d="M 26,23 
+                                             L 33,12 
+                                             L 48,9
+                                             L 48,23 Z" 
                                           fill="#1E293B" />
+                                    <path d="M 50,9
+                                             L 58,8
+                                             L 68,13
+                                             L 60,23
+                                             L 50,23 Z" 
+                                          fill="#1E293B" />
+                                    <rect x="48" y="9" width="2" height="14" fill="#FFFFFF" />
 
-                                    {/* Front Grille & Headlight details */}
-                                    <path d="M 89,33 C 91,34 93,35 95,36 L 95,38 Z" fill="#94A3B8" />
-                                    <rect x="78" y="38" width="12" height="4" rx="2" fill="#334155" />
+                                    {/* SUV front bumper */}
+                                    <path d="M 88,31 L 94,32 L 94,35 L 88,34 Z" fill="#334155" />
                                   </svg>
                                 );
                               } else {
@@ -1314,30 +1335,39 @@ export default function RiderDashboard() {
                                 return (
                                   <svg viewBox="0 0 100 60" width="60" height="42" style={{ display: 'block' }}>
                                     {/* Shadow */}
-                                    <ellipse cx="50" cy="48" rx="45" ry="6" fill="#0F172A" opacity="0.25" />
+                                    <ellipse cx="50" cy="48" rx="45" ry="6" fill="#0F172A" opacity="0.3" />
                                     
                                     {/* Wheels */}
-                                    <ellipse cx="28" cy="41" rx="8.5" ry="8" fill="#1E293B" />
-                                    <circle cx="28" cy="41" r="3.5" fill="#64748B" />
-                                    <circle cx="28" cy="41" r="1.5" fill="#E2E8F0" />
-                                    <ellipse cx="70" cy="43" rx="8.5" ry="8" fill="#1E293B" />
-                                    <circle cx="70" cy="43" r="3.5" fill="#64748B" />
-                                    <circle cx="70" cy="43" r="1.5" fill="#E2E8F0" />
+                                    <g fill="#1E293B" stroke="#64748B" strokeWidth="0.5">
+                                      <ellipse cx="28" cy="42" rx="9" ry="8" />
+                                      <circle cx="28" cy="42" r="3.5" fill="#E2E8F0" />
+                                      <ellipse cx="70" cy="44" rx="9" ry="8" />
+                                      <circle cx="70" cy="44" r="3.5" fill="#E2E8F0" />
+                                    </g>
 
                                     {/* Main body (White Sedan) */}
-                                    <path d="M 10,30 
-                                             C 10,30 8,24 13,19 
-                                             C 18,14 26,14 26,14 
-                                             L 40,11 
-                                             C 40,11 53,6 70,17 
-                                             C 87,28 93,33 93,36 
-                                             C 93,39 88,42 80,43 
-                                             C 72,44 56,45 50,45 
-                                             C 44,45 18,42 12,38 
-                                             C 8,36 10,30 10,30 Z" 
+                                    <path d="M 10,30
+                                             C 10,25 15,24 20,24 
+                                             L 28,24
+                                             L 36,14
+                                             C 38,12 46,10 58,10
+                                             L 70,16
+                                             L 84,24
+                                             L 92,26
+                                             C 95,27 96,30 96,33
+                                             L 94,37
+                                             C 92,39 88,40 84,40
+                                             L 78,40
+                                             C 78,34 76,33 70,33
+                                             C 64,33 62,34 62,40
+                                             L 36,38
+                                             C 36,32 34,31 28,31
+                                             C 22,31 20,32 20,38
+                                             L 12,37
+                                             C 10,36 10,33 10,30 Z" 
                                           fill={v.id === 'LUXURY' ? '#334155' : '#FFFFFF'} 
-                                          stroke="#CBD5E1" 
-                                          strokeWidth="1" />
+                                          stroke="#94A3B8" 
+                                          strokeWidth="1.2" />
 
                                     {/* Blue Roof Panel (Sedan style) */}
                                     <path d="M 26,14 
@@ -1346,7 +1376,7 @@ export default function RiderDashboard() {
                                              L 60,23 
                                              C 60,23 53,26 43,25 
                                              C 33,24 22,18 22,18 Z" 
-                                          fill="#2A5C7A" />
+                                          fill="#1A5072" />
 
                                     {/* Windows */}
                                     <path d="M 22,18 
@@ -1357,6 +1387,7 @@ export default function RiderDashboard() {
                                              C 58,19 52,22 44,21 
                                              C 36,20 22,18 22,18 Z" 
                                           fill="#1E293B" />
+                                    <rect x="50" y="12" width="2" height="11" fill="#FFFFFF" />
 
                                     {/* Headlight glow */}
                                     <path d="M 91,35 C 93,36 95,37 95,38 Z" fill="#FBBF24" />
