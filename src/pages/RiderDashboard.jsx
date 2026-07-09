@@ -266,8 +266,8 @@ export default function RiderDashboard() {
             const subParts = adminParts
               .filter(part => part.adminLevel > 2)
               .map(part => part.name);
-            const addressName = subParts.length > 0 
-              ? subParts.reverse().slice(0, 3).join(', ') 
+            const addressName = subParts.length > 0
+              ? subParts.reverse().slice(0, 3).join(', ')
               : (data.locality || `📍 GPS Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
 
             setPickup({ lat, lng, address: addressName });
@@ -296,8 +296,8 @@ export default function RiderDashboard() {
       const subParts = adminParts
         .filter(part => part.adminLevel > 2)
         .map(part => part.name);
-      const addressName = subParts.length > 0 
-        ? subParts.reverse().slice(0, 3).join(', ') 
+      const addressName = subParts.length > 0
+        ? subParts.reverse().slice(0, 3).join(', ')
         : (data.locality || `📍 Pin Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
 
       const locObj = { lat, lng, address: addressName };
@@ -576,7 +576,7 @@ export default function RiderDashboard() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      
+
       {/* Top Navbar */}
       <header style={{
         height: isMobile ? '54px' : '60px',
@@ -699,219 +699,219 @@ export default function RiderDashboard() {
                   </div>
                 </button>
 
-            {showProfileDropdown && (
-              <div style={{
-                position: 'absolute',
-                top: '50px',
-                right: 0,
-                width: '320px',
-                background: '#FFFFFF',
-                borderRadius: '24px',
-                boxShadow: '0 20px 40px -10px rgba(15,23,42,0.22)',
-                border: '1px solid #F1F5F9',
-                padding: '24px',
-                zIndex: 200,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-                textAlign: 'left'
-              }}>
-                {/* Header: Name and Avatar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ 
-                      fontSize: '24px', 
-                      fontWeight: '900', 
-                      color: '#0F172A', 
-                      letterSpacing: '-0.5px',
-                      wordBreak: 'break-word',
-                      lineHeight: '1.2'
-                    }}>
-                      {user?.name || 'Rider'}
-                    </div>
-                  </div>
-                  
-                  {/* Large Profile Silhouette Avatar (Yellow Circle highlight in image) */}
+                {showProfileDropdown && (
                   <div style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    background: '#F1F5F9',
-                    border: '1px solid #E2E8F0',
+                    position: 'absolute',
+                    top: '50px',
+                    right: 0,
+                    width: '320px',
+                    background: '#FFFFFF',
+                    borderRadius: '24px',
+                    boxShadow: '0 20px 40px -10px rgba(15,23,42,0.22)',
+                    border: '1px solid #F1F5F9',
+                    padding: '24px',
+                    zIndex: 200,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#94A3B8',
-                    flexShrink: 0
+                    flexDirection: 'column',
+                    gap: '20px',
+                    textAlign: 'left'
                   }}>
-                    <User size={36} />
+                    {/* Header: Name and Avatar */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: '24px',
+                          fontWeight: '900',
+                          color: '#0F172A',
+                          letterSpacing: '-0.5px',
+                          wordBreak: 'break-word',
+                          lineHeight: '1.2'
+                        }}>
+                          {user?.name || 'Rider'}
+                        </div>
+                      </div>
+
+                      {/* Large Profile Silhouette Avatar (Yellow Circle highlight in image) */}
+                      <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        background: '#F1F5F9',
+                        border: '1px solid #E2E8F0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#94A3B8',
+                        flexShrink: 0
+                      }}>
+                        <User size={36} />
+                      </div>
+                    </div>
+
+                    {/* Quick Actions Grid (Help & Activity) */}
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        onClick={() => {
+                          setShowProfileDropdown(false);
+                          setShowHelpModal(true);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '16px 12px',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '16px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#F1F5F9';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#F8FAFC';
+                          e.currentTarget.style.transform = 'none';
+                        }}
+                      >
+                        <LifeBuoy size={20} style={{ color: '#0F172A' }} />
+                        <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Help</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowProfileDropdown(false);
+                          handleOpenActivity();
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '16px 12px',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '16px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#F1F5F9';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#F8FAFC';
+                          e.currentTarget.style.transform = 'none';
+                        }}
+                      >
+                        <Clock size={20} style={{ color: '#0F172A' }} />
+                        <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Activity</span>
+                      </button>
+                    </div>
+
+                    {/* Divider */}
+                    <div style={{ height: '1px', background: '#F1F5F9' }} />
+
+                    {/* Navigation Options List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {/* Manage account option */}
+                      <button
+                        onClick={() => {
+                          setShowProfileDropdown(false);
+                          setShowManageAccountModal(true);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: 'none',
+                          border: 'none',
+                          padding: '10px 8px',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          textAlign: 'left',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <User size={18} style={{ color: '#64748B' }} />
+                          <span style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Manage account</span>
+                        </div>
+                        <ChevronRight size={16} style={{ color: '#94A3B8' }} />
+                      </button>
+
+                      {/* Legal option */}
+                      <button
+                        onClick={() => {
+                          setShowProfileDropdown(false);
+                          setShowLegalModal(true);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: 'none',
+                          border: 'none',
+                          padding: '10px 8px',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          textAlign: 'left',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Info size={18} style={{ color: '#64748B' }} />
+                          <span style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Legal</span>
+                        </div>
+                        <ChevronRight size={16} style={{ color: '#94A3B8' }} />
+                      </button>
+                    </div>
+
+                    {/* Sign out button at the bottom */}
+                    <button
+                      onClick={authService.logout}
+                      style={{
+                        width: '100%',
+                        padding: '14px',
+                        background: '#F1F5F9',
+                        color: '#EF4444',
+                        border: 'none',
+                        borderRadius: '14px',
+                        fontSize: '14px',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#FEF2F2';
+                        e.currentTarget.style.color = '#DC2626';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#F1F5F9';
+                        e.currentTarget.style.color = '#EF4444';
+                      }}
+                    >
+                      <LogOut size={16} /> Sign out
+                    </button>
                   </div>
-                </div>
-
-                {/* Quick Actions Grid (Help & Activity) */}
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button
-                    onClick={() => {
-                      setShowProfileDropdown(false);
-                      setShowHelpModal(true);
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '16px 12px',
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '16px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '8px',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#F1F5F9';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#F8FAFC';
-                      e.currentTarget.style.transform = 'none';
-                    }}
-                  >
-                    <LifeBuoy size={20} style={{ color: '#0F172A' }} />
-                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Help</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setShowProfileDropdown(false);
-                      handleOpenActivity();
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '16px 12px',
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '16px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '8px',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#F1F5F9';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#F8FAFC';
-                      e.currentTarget.style.transform = 'none';
-                    }}
-                  >
-                    <Clock size={20} style={{ color: '#0F172A' }} />
-                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>Activity</span>
-                  </button>
-                </div>
-
-                {/* Divider */}
-                <div style={{ height: '1px', background: '#F1F5F9' }} />
-
-                {/* Navigation Options List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {/* Manage account option */}
-                  <button
-                    onClick={() => {
-                      setShowProfileDropdown(false);
-                      setShowManageAccountModal(true);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      background: 'none',
-                      border: 'none',
-                      padding: '10px 8px',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      width: '100%',
-                      textAlign: 'left',
-                      transition: 'background 0.15s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <User size={18} style={{ color: '#64748B' }} />
-                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Manage account</span>
-                    </div>
-                    <ChevronRight size={16} style={{ color: '#94A3B8' }} />
-                  </button>
-
-                  {/* Legal option */}
-                  <button
-                    onClick={() => {
-                      setShowProfileDropdown(false);
-                      setShowLegalModal(true);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      background: 'none',
-                      border: 'none',
-                      padding: '10px 8px',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      width: '100%',
-                      textAlign: 'left',
-                      transition: 'background 0.15s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Info size={18} style={{ color: '#64748B' }} />
-                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Legal</span>
-                    </div>
-                    <ChevronRight size={16} style={{ color: '#94A3B8' }} />
-                  </button>
-                </div>
-
-                {/* Sign out button at the bottom */}
-                <button
-                  onClick={authService.logout}
-                  style={{
-                    width: '100%',
-                    padding: '14px',
-                    background: '#F1F5F9',
-                    color: '#EF4444',
-                    border: 'none',
-                    borderRadius: '14px',
-                    fontSize: '14px',
-                    fontWeight: '800',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#FEF2F2';
-                    e.currentTarget.style.color = '#DC2626';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#F1F5F9';
-                    e.currentTarget.style.color = '#EF4444';
-                  }}
-                >
-                  <LogOut size={16} /> Sign out
-                </button>
+                )}
               </div>
-            )}
-          </div>
-        </>
-      )}
+            </>
+          )}
         </div>
       </header>
 
@@ -926,7 +926,7 @@ export default function RiderDashboard() {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        
+
         {/* Left Control Column */}
         <div style={{
           padding: isMobile ? '16px' : '24px',
@@ -948,7 +948,7 @@ export default function RiderDashboard() {
           {isMobile && (
             <div style={{ width: '40px', height: '4px', background: '#E2E8F0', borderRadius: '2px', alignSelf: 'center', marginBottom: '8px', flexShrink: 0 }} />
           )}
-          
+
           {!activeTrip && !invoice && (
             <>
               {/* Header Location Tag (Screenshot #2 Match: "📍 Chennai, IN  Change city") */}
@@ -1018,7 +1018,7 @@ export default function RiderDashboard() {
 
               {/* Connected Location Selector (Screenshot #3 & #4 Match) */}
               <div style={{ background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', padding: '14px', position: 'relative' }}>
-                
+
                 {/* Visual Connector Line */}
                 <div style={{ position: 'absolute', left: '26px', top: '34px', bottom: '34px', width: '2px', background: '#E2E8F0', zIndex: 1 }} />
 
@@ -1197,204 +1197,24 @@ export default function RiderDashboard() {
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '64px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            {(() => {
-                              if (v.id === 'HATCHBACK') {
-                                return (
-                                  <svg viewBox="0 0 100 65" width="60" height="42" style={{ display: 'block' }}>
-                                    {/* Shadow */}
-                                    <ellipse cx="50" cy="54" rx="42" ry="7" fill="#0F172A" opacity="0.3" />
-                                    
-                                    {/* Wheels */}
-                                    <g fill="#1E293B" stroke="#64748B" strokeWidth="0.5">
-                                      <ellipse cx="28" cy="46" rx="9" ry="8" />
-                                      <circle cx="28" cy="46" r="3.5" fill="#E2E8F0" />
-                                      <ellipse cx="68" cy="48" rx="9" ry="8" />
-                                      <circle cx="68" cy="48" r="3.5" fill="#E2E8F0" />
-                                    </g>
-
-                                    {/* White Body */}
-                                    <path d="M 12,34
-                                             C 12,26 16,24 22,24
-                                             L 28,24
-                                             L 34,14
-                                             C 36,12 46,10 58,10
-                                             L 70,16
-                                             L 82,24
-                                             L 90,26
-                                             C 93,27 94,30 94,33
-                                             L 92,37
-                                             C 90,39 86,40 82,40
-                                             L 76,40
-                                             C 76,34 74,33 68,33
-                                             C 62,33 60,34 60,40
-                                             L 36,38
-                                             C 36,32 34,31 28,31
-                                             C 22,31 20,32 20,38
-                                             L 14,37
-                                             C 12,36 12,34 12,34 Z" 
-                                          fill="#FFFFFF" 
-                                          stroke="#94A3B8" 
-                                          strokeWidth="1.2" />
-
-                                    {/* Blue Roof Panel (Tall Hatchback style) */}
-                                    <path d="M 22,24 
-                                             L 32,12 
-                                             C 34,10 46,8 58,8 
-                                             L 70,14 
-                                             L 62,25 
-                                             L 22,24 Z" 
-                                          fill="#1A5072" />
-
-                                    {/* Windows */}
-                                    <path d="M 26,23 
-                                             L 33,14 
-                                             L 48,11
-                                             L 48,23 Z" 
-                                          fill="#1E293B" />
-                                    <path d="M 50,11
-                                             L 56,10
-                                             L 66,15
-                                             L 60,23
-                                             L 50,23 Z" 
-                                          fill="#1E293B" />
-                                    <rect x="48" y="11" width="2" height="12" fill="#FFFFFF" />
-
-                                    {/* Grille & Headlight */}
-                                    <circle cx="86" cy="31" r="3" fill="#E2E8F0" stroke="#94A3B8" />
-                                    <rect x="76" y="33" width="10" height="3" rx="1.5" fill="#334155" />
-                                  </svg>
-                                );
-                              } else if (v.id === 'SUV') {
-                                return (
-                                  <svg viewBox="0 0 100 65" width="60" height="42" style={{ display: 'block' }}>
-                                    {/* Shadow */}
-                                    <ellipse cx="50" cy="54" rx="45" ry="7" fill="#0F172A" opacity="0.3" />
-                                    
-                                    {/* Wheels */}
-                                    <g fill="#1E293B" stroke="#64748B" strokeWidth="0.5">
-                                      <ellipse cx="28" cy="46" rx="9.5" ry="9" />
-                                      <circle cx="28" cy="46" r="3.5" fill="#E2E8F0" />
-                                      <ellipse cx="69" cy="48" rx="9.5" ry="9" />
-                                      <circle cx="69" cy="48" r="3.5" fill="#E2E8F0" />
-                                    </g>
-
-                                    {/* White SUV Body */}
-                                    <path d="M 10,34
-                                             C 10,26 15,24 20,24
-                                             L 26,24
-                                             L 34,12
-                                             C 36,10 48,8 60,8
-                                             L 72,14
-                                             L 84,24
-                                             L 92,26
-                                             C 95,27 96,30 96,33
-                                             L 94,37
-                                             C 92,39 88,40 84,40
-                                             L 78,40
-                                             C 78,34 76,33 70,33
-                                             C 64,33 62,34 62,40
-                                             L 36,38
-                                             C 36,32 34,31 28,31
-                                             C 22,31 20,32 20,38
-                                             L 12,37
-                                             C 10,36 10,34 10,34 Z" 
-                                          fill="#FFFFFF" 
-                                          stroke="#94A3B8" 
-                                          strokeWidth="1.2" />
-
-                                    {/* Blue SUV Roof */}
-                                    <path d="M 22,24 
-                                             L 32,10 
-                                             C 34,8 48,6 60,6 
-                                             L 72,12 
-                                             L 62,25 
-                                             L 22,24 Z" 
-                                          fill="#1A5072" />
-
-                                    {/* Windows */}
-                                    <path d="M 26,23 
-                                             L 33,12 
-                                             L 48,9
-                                             L 48,23 Z" 
-                                          fill="#1E293B" />
-                                    <path d="M 50,9
-                                             L 58,8
-                                             L 68,13
-                                             L 60,23
-                                             L 50,23 Z" 
-                                          fill="#1E293B" />
-                                    <rect x="48" y="9" width="2" height="14" fill="#FFFFFF" />
-
-                                    {/* SUV front bumper */}
-                                    <path d="M 88,31 L 94,32 L 94,35 L 88,34 Z" fill="#334155" />
-                                  </svg>
-                                );
-                              } else {
-                                // Default Sedan (for SEDAN / LUXURY / PREMIER)
-                                return (
-                                  <svg viewBox="0 0 100 60" width="60" height="42" style={{ display: 'block' }}>
-                                    {/* Shadow */}
-                                    <ellipse cx="50" cy="48" rx="45" ry="6" fill="#0F172A" opacity="0.3" />
-                                    
-                                    {/* Wheels */}
-                                    <g fill="#1E293B" stroke="#64748B" strokeWidth="0.5">
-                                      <ellipse cx="28" cy="42" rx="9" ry="8" />
-                                      <circle cx="28" cy="42" r="3.5" fill="#E2E8F0" />
-                                      <ellipse cx="70" cy="44" rx="9" ry="8" />
-                                      <circle cx="70" cy="44" r="3.5" fill="#E2E8F0" />
-                                    </g>
-
-                                    {/* Main body (White Sedan) */}
-                                    <path d="M 10,30
-                                             C 10,25 15,24 20,24 
-                                             L 28,24
-                                             L 36,14
-                                             C 38,12 46,10 58,10
-                                             L 70,16
-                                             L 84,24
-                                             L 92,26
-                                             C 95,27 96,30 96,33
-                                             L 94,37
-                                             C 92,39 88,40 84,40
-                                             L 78,40
-                                             C 78,34 76,33 70,33
-                                             C 64,33 62,34 62,40
-                                             L 36,38
-                                             C 36,32 34,31 28,31
-                                             C 22,31 20,32 20,38
-                                             L 12,37
-                                             C 10,36 10,33 10,30 Z" 
-                                          fill={v.id === 'LUXURY' ? '#334155' : '#FFFFFF'} 
-                                          stroke="#94A3B8" 
-                                          strokeWidth="1.2" />
-
-                                    {/* Blue Roof Panel (Sedan style) */}
-                                    <path d="M 26,14 
-                                             C 26,14 34,8 48,7 
-                                             C 62,6 72,12 72,12 
-                                             L 60,23 
-                                             C 60,23 53,26 43,25 
-                                             C 33,24 22,18 22,18 Z" 
-                                          fill="#1A5072" />
-
-                                    {/* Windows */}
-                                    <path d="M 22,18 
-                                             L 28,15 
-                                             C 28,15 36,11 46,11 
-                                             L 56,15 
-                                             L 58,19 
-                                             C 58,19 52,22 44,21 
-                                             C 36,20 22,18 22,18 Z" 
-                                          fill="#1E293B" />
-                                    <rect x="50" y="12" width="2" height="11" fill="#FFFFFF" />
-
-                                    {/* Headlight glow */}
-                                    <path d="M 91,35 C 93,36 95,37 95,38 Z" fill="#FBBF24" />
-                                  </svg>
-                                );
+                          <div style={{ width: '80px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <img
+                              src={
+                                v.id === 'HATCHBACK' ? '/assets/vehicles/hatchback.png' :
+                                v.id === 'SUV' ? '/assets/vehicles/suv.png' :
+                                v.id === 'PREMIER' ? '/assets/vehicles/premier.png' :
+                                '/assets/vehicles/sedan.png'
                               }
-                            })()}
+                              alt={v.name}
+                              style={{
+                                width: '80px',
+                                height: '56px',
+                                objectFit: 'contain',
+                                filter: !v.active ? 'grayscale(0.5) opacity(0.7)' : 'none',
+                                transition: 'transform 0.2s ease',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)'
+                              }}
+                            />
                           </div>
                           <div>
                             <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1489,7 +1309,7 @@ export default function RiderDashboard() {
           {/* Active Ride Tracking Card (100% Screenshot #2 Match) */}
           {activeTrip && !invoice && (
             <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-              
+
               {/* Header */}
               <div style={{ fontSize: '18px', fontWeight: '900', color: '#0F172A', marginBottom: '2px' }}>
                 {activeTrip.status === 'REQUESTED' ? 'Ride requested' : (activeTrip.status === 'STARTED' ? 'Trip in progress' : 'Driver on the way')}
@@ -1623,11 +1443,11 @@ export default function RiderDashboard() {
           boxShadow: isMobile ? 'none' : '0 4px 6px -1px rgba(0,0,0,0.05)',
           zIndex: 1
         }}>
-          <CabMap 
-            pickup={pickup} 
-            drop={drop} 
-            driver={driverLoc} 
-            onMapClick={handleMapClick} 
+          <CabMap
+            pickup={pickup}
+            drop={drop}
+            driver={driverLoc}
+            onMapClick={handleMapClick}
             onReroutingAlert={setIsRerouting}
           />
 
@@ -1868,7 +1688,7 @@ export default function RiderDashboard() {
                       <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>
                         Fare: ₹{trip.fare}
                       </div>
-                      
+
                       {trip.status === 'COMPLETED' && (
                         <a
                           href={tripService.getInvoicePdfUrl(trip.id)}
@@ -1914,8 +1734,8 @@ export default function RiderDashboard() {
                 <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Account & Privacy Settings</h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>Manage your data privacy and account preferences</p>
               </div>
-              <button 
-                onClick={() => setShowManageAccountModal(false)} 
+              <button
+                onClick={() => setShowManageAccountModal(false)}
                 style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B', transition: 'background 0.2s' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#E2E8F0'}
                 onMouseLeave={(e) => e.currentTarget.style.background = '#F1F5F9'}
@@ -2240,8 +2060,8 @@ export default function RiderDashboard() {
                 <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Legal Information</h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>Review Ridevel terms, privacy agreements, and licenses</p>
               </div>
-              <button 
-                onClick={() => setShowLegalModal(false)} 
+              <button
+                onClick={() => setShowLegalModal(false)}
                 style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justify: 'center', cursor: 'pointer', color: '#64748B', transition: 'background 0.2s' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#E2E8F0'}
                 onMouseLeave={(e) => e.currentTarget.style.background = '#F1F5F9'}
@@ -2303,8 +2123,8 @@ export default function RiderDashboard() {
                 <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Help & Support Center</h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>Get quick answers, safety guidance, and submit tickets</p>
               </div>
-              <button 
-                onClick={() => setShowHelpModal(false)} 
+              <button
+                onClick={() => setShowHelpModal(false)}
                 style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justify: 'center', cursor: 'pointer', color: '#64748B', transition: 'background 0.2s' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#E2E8F0'}
                 onMouseLeave={(e) => e.currentTarget.style.background = '#F1F5F9'}
@@ -2314,7 +2134,7 @@ export default function RiderDashboard() {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '4px', textAlign: 'left' }}>
-              
+
               {/* Emergency Assistance Button */}
               <div style={{ background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
