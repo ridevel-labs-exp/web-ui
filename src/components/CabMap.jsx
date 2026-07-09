@@ -43,20 +43,68 @@ const dropIcon = L.divIcon({
 const driverIcon = L.divIcon({
   className: 'custom-driver-pin',
   html: `
-    <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-      <div style="position: absolute; width: 46px; height: 46px; background: rgba(255, 204, 0, 0.3); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
-      <div style="background: #ffcc00; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #000000; box-shadow: 0 4px 16px rgba(255, 204, 0, 0.8); display: flex; align-items: center; justify-content: center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H7c-.7 0-1.3.3-1.8.7C4.3 8.6 3 10 3 10s-2.7.6-4.5 1.1C.7 11.3 0 12.1 0 13v3c0 .6.4 1 1 1h2"/>
-          <circle cx="7" cy="17" r="2"/>
-          <path d="M9 17h6"/>
-          <circle cx="17" cy="17" r="2"/>
+    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 56px; height: 44px;">
+      <div style="position: absolute; width: 56px; height: 56px; background: rgba(37, 99, 235, 0.2); border-radius: 50%; animation: pulse-ring 2s infinite;"></div>
+      <div style="position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+        <svg viewBox="0 0 100 60" width="56" height="38" style="display: block;">
+          <!-- Underbody Shadow -->
+          <ellipse cx="48" cy="50" rx="42" ry="6" fill="#0F172A" opacity="0.5" />
+          
+          <!-- Wheels -->
+          <!-- Rear wheel -->
+          <ellipse cx="25" cy="43" rx="8" ry="7.5" fill="#1E293B" />
+          <ellipse cx="25" cy="43" rx="3.5" ry="3" fill="#E2E8F0" />
+          <!-- Front wheel -->
+          <ellipse cx="69" cy="46" rx="8" ry="7.5" fill="#1E293B" />
+          <ellipse cx="69" cy="46" rx="3.5" ry="3" fill="#E2E8F0" />
+          
+          <!-- Main White Body -->
+          <path d="M 12,32 
+                   C 12,32 10,25 15,20 
+                   C 20,15 28,15 28,15 
+                   L 42,12 
+                   C 42,12 55,7 72,18 
+                   C 89,29 95,35 95,38 
+                   C 95,41 90,44 82,45 
+                   C 74,46 58,47 52,47 
+                   C 46,47 20,44 14,40 
+                   C 10,38 12,32 12,32 Z" 
+                fill="#FFFFFF" 
+                stroke="#CBD5E1" 
+                stroke-width="1" />
+                
+          <!-- Black Panoramic Glass Roof & Canopy -->
+          <path d="M 28,15 
+                   C 28,15 36,9 50,8 
+                   C 64,7 74,13 74,13 
+                   L 62,24 
+                   C 62,24 55,27 45,26 
+                   C 35,25 24,19 24,19 Z" 
+                fill="#0F172A" />
+                
+          <!-- Side Windows & Windshield -->
+          <path d="M 24,19 
+                   L 30,16 
+                   C 30,16 38,12 48,12 
+                   L 58,16 
+                   L 60,20 
+                   C 60,20 54,23 46,22 
+                   C 38,21 24,19 24,19 Z" 
+                fill="#1E293B" 
+                opacity="0.9" />
+                
+          <!-- Side Mirror -->
+          <ellipse cx="62" cy="20" rx="3" ry="2" fill="#0F172A" />
+          <ellipse cx="28" cy="18" rx="2" ry="1.5" fill="#0F172A" />
+          
+          <!-- Headlight glow -->
+          <path d="M 91,38 C 93,39 95,40 95,41 C 94,41 92,41 90,40 Z" fill="#FBBF24" />
         </svg>
       </div>
     </div>
   `,
-  iconSize: [46, 46],
-  iconAnchor: [23, 23],
+  iconSize: [56, 44],
+  iconAnchor: [28, 22],
 });
 
 // Helper component to handle map clicks for manual pin placement

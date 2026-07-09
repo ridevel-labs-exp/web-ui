@@ -1153,8 +1153,59 @@ export default function RiderDashboard() {
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: v.color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Car size={26} style={{ color: v.active ? '#0F172A' : '#64748B' }} />
+                          <div style={{ width: '64px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg viewBox="0 0 100 60" width="60" height="42" style={{ display: 'block' }}>
+                              {/* Underbody Shadow */}
+                              <ellipse cx="48" cy="50" rx="42" ry="6" fill="#0F172A" opacity="0.3" />
+                              
+                              {/* Wheels */}
+                              <ellipse cx="25" cy="43" rx="8" ry="7.5" fill="#1E293B" />
+                              <ellipse cx="25" cy="43" rx="3.5" ry="3" fill="#E2E8F0" />
+                              <ellipse cx="69" cy="46" rx="8" ry="7.5" fill="#1E293B" />
+                              <ellipse cx="69" cy="46" rx="3.5" ry="3" fill="#E2E8F0" />
+                              
+                              {/* Main Body */}
+                              <path d="M 12,32 
+                                       C 12,32 10,25 15,20 
+                                       C 20,15 28,15 28,15 
+                                       L 42,12 
+                                       C 42,12 55,7 72,18 
+                                       C 89,29 95,35 95,38 
+                                       C 95,41 90,44 82,45 
+                                       C 74,46 58,47 52,47 
+                                       C 46,47 20,44 14,40 
+                                       C 10,38 12,32 12,32 Z" 
+                                    fill={v.id === 'LUXURY' ? '#1E293B' : '#FFFFFF'} 
+                                    stroke="#CBD5E1" 
+                                    strokeWidth="1" />
+                                    
+                              {/* Black Panoramic Glass Roof & Canopy */}
+                              <path d="M 28,15 
+                                       C 28,15 36,9 50,8 
+                                       C 64,7 74,13 74,13 
+                                       L 62,24 
+                                       C 62,24 55,27 45,26 
+                                       C 35,25 24,19 24,19 Z" 
+                                    fill="#0F172A" />
+                                    
+                              {/* Side Windows & Windshield */}
+                              <path d="M 24,19 
+                                       L 30,16 
+                                       C 30,16 38,12 48,12 
+                                       L 58,16 
+                                       L 60,20 
+                                       C 60,20 54,23 46,22 
+                                       C 38,21 24,19 24,19 Z" 
+                                    fill="#1E293B" 
+                                    opacity="0.9" />
+                                    
+                              {/* Side Mirror */}
+                              <ellipse cx="62" cy="20" rx="3" ry="2" fill="#0F172A" />
+                              <ellipse cx="28" cy="18" rx="2" ry="1.5" fill="#0F172A" />
+                              
+                              {/* Headlight glow */}
+                              <path d="M 91,38 C 93,39 95,40 95,41 C 94,41 92,41 90,40 Z" fill="#FBBF24" />
+                            </svg>
                           </div>
                           <div>
                             <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
