@@ -110,6 +110,17 @@ const VEHICLE_TYPES = [
 
 export default function RiderDashboard() {
   const user = authService.getCurrentUser();
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 992 : false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [activeTrip, setActiveTrip] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -567,7 +578,23 @@ export default function RiderDashboard() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Inter', -apple-system, sans-serif" }}>
       
       {/* Top Navbar */}
-      <header style={{ height: '60px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#FFFFFF', zIndex: 100, boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+      <header style={{
+        height: isMobile ? '54px' : '60px',
+        borderBottom: isMobile ? 'none' : '1px solid #E2E8F0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: isMobile ? '0 16px' : '0 24px',
+        background: '#FFFFFF',
+        zIndex: 1000,
+        boxShadow: isMobile ? '0 4px 20px rgba(0, 0, 0, 0.08)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        position: isMobile ? 'absolute' : 'relative',
+        top: isMobile ? '12px' : '0',
+        left: isMobile ? '12px' : '0',
+        right: isMobile ? '12px' : '0',
+        borderRadius: isMobile ? '30px' : '0',
+        border: isMobile ? '1px solid #E2E8F0' : 'none'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
           <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
             Ridevel
@@ -845,10 +872,38 @@ export default function RiderDashboard() {
       </header>
 
       {/* Main Grid: Left Control Panel + Right Full Height Map */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '430px 1fr', gap: '20px', padding: '20px', background: '#F8FAFC', overflow: 'hidden' }}>
+      <div style={{
+        flex: 1,
+        display: isMobile ? 'block' : 'grid',
+        gridTemplateColumns: isMobile ? 'none' : '430px 1fr',
+        gap: isMobile ? '0' : '20px',
+        padding: isMobile ? '0' : '20px',
+        background: '#F8FAFC',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
         
         {/* Left Control Column */}
-        <div style={{ padding: '24px', overflowY: 'auto', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '18px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{
+          padding: isMobile ? '16px' : '24px',
+          overflowY: 'auto',
+          background: '#FFFFFF',
+          border: isMobile ? 'none' : '1px solid #E2E8F0',
+          borderRadius: isMobile ? '24px 24px 0 0' : '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? '14px' : '18px',
+          boxShadow: isMobile ? '0 -8px 30px rgba(15,23,42,0.12)' : '0 4px 6px -1px rgba(0,0,0,0.05)',
+          position: isMobile ? 'absolute' : 'relative',
+          bottom: isMobile ? '0' : 'auto',
+          left: isMobile ? '0' : 'auto',
+          right: isMobile ? '0' : 'auto',
+          maxHeight: isMobile ? '45vh' : '100%',
+          zIndex: 100
+        }}>
+          {isMobile && (
+            <div style={{ width: '40px', height: '4px', background: '#E2E8F0', borderRadius: '2px', alignSelf: 'center', marginBottom: '8px', flexShrink: 0 }} />
+          )}
           
           {!activeTrip && !invoice && (
             <>
@@ -1315,7 +1370,19 @@ export default function RiderDashboard() {
         </div>
 
         {/* Right Map View */}
-        <div style={{ position: 'relative', height: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{
+          position: isMobile ? 'absolute' : 'relative',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: '100%',
+          borderRadius: isMobile ? '0' : '16px',
+          overflow: 'hidden',
+          border: isMobile ? 'none' : '1px solid #E2E8F0',
+          boxShadow: isMobile ? 'none' : '0 4px 6px -1px rgba(0,0,0,0.05)',
+          zIndex: 1
+        }}>
           <CabMap 
             pickup={pickup} 
             drop={drop} 
@@ -1402,7 +1469,7 @@ export default function RiderDashboard() {
       {/* City Switcher Modal Popup (Screenshot #2 Match) */}
       {showCityModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '24px', width: '400px', maxWidth: '90vw', color: '#0F172A', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: isMobile ? '16px' : '24px', width: '400px', maxWidth: '95vw', color: '#0F172A', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>Select City</h3>
               <X size={20} onClick={() => setShowCityModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
@@ -1458,7 +1525,7 @@ export default function RiderDashboard() {
       {/* No Driver Available 10km Radius Modal Popup */}
       {noDriverModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '28px', width: '420px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: isMobile ? '20px' : '28px', width: '420px', maxWidth: '95vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
             <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#FEF2F2', border: '2px solid #FCA5A5', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
               <AlertTriangle size={32} />
             </div>
@@ -1478,7 +1545,7 @@ export default function RiderDashboard() {
       {/* Google Pay / UPI Desktop QR Code Modal Overlay */}
       {showUpiQrModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '420px', maxWidth: '90vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '20px' : '32px', width: '420px', maxWidth: '95vw', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', border: '2px solid #2563EB' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ fontSize: '18px', fontWeight: '900', color: '#0F172A' }}>Pay with GPay / UPI</div>
               <X size={20} onClick={() => setShowUpiQrModal(false)} style={{ cursor: 'pointer', color: '#64748B' }} />
@@ -1514,7 +1581,7 @@ export default function RiderDashboard() {
       {/* Rider Activity / Ride History Modal */}
       {showActivityModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(6px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '560px', maxWidth: '90vw', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #E2E8F0' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '20px' : '32px', width: '560px', maxWidth: '95vw', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #E2E8F0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '16px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#0F172A' }}>Your Activity</h3>
@@ -1600,7 +1667,7 @@ export default function RiderDashboard() {
       {/* Manage Account & Privacy Modal */}
       {showManageAccountModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '560px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '20px' : '32px', width: '560px', maxWidth: '95vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '20px', marginBottom: '20px' }}>
               <div>
@@ -1927,7 +1994,7 @@ export default function RiderDashboard() {
       {/* Legal Modal */}
       {showLegalModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '600px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '20px' : '32px', width: '600px', maxWidth: '95vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '20px', marginBottom: '20px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Legal Information</h3>
@@ -1990,7 +2057,7 @@ export default function RiderDashboard() {
       {/* Help & Support Modal */}
       {showHelpModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '32px', width: '560px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: isMobile ? '20px' : '32px', width: '560px', maxWidth: '95vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15,23,42,0.25)', border: '1px solid #E2E8F0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '20px', marginBottom: '20px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0F172A', letterSpacing: '-0.5px' }}>Help & Support Center</h3>
