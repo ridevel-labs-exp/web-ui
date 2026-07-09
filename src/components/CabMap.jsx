@@ -53,7 +53,7 @@ const driverIcon = L.divIcon({
                    L 62,24 
                    C 62,24 55,27 45,26 
                    C 35,25 24,19 24,19 Z" 
-                fill="#0F172A" />
+                fill="#2A5C7A" />
                 
           <!-- Side Windows & Windshield -->
           <path d="M 24,19 
