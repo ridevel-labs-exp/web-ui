@@ -239,7 +239,9 @@ export default function DriverOnboarding() {
       setProfile(response);
       setIsEditingRejection(false);
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to submit onboarding files. Please try again.');
+      const errMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to submit onboarding files. Please try again.';
+      setError(errMsg);
+      alert("⚠️ Document Validation Failed:\n\n" + errMsg);
     } finally {
       setSubmitting(false);
     }

@@ -1325,6 +1325,7 @@ export default function RiderDashboard() {
             >
               Done & Continue
             </button>
+          </div>
         </div>
       )}
 

@@ -426,6 +426,22 @@ export default function AdminDashboard() {
               <X size={20} onClick={() => setSelectedDriverModal(null)} style={{ cursor: 'pointer', color: '#64748B' }} />
             </div>
 
+            {selectedDriverModal.rejectionReason && (
+              <div style={{
+                padding: '14px',
+                borderRadius: '10px',
+                marginBottom: '20px',
+                fontSize: '13px',
+                fontWeight: '600',
+                background: selectedDriverModal.rejectionReason.includes('Bypassed') ? '#FFF9E6' : '#EFF6FF',
+                border: `1px solid ${selectedDriverModal.rejectionReason.includes('Bypassed') ? '#FFE0B2' : '#BFDBFE'}`,
+                color: selectedDriverModal.rejectionReason.includes('Bypassed') ? '#B7791F' : '#1D4ED8',
+                lineHeight: '1.4'
+              }}>
+                ℹ️ <strong>AI Validation Log:</strong> {selectedDriverModal.rejectionReason}
+              </div>
+            )}
+
             {/* Group 1: Vehicle Pictures */}
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Vehicle Photos</div>
