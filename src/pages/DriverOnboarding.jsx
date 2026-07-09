@@ -311,6 +311,7 @@ export default function DriverOnboarding() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {submitting && <BrandedLoader text="Uploading & validating documents with AI..." />}
       {/* Concise Uber-Style Header */}
       <header style={{ height: '64px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import { signInWithGoogle } from '../services/firebase';
 import { Mail, Lock, RefreshCw } from 'lucide-react';
+import BrandedLoader from '../components/BrandedLoader';
 
 export default function Login({ onNavigate }) {
   const [email, setEmail] = useState('');
@@ -46,6 +47,7 @@ export default function Login({ onNavigate }) {
   const handleGoogleLogin = async () => {
     setError(null);
     setInfoMessage(null);
+    setLoading(true);
     try {
       const googleResult = await signInWithGoogle();
       const data = await authService.googleLogin(googleResult.idToken);
@@ -60,11 +62,14 @@ export default function Login({ onNavigate }) {
       console.error('Google Login error details:', err);
       const errMsg = err.response?.data?.error || err.message || 'Google Sign-In failed. Please try again.';
       setError(errMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="auth-container">
+      {loading && <BrandedLoader text="Logging you in securely..." />}
       <div className="auth-box glass-card">
         <div className="auth-header">
           <div className="auth-logo">Ridevel</div>
